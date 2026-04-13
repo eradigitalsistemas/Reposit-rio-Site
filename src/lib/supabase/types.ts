@@ -202,6 +202,164 @@ export type Database = {
           },
         ]
       }
+      disc_results: {
+        Row: {
+          created_at: string
+          data_teste: string | null
+          id: string
+          pontuacao_c: number | null
+          pontuacao_d: number | null
+          pontuacao_i: number | null
+          pontuacao_s: number | null
+          tipo_perfil: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          data_teste?: string | null
+          id?: string
+          pontuacao_c?: number | null
+          pontuacao_d?: number | null
+          pontuacao_i?: number | null
+          pontuacao_s?: number | null
+          tipo_perfil?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          data_teste?: string | null
+          id?: string
+          pontuacao_c?: number | null
+          pontuacao_d?: number | null
+          pontuacao_i?: number | null
+          pontuacao_s?: number | null
+          tipo_perfil?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'disc_results_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      educations: {
+        Row: {
+          created_at: string
+          curso: string | null
+          data_fim: string | null
+          data_inicio: string | null
+          id: string
+          instituicao: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          curso?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          id?: string
+          instituicao?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          curso?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          id?: string
+          instituicao?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'educations_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      emails_sent: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'emails_sent_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      experiences: {
+        Row: {
+          cargo: string | null
+          created_at: string
+          data_fim: string | null
+          data_inicio: string | null
+          descricao: string | null
+          empresa: string | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          cargo?: string | null
+          created_at?: string
+          data_fim?: string | null
+          data_inicio?: string | null
+          descricao?: string | null
+          empresa?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          cargo?: string | null
+          created_at?: string
+          data_fim?: string | null
+          data_inicio?: string | null
+          descricao?: string | null
+          empresa?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'experiences_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       historico_leads: {
         Row: {
           contato_nome: string
@@ -279,6 +437,60 @@ export type Database = {
           status_interesse?: string
           telefone?: string | null
           usuario_id?: string
+        }
+        Relationships: []
+      }
+      leads_certificados: {
+        Row: {
+          created_at: string
+          data_contato: string | null
+          email: string | null
+          id: string
+          telefone: string | null
+          tipo_certificado: string | null
+        }
+        Insert: {
+          created_at?: string
+          data_contato?: string | null
+          email?: string | null
+          id?: string
+          telefone?: string | null
+          tipo_certificado?: string | null
+        }
+        Update: {
+          created_at?: string
+          data_contato?: string | null
+          email?: string | null
+          id?: string
+          telefone?: string | null
+          tipo_certificado?: string | null
+        }
+        Relationships: []
+      }
+      leads_erp: {
+        Row: {
+          created_at: string
+          data_contato: string | null
+          email: string | null
+          empresa: string | null
+          id: string
+          telefone: string | null
+        }
+        Insert: {
+          created_at?: string
+          data_contato?: string | null
+          email?: string | null
+          empresa?: string | null
+          id?: string
+          telefone?: string | null
+        }
+        Update: {
+          created_at?: string
+          data_contato?: string | null
+          email?: string | null
+          empresa?: string | null
+          id?: string
+          telefone?: string | null
         }
         Relationships: []
       }
@@ -403,6 +615,42 @@ export type Database = {
             referencedColumns: ['id']
           },
         ]
+      }
+      users: {
+        Row: {
+          created_at: string
+          data_nascimento: string | null
+          email: string
+          endereco: string | null
+          foto_url: string | null
+          id: string
+          nome: string
+          telefone: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_nascimento?: string | null
+          email: string
+          endereco?: string | null
+          foto_url?: string | null
+          id?: string
+          nome: string
+          telefone: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_nascimento?: string | null
+          email?: string
+          endereco?: string | null
+          foto_url?: string | null
+          id?: string
+          nome?: string
+          telefone?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       usuarios: {
         Row: {
@@ -625,6 +873,40 @@ export const Constants = {
 //   anexos: jsonb (nullable, default: '[]'::jsonb)
 //   checklist: jsonb (nullable, default: '[]'::jsonb)
 //   cliente_id: uuid (nullable)
+// Table: disc_results
+//   id: uuid (not null, default: gen_random_uuid())
+//   user_id: uuid (nullable)
+//   tipo_perfil: text (nullable)
+//   pontuacao_d: integer (nullable)
+//   pontuacao_i: integer (nullable)
+//   pontuacao_s: integer (nullable)
+//   pontuacao_c: integer (nullable)
+//   data_teste: timestamp with time zone (nullable, default: now())
+//   created_at: timestamp with time zone (not null, default: now())
+// Table: educations
+//   id: uuid (not null, default: gen_random_uuid())
+//   user_id: uuid (nullable)
+//   instituicao: text (nullable)
+//   curso: text (nullable)
+//   data_inicio: text (nullable)
+//   data_fim: text (nullable)
+//   created_at: timestamp with time zone (not null, default: now())
+// Table: emails_sent
+//   id: uuid (not null, default: gen_random_uuid())
+//   user_id: uuid (nullable)
+//   email: text (not null)
+//   status: text (not null, default: 'pending'::text)
+//   created_at: timestamp with time zone (not null, default: now())
+//   updated_at: timestamp with time zone (not null, default: now())
+// Table: experiences
+//   id: uuid (not null, default: gen_random_uuid())
+//   user_id: uuid (nullable)
+//   empresa: text (nullable)
+//   cargo: text (nullable)
+//   data_inicio: text (nullable)
+//   data_fim: text (nullable)
+//   descricao: text (nullable)
+//   created_at: timestamp with time zone (not null, default: now())
 // Table: historico_leads
 //   id: uuid (not null, default: gen_random_uuid())
 //   lead_id: uuid (not null)
@@ -645,6 +927,20 @@ export const Constants = {
 //   observacoes: text (nullable, default: ''::text)
 //   status_interesse: text (not null, default: 'Interessado'::text)
 //   endereco: text (nullable)
+// Table: leads_certificados
+//   id: uuid (not null, default: gen_random_uuid())
+//   email: text (nullable)
+//   tipo_certificado: text (nullable)
+//   telefone: text (nullable)
+//   data_contato: timestamp with time zone (nullable, default: now())
+//   created_at: timestamp with time zone (not null, default: now())
+// Table: leads_erp
+//   id: uuid (not null, default: gen_random_uuid())
+//   email: text (nullable)
+//   empresa: text (nullable)
+//   telefone: text (nullable)
+//   data_contato: timestamp with time zone (nullable, default: now())
+//   created_at: timestamp with time zone (not null, default: now())
 // Table: logs_auditoria
 //   id: uuid (not null, default: gen_random_uuid())
 //   demanda_id: uuid (nullable)
@@ -667,6 +963,16 @@ export const Constants = {
 //   usuario_id: uuid (not null)
 //   subscription_data: jsonb (not null)
 //   created_at: timestamp with time zone (not null, default: now())
+// Table: users
+//   id: uuid (not null, default: gen_random_uuid())
+//   email: text (not null)
+//   nome: text (not null)
+//   telefone: text (not null)
+//   data_nascimento: date (nullable)
+//   foto_url: text (nullable)
+//   endereco: text (nullable)
+//   created_at: timestamp with time zone (not null, default: now())
+//   updated_at: timestamp with time zone (not null, default: now())
 // Table: usuarios
 //   id: uuid (not null)
 //   nome: text (not null, default: ''::text)
@@ -693,6 +999,18 @@ export const Constants = {
 //   PRIMARY KEY demandas_pkey: PRIMARY KEY (id)
 //   FOREIGN KEY demandas_responsavel_id_fkey: FOREIGN KEY (responsavel_id) REFERENCES usuarios(id) ON DELETE SET NULL
 //   FOREIGN KEY demandas_usuario_id_fkey: FOREIGN KEY (usuario_id) REFERENCES auth.users(id) ON DELETE CASCADE
+// Table: disc_results
+//   PRIMARY KEY disc_results_pkey: PRIMARY KEY (id)
+//   FOREIGN KEY disc_results_user_id_fkey: FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+// Table: educations
+//   PRIMARY KEY educations_pkey: PRIMARY KEY (id)
+//   FOREIGN KEY educations_user_id_fkey: FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+// Table: emails_sent
+//   PRIMARY KEY emails_sent_pkey: PRIMARY KEY (id)
+//   FOREIGN KEY emails_sent_user_id_fkey: FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+// Table: experiences
+//   PRIMARY KEY experiences_pkey: PRIMARY KEY (id)
+//   FOREIGN KEY experiences_user_id_fkey: FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 // Table: historico_leads
 //   FOREIGN KEY historico_leads_lead_id_fkey: FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE
 //   PRIMARY KEY historico_leads_pkey: PRIMARY KEY (id)
@@ -700,6 +1018,10 @@ export const Constants = {
 // Table: leads
 //   PRIMARY KEY leads_pkey: PRIMARY KEY (id)
 //   FOREIGN KEY leads_usuario_id_fkey: FOREIGN KEY (usuario_id) REFERENCES auth.users(id) ON DELETE CASCADE
+// Table: leads_certificados
+//   PRIMARY KEY leads_certificados_pkey: PRIMARY KEY (id)
+// Table: leads_erp
+//   PRIMARY KEY leads_erp_pkey: PRIMARY KEY (id)
 // Table: logs_auditoria
 //   FOREIGN KEY logs_auditoria_demanda_id_fkey: FOREIGN KEY (demanda_id) REFERENCES demandas(id) ON DELETE SET NULL
 //   PRIMARY KEY logs_auditoria_pkey: PRIMARY KEY (id)
@@ -711,6 +1033,9 @@ export const Constants = {
 // Table: push_subscriptions
 //   PRIMARY KEY push_subscriptions_pkey: PRIMARY KEY (id)
 //   FOREIGN KEY push_subscriptions_usuario_id_fkey: FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+// Table: users
+//   UNIQUE users_email_key: UNIQUE (email)
+//   PRIMARY KEY users_pkey: PRIMARY KEY (id)
 // Table: usuarios
 //   FOREIGN KEY usuarios_id_fkey: FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE
 //   PRIMARY KEY usuarios_pkey: PRIMARY KEY (id)
@@ -753,6 +1078,26 @@ export const Constants = {
 //     WITH CHECK: true
 //   Policy "Colaboradores veem proprias demandas" (SELECT, PERMISSIVE) roles={authenticated}
 //     USING: ((auth.uid() = responsavel_id) OR is_admin())
+// Table: disc_results
+//   Policy "anon_insert_disc" (INSERT, PERMISSIVE) roles={anon,authenticated}
+//     WITH CHECK: true
+//   Policy "auth_read_disc" (SELECT, PERMISSIVE) roles={authenticated}
+//     USING: true
+// Table: educations
+//   Policy "anon_insert_educations" (INSERT, PERMISSIVE) roles={anon,authenticated}
+//     WITH CHECK: true
+//   Policy "auth_read_educations" (SELECT, PERMISSIVE) roles={authenticated}
+//     USING: true
+// Table: emails_sent
+//   Policy "anon_insert_emails_sent" (INSERT, PERMISSIVE) roles={anon,authenticated}
+//     WITH CHECK: true
+//   Policy "auth_read_emails_sent" (SELECT, PERMISSIVE) roles={authenticated}
+//     USING: true
+// Table: experiences
+//   Policy "anon_insert_experiences" (INSERT, PERMISSIVE) roles={anon,authenticated}
+//     WITH CHECK: true
+//   Policy "auth_read_experiences" (SELECT, PERMISSIVE) roles={authenticated}
+//     USING: true
 // Table: historico_leads
 //   Policy "Admins podem gerenciar tudo em historico_leads" (ALL, PERMISSIVE) roles={authenticated}
 //     USING: is_admin()
@@ -767,6 +1112,16 @@ export const Constants = {
 //   Policy "Usuarios gerenciam proprios leads" (ALL, PERMISSIVE) roles={authenticated}
 //     USING: (auth.uid() = usuario_id)
 //     WITH CHECK: (auth.uid() = usuario_id)
+// Table: leads_certificados
+//   Policy "anon_insert_certificados" (INSERT, PERMISSIVE) roles={anon,authenticated}
+//     WITH CHECK: true
+//   Policy "auth_read_certificados" (SELECT, PERMISSIVE) roles={authenticated}
+//     USING: true
+// Table: leads_erp
+//   Policy "anon_insert_erp" (INSERT, PERMISSIVE) roles={anon,authenticated}
+//     WITH CHECK: true
+//   Policy "auth_read_erp" (SELECT, PERMISSIVE) roles={authenticated}
+//     USING: true
 // Table: logs_auditoria
 //   Policy "Admins podem ver logs_auditoria" (SELECT, PERMISSIVE) roles={authenticated}
 //     USING: is_admin()
@@ -789,6 +1144,11 @@ export const Constants = {
 //     WITH CHECK: (auth.uid() = usuario_id)
 //   Policy "Enable select for authenticated users" (SELECT, PERMISSIVE) roles={authenticated}
 //     USING: (auth.uid() = usuario_id)
+// Table: users
+//   Policy "anon_insert_users" (INSERT, PERMISSIVE) roles={anon,authenticated}
+//     WITH CHECK: true
+//   Policy "auth_read_users" (SELECT, PERMISSIVE) roles={authenticated}
+//     USING: true
 // Table: usuarios
 //   Policy "Admins podem atualizar usuarios" (UPDATE, PERMISSIVE) roles={authenticated}
 //     USING: is_admin()
@@ -895,6 +1255,17 @@ export const Constants = {
 //           END IF;
 //       END IF;
 //       RETURN NEW;
+//   END;
+//   $function$
+//
+// FUNCTION set_updated_at_timestamp()
+//   CREATE OR REPLACE FUNCTION public.set_updated_at_timestamp()
+//    RETURNS trigger
+//    LANGUAGE plpgsql
+//   AS $function$
+//   BEGIN
+//     NEW.updated_at = NOW();
+//     RETURN NEW;
 //   END;
 //   $function$
 //
@@ -1025,6 +1396,10 @@ export const Constants = {
 //   on_demanda_change_log: CREATE TRIGGER on_demanda_change_log AFTER INSERT OR UPDATE ON public.demandas FOR EACH ROW EXECUTE FUNCTION log_demanda_changes()
 //   on_demanda_push_notify: CREATE TRIGGER on_demanda_push_notify AFTER UPDATE ON public.demandas FOR EACH ROW EXECUTE FUNCTION trigger_demanda_push_notification()
 //   on_demanda_status_change_notify: CREATE TRIGGER on_demanda_status_change_notify AFTER UPDATE OF status ON public.demandas FOR EACH ROW EXECUTE FUNCTION trigger_notify_automation()
+// Table: emails_sent
+//   set_public_emails_sent_updated_at: CREATE TRIGGER set_public_emails_sent_updated_at BEFORE UPDATE ON public.emails_sent FOR EACH ROW EXECUTE FUNCTION set_updated_at_timestamp()
+// Table: users
+//   set_public_users_updated_at: CREATE TRIGGER set_public_users_updated_at BEFORE UPDATE ON public.users FOR EACH ROW EXECUTE FUNCTION set_updated_at_timestamp()
 
 // --- INDEXES ---
 // Table: agenda_eventos
@@ -1033,3 +1408,9 @@ export const Constants = {
 //   CREATE INDEX idx_agenda_eventos_usuario_id ON public.agenda_eventos USING btree (usuario_id)
 // Table: demandas
 //   CREATE INDEX idx_demandas_cliente_id ON public.demandas USING btree (cliente_id)
+// Table: emails_sent
+//   CREATE INDEX idx_emails_sent_status ON public.emails_sent USING btree (status)
+// Table: users
+//   CREATE INDEX idx_users_created_at ON public.users USING btree (created_at)
+//   CREATE INDEX idx_users_email ON public.users USING btree (email)
+//   CREATE UNIQUE INDEX users_email_key ON public.users USING btree (email)

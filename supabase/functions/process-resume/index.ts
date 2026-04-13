@@ -1,6 +1,32 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
+import { z } from 'npm:zod@3.22.4'
+
+const rateLimit = new Map<string, { count: number; resetTime: number }>()
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now()
+  const record = rateLimit.get(ip)
+  if (!record || now > record.resetTime) {
+    rateLimit.set(ip, { count: 1, resetTime: now + 60000 })
+    return true
+  }
+  if (record.count >= 10) {
+    return false
+  }
+  record.count++
+  return true
+}
+
+const sanitizeHtml = (str: string) => {
+  if (!str) return str
+  return str
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
@@ -8,30 +34,44 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { user_id, email, nome, pdf_base64 } = await req.json()
+    const ip = req.headers.get('x-forwarded-for') || 'unknown'
+    if (!checkRateLimit(ip)) {
+      console.warn(`Rate limit exceeded for IP: ${ip}`)
+      return new Response(JSON.stringify({ error: 'Too many requests. Please try again later.' }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
 
-    // Validação de e-mail e PDF
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!email || !emailRegex.test(email)) {
-      return new Response(JSON.stringify({ error: 'Email inválido' }), {
+    const body = await req.json()
+
+    const payloadSchema = z.object({
+      user_id: z.string().uuid('ID de usuário inválido'),
+      email: z
+        .string()
+        .email('Email inválido. Formato esperado: usuario@dominio.com')
+        .max(255)
+        .transform(sanitizeHtml),
+      nome: z
+        .string()
+        .min(3)
+        .max(100)
+        .regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/, 'Nome deve conter apenas letras e espaços')
+        .transform(sanitizeHtml),
+      pdf_base64: z.string().min(10, 'PDF inválido ou não fornecido'),
+    })
+
+    const parsed = payloadSchema.safeParse(body)
+    if (!parsed.success) {
+      const errorMsg = parsed.error.errors[0]?.message || 'Dados inválidos'
+      console.warn('Validation failed:', parsed.error.errors)
+      return new Response(JSON.stringify({ error: errorMsg, details: parsed.error.errors }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    if (!pdf_base64 || typeof pdf_base64 !== 'string' || pdf_base64.trim() === '') {
-      return new Response(JSON.stringify({ error: 'PDF inválido ou não fornecido' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-
-    if (!user_id || !nome) {
-      return new Response(JSON.stringify({ error: 'Dados obrigatórios ausentes' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
+    const { user_id, email, nome, pdf_base64 } = parsed.data
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',

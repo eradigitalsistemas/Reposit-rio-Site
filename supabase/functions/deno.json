@@ -1,12 +1,12 @@
 {
   "_versions": {
-    "update-demand-priority": 2,
-    "admin-users": 3,
-    "notify-push": 1,
-    "notify-automation": 3,
-    "manage-client-documents": 1,
+    "update-demand-priority": 3,
+    "admin-users": 4,
+    "notify-push": 2,
+    "notify-automation": 4,
+    "manage-client-documents": 2,
     "functions": 1,
-    "process-resume": 6,
-    "submit-talento": 6
+    "process-resume": 7,
+    "submit-talento": 7
   }
 }

@@ -91,6 +91,25 @@ export default function TalentosPage() {
         data_teste: new Date().toISOString(),
       })
 
+      // Gerar PDF em base64 mockado para o anexo e envio à Edge Function.
+      // Em produção, isso seria gerado dinamicamente com base nos dados do formulário.
+      const dummyPdfBase64 =
+        'JVBERi0xLjcKCjEgMCBvYmogICUgZW50cnkgcG9pbnQKPDwKICAvVHlwZSAvQ2F0YWxvZwogIC9QYWdlcyAyIDAgUgo+PgplbmRvYmoKCjIgMCBvYmoKPDwKICAvVHlwZSAvUGFnZXMKICAvTWVkaWFCb3ggWyAwIDAgMjAwIDIwMCBdCiAgL0NvdW50IDEKICAvS2lkcyBbIDMgMCBSIF0KPj4KZW5kb2JqCgozIDAgb2JqCjw8CiAgL1R5cGUgL1BhZ2UKICAvUGFyZW50IDIgMCBSCiAgL1Jlc291cmNlcyA8PAogICAgL0ZvbnQgPDwKICAgICAgL0YxIDQgMCBSCidJRjAgUmVzb3VyY2VzCiAgICA+PgogID4+CiAgL0NvbnRlbnRzIDUgMCBSCj4+CmVuZG9iagoKNCAwIG9iago8PAogIC9UeXBlIC9Gb250CiAgL1N1YnR5cGUgL1R5cGUxCiAgL0Jhc2VGb250IC9UaW1lcy1Sb21hbgo+PgplbmRvYmoKCjUgMCBvYmoKPDwgL0xlbmd0aCAzNiA+PgpzdHJlYW0KQlQKL0YxIDE4IFRmCjAgMCBUZAooQ3VycmljdWxvIEdlcmFkbyBjb20gU3VjZXNzbykgVGoKRVQKZW5kc3RyZWFtCmVuZG9iagoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNzkgMDAwMDAgbiAKMDAwMDAwMDE3MyAwMDAwMCBuIAowMDAwMDAwMzAxIDAwMDAwIG4gCjAwMDAwMDAzODAgMDAwMDAgbiAKdHJhaWxlcgo8PAogIC9TaXplIDYKICAvUm9vdCAxIDAgUgo+PgpzdGFydHhyZWYKNDc3CiUlRU9GCg=='
+
+      // Dispara a Edge Function para o envio assíncrono do email e sincronização com ERP
+      const { error: fnError } = await supabase.functions.invoke('process-resume', {
+        body: {
+          user_id: userId,
+          email: data.personal.email,
+          nome: data.personal.nome,
+          pdf_base64: dummyPdfBase64,
+        },
+      })
+
+      if (fnError) {
+        console.error('Aviso: Os dados foram salvos mas o envio do currículo falhou.', fnError)
+      }
+
       setIsSuccess(true)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (err: any) {

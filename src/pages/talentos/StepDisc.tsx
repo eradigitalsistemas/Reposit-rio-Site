@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useFormContext, Controller } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -130,7 +130,7 @@ export const discQuestions = [
 ]
 
 export function StepDisc() {
-  const { control, watch } = useFormContext()
+  const { control, watch, trigger } = useFormContext()
   const [currentIndex, setCurrentIndex] = useState(0)
 
   const currentQ = discQuestions[currentIndex]
@@ -152,6 +152,13 @@ export function StepDisc() {
 
   const progress = ((currentIndex + 1) / discQuestions.length) * 100
   const isFinished = Object.values(allAnswers).filter(Boolean).length === 12
+
+  // Force validation to update parent form's isValid state when finished
+  useEffect(() => {
+    if (isFinished) {
+      trigger()
+    }
+  }, [isFinished, trigger])
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -197,10 +204,15 @@ export function StepDisc() {
                         className="sr-only"
                         value={opt.value}
                         checked={field.value === opt.value}
-                        onChange={(e) => {
+                        onChange={async (e) => {
                           field.onChange(e.target.value)
+                          await trigger(`disc.${currentQ.id}`)
+
                           if (currentIndex < discQuestions.length - 1) {
                             setTimeout(() => handleNext(), 350)
+                          } else {
+                            // Ensure overall form validation gets updated when clicking the last option
+                            await trigger()
                           }
                         }}
                       />

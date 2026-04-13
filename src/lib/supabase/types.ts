@@ -616,6 +616,39 @@ export type Database = {
           },
         ]
       }
+      sync_logs: {
+        Row: {
+          attempts: number | null
+          created_at: string
+          entity_id: string
+          entity_type: string
+          error_message: string | null
+          id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number | null
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          error_message?: string | null
+          id?: string
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number | null
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          error_message?: string | null
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           created_at: string
@@ -679,6 +712,30 @@ export type Database = {
           nome?: string
           perfil?: string
           telefone?: string | null
+        }
+        Relationships: []
+      }
+      whatsapp_clicks: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          phone_number: string
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          phone_number: string
+          source: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          phone_number?: string
+          source?: string
         }
         Relationships: []
       }
@@ -963,6 +1020,15 @@ export const Constants = {
 //   usuario_id: uuid (not null)
 //   subscription_data: jsonb (not null)
 //   created_at: timestamp with time zone (not null, default: now())
+// Table: sync_logs
+//   id: uuid (not null, default: gen_random_uuid())
+//   entity_type: text (not null)
+//   entity_id: text (not null)
+//   status: text (not null)
+//   attempts: integer (nullable, default: 1)
+//   error_message: text (nullable)
+//   created_at: timestamp with time zone (not null, default: now())
+//   updated_at: timestamp with time zone (not null, default: now())
 // Table: users
 //   id: uuid (not null, default: gen_random_uuid())
 //   email: text (not null)
@@ -981,6 +1047,12 @@ export const Constants = {
 //   perfil: text (not null, default: 'colaborador'::text)
 //   ativo: boolean (not null, default: true)
 //   telefone: text (nullable)
+// Table: whatsapp_clicks
+//   id: uuid (not null, default: gen_random_uuid())
+//   phone_number: text (not null)
+//   source: text (not null)
+//   message: text (nullable)
+//   created_at: timestamp with time zone (not null, default: now())
 
 // --- CONSTRAINTS ---
 // Table: agenda_eventos
@@ -1033,12 +1105,16 @@ export const Constants = {
 // Table: push_subscriptions
 //   PRIMARY KEY push_subscriptions_pkey: PRIMARY KEY (id)
 //   FOREIGN KEY push_subscriptions_usuario_id_fkey: FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+// Table: sync_logs
+//   PRIMARY KEY sync_logs_pkey: PRIMARY KEY (id)
 // Table: users
 //   UNIQUE users_email_key: UNIQUE (email)
 //   PRIMARY KEY users_pkey: PRIMARY KEY (id)
 // Table: usuarios
 //   FOREIGN KEY usuarios_id_fkey: FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE
 //   PRIMARY KEY usuarios_pkey: PRIMARY KEY (id)
+// Table: whatsapp_clicks
+//   PRIMARY KEY whatsapp_clicks_pkey: PRIMARY KEY (id)
 
 // --- ROW LEVEL SECURITY POLICIES ---
 // Table: agenda_eventos
@@ -1144,6 +1220,14 @@ export const Constants = {
 //     WITH CHECK: (auth.uid() = usuario_id)
 //   Policy "Enable select for authenticated users" (SELECT, PERMISSIVE) roles={authenticated}
 //     USING: (auth.uid() = usuario_id)
+// Table: sync_logs
+//   Policy "anon_insert_sync_logs" (INSERT, PERMISSIVE) roles={anon,authenticated}
+//     WITH CHECK: true
+//   Policy "auth_read_sync_logs" (SELECT, PERMISSIVE) roles={authenticated}
+//     USING: true
+//   Policy "auth_update_sync_logs" (UPDATE, PERMISSIVE) roles={authenticated}
+//     USING: true
+//     WITH CHECK: true
 // Table: users
 //   Policy "anon_insert_users" (INSERT, PERMISSIVE) roles={anon,authenticated}
 //     WITH CHECK: true
@@ -1159,6 +1243,11 @@ export const Constants = {
 //     USING: (auth.uid() = id)
 //     WITH CHECK: (auth.uid() = id)
 //   Policy "Usuarios podem ver perfis" (SELECT, PERMISSIVE) roles={authenticated}
+//     USING: true
+// Table: whatsapp_clicks
+//   Policy "anon_insert_whatsapp_clicks" (INSERT, PERMISSIVE) roles={anon,authenticated}
+//     WITH CHECK: true
+//   Policy "auth_read_whatsapp_clicks" (SELECT, PERMISSIVE) roles={authenticated}
 //     USING: true
 
 // --- DATABASE FUNCTIONS ---

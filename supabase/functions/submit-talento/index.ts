@@ -38,17 +38,8 @@ const personalSchema = z.object({
     .email('Email inválido. Formato esperado: usuario@dominio.com')
     .max(255)
     .transform(sanitizeHtml),
-  telefone: z
-    .string()
-    .regex(/^\+55 \d{2} \d{4,5}-\d{4}$/, 'Telefone inválido. Formato esperado: +55 89 99999-9999')
-    .transform(sanitizeHtml),
-  data_nascimento: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato inválido (YYYY-MM-DD)')
-    .refine((date) => {
-      const d = new Date(date)
-      return d >= new Date('1950-01-01') && d <= new Date()
-    }, 'Data fora do intervalo permitido'),
+  telefone: z.string().min(1, 'Telefone é obrigatório').transform(sanitizeHtml),
+  data_nascimento: z.string().optional().or(z.literal('')),
   endereco: z.string().min(5).max(200).transform(sanitizeHtml),
   foto_url: z
     .string()

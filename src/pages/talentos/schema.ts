@@ -8,21 +8,8 @@ export const talentosSchema = z.object({
       .max(100, 'Máximo 100 caracteres')
       .regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/, 'Nome deve conter apenas letras e espaços'),
     email: z.string().email('Email inválido. Formato esperado: usuario@dominio.com').max(255),
-    telefone: z
-      .string()
-      .regex(
-        /^\+55 \d{2} \d{4,5}-\d{4}$/,
-        'Telefone inválido. Formato esperado: +55 89 99999-9999',
-      ),
-    data_nascimento: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato inválido (YYYY-MM-DD)')
-      .refine((date) => {
-        const d = new Date(date)
-        return d >= new Date('1950-01-01') && d <= new Date()
-      }, 'Data fora do intervalo permitido')
-      .optional()
-      .or(z.literal('')),
+    telefone: z.string().min(1, 'Telefone é obrigatório'),
+    data_nascimento: z.string().optional().or(z.literal('')),
     endereco: z.string().max(200, 'Máximo 200 caracteres').optional().or(z.literal('')),
     foto_url: z.string().optional().or(z.literal('')),
   }),

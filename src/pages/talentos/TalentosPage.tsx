@@ -71,18 +71,15 @@ export default function TalentosPage() {
     }, 100)
   }, [reset])
 
-  useEffect(() => {
-    const subscription = watch((value) => {
-      if (isInitialMount.current) return
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(value))
-      setSaveStatus('Salvando...')
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
-      timeoutRef.current = setTimeout(() => {
-        setSaveStatus('Salvo')
-      }, 2000)
-    })
-    return () => subscription.unsubscribe()
-  }, [watch])
+  const saveData = () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(getValues()))
+    setSaveStatus('Salvando...')
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    timeoutRef.current = setTimeout(() => {
+      setSaveStatus('Salvo')
+      setTimeout(() => setSaveStatus(''), 2000)
+    }, 500)
+  }
 
   const handleNext = async () => {
     const fieldsToValidate = steps[currentStep].fields
@@ -112,9 +109,16 @@ export default function TalentosPage() {
         setIsCheckingEmail(false)
       }
 
+      saveData()
       setCurrentStep((prev) => prev + 1)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
+  }
+
+  const handlePrev = () => {
+    saveData()
+    setCurrentStep((prev) => prev - 1)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const progress = ((currentStep + 1) / steps.length) * 100
@@ -124,7 +128,7 @@ export default function TalentosPage() {
       const p = getValues('personal')
       if (!p?.nome || p.nome.length < 3) return true
       if (!p?.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.email)) return true
-      if (!p?.telefone || !/^\+55 \d{2} \d{4,5}-\d{4}$/.test(p.telefone)) return true
+      if (!p?.telefone) return true
       if (errors.personal) return true
     }
     if (currentStep === 1) {
@@ -201,7 +205,7 @@ export default function TalentosPage() {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => setCurrentStep((prev) => prev - 1)}
+                    onClick={handlePrev}
                     disabled={currentStep === 0 || isCheckingEmail}
                     className="min-w-[100px]"
                   >

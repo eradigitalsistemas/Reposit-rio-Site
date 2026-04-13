@@ -1,6 +1,5 @@
 import { useFormContext } from 'react-hook-form'
 import { Camera, Trash2, CheckCircle2, XCircle } from 'lucide-react'
-import { formatPhone } from '@/lib/utils'
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -168,7 +167,7 @@ export function StepPersonal() {
           <FormField
             control={control}
             name="personal.telefone"
-            render={({ field: { onChange, ...field }, fieldState }) => (
+            render={({ field, fieldState }) => (
               <FormItem>
                 <FormLabel>
                   Telefone / WhatsApp <span className="text-destructive">*</span>
@@ -177,10 +176,7 @@ export function StepPersonal() {
                   <InputWithFeedback
                     field={field}
                     fieldState={fieldState}
-                    placeholder="+55 11 99999-9999"
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      onChange(formatPhone(e.target.value))
-                    }
+                    placeholder="Ex: (11) 99999-9999"
                   />
                 </FormControl>
                 <FormMessage />

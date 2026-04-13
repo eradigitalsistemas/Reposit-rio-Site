@@ -56,6 +56,8 @@ export default function TalentosPage() {
     formState: { errors },
   } = methods
 
+  const formValues = watch()
+
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
@@ -125,14 +127,14 @@ export default function TalentosPage() {
 
   const isNextDisabled = () => {
     if (currentStep === 0) {
-      const p = getValues('personal')
+      const p = formValues.personal
       if (!p?.nome || p.nome.length < 3) return true
       if (!p?.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.email)) return true
       if (!p?.telefone) return true
       if (errors.personal) return true
     }
     if (currentStep === 1) {
-      const eds = getValues('educations')
+      const eds = formValues.educations
       if (!eds || eds.length === 0) return true
       const hasInvalidEdu = eds.some(
         (e: any) =>
@@ -146,7 +148,7 @@ export default function TalentosPage() {
       if (errors.educations) return true
     }
     if (currentStep === 2) {
-      const exps = getValues('experiences')
+      const exps = formValues.experiences
       if (!exps || exps.length === 0) return true
       const hasInvalidExp = exps.some(
         (e: any) =>
@@ -156,7 +158,7 @@ export default function TalentosPage() {
       if (errors.experiences) return true
     }
     if (currentStep === 3) {
-      const d = getValues('disc')
+      const d = formValues.disc
       if (!d) return true
       const answeredCount = Object.values(d).filter(Boolean).length
       if (answeredCount < 12) return true
@@ -196,7 +198,7 @@ export default function TalentosPage() {
                 {currentStep === 0 && <StepPersonal />}
                 {currentStep === 1 && <StepEducation />}
                 {currentStep === 2 && <StepExperience />}
-                {currentStep === 3 && <StepDisc />}
+                {currentStep === 3 && <StepDisc onComplete={handleNext} />}
                 {currentStep === 4 && <StepReview setCurrentStep={setCurrentStep} />}
               </div>
 

@@ -129,7 +129,7 @@ export const discQuestions = [
   },
 ]
 
-export function StepDisc() {
+export function StepDisc({ onComplete }: { onComplete?: () => void }) {
   const { control, watch, trigger } = useFormContext()
   const [currentIndex, setCurrentIndex] = useState(0)
 
@@ -212,7 +212,10 @@ export function StepDisc() {
                             setTimeout(() => handleNext(), 350)
                           } else {
                             // Ensure overall form validation gets updated when clicking the last option
-                            await trigger()
+                            const isValid = await trigger()
+                            if (isValid && onComplete) {
+                              setTimeout(() => onComplete(), 600)
+                            }
                           }
                         }}
                       />

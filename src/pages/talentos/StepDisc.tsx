@@ -1,10 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useFormContext, Controller } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
-import { CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { useFormContext } from 'react-hook-form'
+import { DISCQuiz } from '@/components/disc/DISCQuiz'
 
 export const discQuestions = [
   {
@@ -130,37 +125,18 @@ export const discQuestions = [
 ]
 
 export function StepDisc({ onComplete }: { onComplete?: () => void }) {
-  const { control, watch, trigger } = useFormContext()
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const { setValue, watch, trigger } = useFormContext()
+  const initialAnswers = watch('disc') || {}
 
-  const currentQ = discQuestions[currentIndex]
-  const allAnswers = watch('disc') || {}
-
-  const isAnswered = !!allAnswers[currentQ.id]
-
-  const handleNext = () => {
-    if (currentIndex < discQuestions.length - 1) {
-      setCurrentIndex((prev) => prev + 1)
-    }
+  const handleOnChange = (answers: Record<string, string>) => {
+    setValue('disc', answers, { shouldValidate: true })
+    trigger('disc').catch(() => {})
   }
 
-  const handlePrev = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex((prev) => prev - 1)
-    }
-  }
-
-  const progress = ((currentIndex + 1) / discQuestions.length) * 100
-  const isFinished = Object.values(allAnswers).filter(Boolean).length === 12
-
-  // Notify parent form explicitly to clear errors if needed
-  useEffect(() => {
-    if (isFinished) {
-      trigger('disc').catch(() => {})
-    }
-  }, [isFinished, trigger])
-
-  const handleFinish = () => {
+  const handleQuizComplete = (answers: Record<string, string>, scores: Record<string, number>) => {
+    setValue('disc', answers, { shouldValidate: true })
+    // In a real scenario you would save the 'scores' object, but for this step we advance the UI
+    trigger('disc').catch(() => {})
     if (onComplete) onComplete()
   }
 
@@ -173,105 +149,12 @@ export function StepDisc({ onComplete }: { onComplete?: () => void }) {
         </p>
       </div>
 
-      <div className="max-w-2xl mx-auto space-y-6">
-        <div className="flex items-center justify-between text-sm font-medium text-muted-foreground mb-2">
-          <span>
-            Pergunta {currentIndex + 1} de {discQuestions.length}
-          </span>
-          <span>{Math.round(progress)}%</span>
-        </div>
-        <Progress value={progress} className="h-2" />
-
-        <Card className="mt-8 border-primary/20 shadow-sm relative overflow-hidden">
-          <CardContent className="p-6 md:p-8 relative z-10 bg-card">
-            <h4 className="text-xl font-medium mb-6 min-h-[56px] flex items-center">
-              {currentQ.text}
-            </h4>
-
-            <Controller
-              name={`disc.${currentQ.id}`}
-              control={control}
-              render={({ field }) => (
-                <div className="space-y-3">
-                  {currentQ.options.map((opt) => (
-                    <label
-                      key={opt.value}
-                      className={cn(
-                        'flex items-center p-4 border rounded-xl cursor-pointer transition-all',
-                        field.value === opt.value
-                          ? 'border-primary bg-primary/5 ring-1 ring-primary'
-                          : 'border-muted hover:border-primary/50 hover:bg-muted/50',
-                      )}
-                    >
-                      <input
-                        type="radio"
-                        className="sr-only"
-                        value={opt.value}
-                        checked={field.value === opt.value}
-                        onChange={(e) => {
-                          field.onChange(e.target.value)
-                          trigger(`disc.${currentQ.id}`).catch(() => {})
-
-                          if (currentIndex < discQuestions.length - 1) {
-                            setTimeout(() => handleNext(), 350)
-                          } else {
-                            // On the last question, auto-advance after a small delay
-                            // We use a safe try-catch wrapper in case of any unhandled promise issues
-                            setTimeout(() => {
-                              try {
-                                if (onComplete) onComplete()
-                              } catch (err) {
-                                console.error('Error auto-advancing:', err)
-                              }
-                            }, 800)
-                          }
-                        }}
-                      />
-                      <div
-                        className={cn(
-                          'w-5 h-5 rounded-full border-2 mr-4 flex items-center justify-center flex-shrink-0 transition-colors',
-                          field.value === opt.value ? 'border-primary' : 'border-muted-foreground',
-                        )}
-                      >
-                        {field.value === opt.value && (
-                          <div className="w-2.5 h-2.5 bg-primary rounded-full" />
-                        )}
-                      </div>
-                      <span className="text-sm md:text-base font-medium">{opt.label}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-            />
-          </CardContent>
-        </Card>
-
-        <div className="flex justify-between items-center pt-6">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handlePrev}
-            disabled={currentIndex === 0}
-          >
-            <ChevronLeft className="w-4 h-4 mr-2" /> Anterior
-          </Button>
-
-          {currentIndex < discQuestions.length - 1 ? (
-            <Button type="button" onClick={handleNext} disabled={!isAnswered}>
-              Próxima Pergunta <ChevronRight className="w-4 h-4 ml-2" />
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              onClick={handleFinish}
-              disabled={!isFinished}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[140px]"
-            >
-              Concluir e Avançar <CheckCircle2 className="w-4 h-4 ml-2" />
-            </Button>
-          )}
-        </div>
-      </div>
+      <DISCQuiz
+        questions={discQuestions}
+        initialAnswers={initialAnswers}
+        onChange={handleOnChange}
+        onComplete={handleQuizComplete}
+      />
     </div>
   )
 }

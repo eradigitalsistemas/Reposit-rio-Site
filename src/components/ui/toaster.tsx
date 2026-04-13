@@ -8,7 +8,7 @@ import {
   ToastTitle,
   ToastViewport,
 } from '@/components/ui/toast'
-import { AlertCircle, CheckCircle2, Info } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Info, AlertTriangle } from 'lucide-react'
 
 export function Toaster() {
   const { toasts } = useToast()
@@ -23,10 +23,13 @@ export function Toaster() {
               {variant === 'success' && (
                 <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
               )}
-              {variant === 'destructive' && (
+              {(variant === 'destructive' || variant === 'error') && (
                 <AlertCircle className="h-5 w-5 text-destructive shrink-0" />
               )}
               {variant === 'info' && <Info className="h-5 w-5 text-blue-500 shrink-0" />}
+              {variant === 'warning' && (
+                <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0" />
+              )}
 
               <div className="grid gap-1">
                 {title && <ToastTitle>{title}</ToastTitle>}

@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Check, ChevronsUpDown, X } from 'lucide-react'
+
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,16 +14,17 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Badge } from '@/components/ui/badge'
 
-export type Option = {
+export interface Option {
   label: string
   value: string
 }
 
-interface MultiSelectProps {
+export interface MultiSelectProps {
   options: Option[]
   selected: string[]
   onChange: (values: string[]) => void
   placeholder?: string
+  searchable?: boolean
   className?: string
 }
 
@@ -30,13 +32,14 @@ export function MultiSelect({
   options,
   selected,
   onChange,
-  placeholder = 'Selecione...',
+  placeholder = 'Select items...',
+  searchable = true,
   className,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false)
 
-  const handleUnselect = (value: string) => {
-    onChange(selected.filter((s) => s !== value))
+  const handleUnselect = (item: string) => {
+    onChange(selected.filter((i) => i !== item))
   }
 
   return (
@@ -46,29 +49,44 @@ export function MultiSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn('w-full justify-between hover:bg-transparent h-auto min-h-10', className)}
+          className={cn(
+            'w-full justify-between hover:bg-background font-normal',
+            selected.length > 0 ? 'h-auto py-1 min-h-10' : 'h-10',
+            className,
+          )}
         >
           <div className="flex flex-wrap gap-1">
-            {selected.length === 0 && (
-              <span className="text-muted-foreground font-normal">{placeholder}</span>
-            )}
-            {selected.map((value) => {
-              const option = options.find((o) => o.value === value)
+            {selected.length === 0 && <span className="text-muted-foreground">{placeholder}</span>}
+            {selected.map((item) => {
+              const option = options.find((o) => o.value === item)
+              if (!option) return null
               return (
-                <Badge variant="secondary" key={value} className="mr-1 mb-1">
-                  {option?.label}
+                <Badge
+                  key={item}
+                  variant="secondary"
+                  className="mr-1 mb-1 mt-1 hover:bg-secondary"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleUnselect(item)
+                  }}
+                >
+                  {option.label}
                   <button
                     className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
-                        handleUnselect(value)
+                        handleUnselect(item)
                       }
                     }}
                     onMouseDown={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
                     }}
-                    onClick={() => handleUnselect(value)}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      handleUnselect(item)
+                    }}
                   >
                     <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
                   </button>
@@ -79,33 +97,33 @@ export function MultiSelect({
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
+      <PopoverContent className="w-full p-0" align="start">
         <Command>
-          <CommandInput placeholder="Buscar..." />
+          {searchable && <CommandInput placeholder="Buscar..." />}
           <CommandList>
-            <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
-            <CommandGroup>
-              {options.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  onSelect={() => {
-                    onChange(
-                      selected.includes(option.value)
-                        ? selected.filter((item) => item !== option.value)
-                        : [...selected, option.value],
-                    )
-                    setOpen(true)
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      'mr-2 h-4 w-4',
-                      selected.includes(option.value) ? 'opacity-100' : 'opacity-0',
-                    )}
-                  />
-                  {option.label}
-                </CommandItem>
-              ))}
+            <CommandEmpty>Nenhum item encontrado.</CommandEmpty>
+            <CommandGroup className="max-h-64 overflow-auto">
+              {options.map((option) => {
+                const isSelected = selected.includes(option.value)
+                return (
+                  <CommandItem
+                    key={option.value}
+                    onSelect={() => {
+                      onChange(
+                        isSelected
+                          ? selected.filter((item) => item !== option.value)
+                          : [...selected, option.value],
+                      )
+                      // Keep popover open for multi-select
+                    }}
+                  >
+                    <Check
+                      className={cn('mr-2 h-4 w-4', isSelected ? 'opacity-100' : 'opacity-0')}
+                    />
+                    {option.label}
+                  </CommandItem>
+                )
+              })}
             </CommandGroup>
           </CommandList>
         </Command>

@@ -5,12 +5,45 @@ import { ChevronRight, MoreHorizontal } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
-const Breadcrumb = React.forwardRef<
-  HTMLElement,
-  React.ComponentPropsWithoutRef<'nav'> & {
-    separator?: React.ReactNode
-  }
->(({ ...props }, ref) => <nav ref={ref} aria-label="breadcrumb" {...props} />)
+export interface BreadcrumbShorthandProps extends React.ComponentPropsWithoutRef<'nav'> {
+  separator?: React.ReactNode
+  items?: Array<{ label: string; href?: string }>
+  current?: string
+}
+
+const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbShorthandProps>(
+  ({ items, current, separator, ...props }, ref) => {
+    if (items || current) {
+      return (
+        <nav ref={ref} aria-label="breadcrumb" {...props}>
+          <BreadcrumbList>
+            {items?.map((item, index) => (
+              <React.Fragment key={index}>
+                <BreadcrumbItem>
+                  {item.href ? (
+                    <BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink>
+                  ) : (
+                    <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                  )}
+                </BreadcrumbItem>
+                {(index < items.length - 1 || current) && (
+                  <BreadcrumbSeparator>{separator}</BreadcrumbSeparator>
+                )}
+              </React.Fragment>
+            ))}
+            {current && (
+              <BreadcrumbItem>
+                <BreadcrumbPage>{current}</BreadcrumbPage>
+              </BreadcrumbItem>
+            )}
+          </BreadcrumbList>
+        </nav>
+      )
+    }
+
+    return <nav ref={ref} aria-label="breadcrumb" {...props} />
+  },
+)
 Breadcrumb.displayName = 'Breadcrumb'
 
 const BreadcrumbList = React.forwardRef<HTMLOListElement, React.ComponentPropsWithoutRef<'ol'>>(

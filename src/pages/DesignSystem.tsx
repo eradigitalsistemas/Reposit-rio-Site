@@ -44,10 +44,12 @@ import { MultiSelect } from '@/components/ui/multi-select'
 import { useToast } from '@/hooks/use-toast'
 import { useState } from 'react'
 import { Home } from 'lucide-react'
+import { Modal } from '@/components/ui/modal'
 
 export default function DesignSystem() {
   const { toast } = useToast()
   const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   return (
     <div className="container py-12 space-y-16">
@@ -120,39 +122,40 @@ export default function DesignSystem() {
       <section className="space-y-6">
         <h2 className="h2 border-b pb-2">3. Botões</h2>
         <div className="flex flex-wrap gap-4 items-center">
-          <Button>Primary</Button>
+          <Button variant="primary">Primary</Button>
           <Button variant="secondary">Secondary</Button>
           <Button variant="outline">Outline</Button>
           <Button variant="ghost">Ghost</Button>
-          <Button variant="destructive">Destructive</Button>
+          <Button variant="danger">Danger</Button>
           <Button size="sm">Small</Button>
+          <Button size="md">Medium</Button>
           <Button size="lg">Large</Button>
           <Button loading>Loading</Button>
           <Button disabled>Disabled</Button>
         </div>
       </section>
 
-      <section className="space-y-6 max-w-sm">
+      <section className="space-y-6 max-w-md">
         <h2 className="h2 border-b pb-2">4. Inputs</h2>
         <div className="space-y-4">
-          <Input placeholder="Input padrão com sombra baixa" />
-          <Input error placeholder="Input com erro" />
-          <Input disabled placeholder="Input desabilitado" />
+          <Input type="text" label="Padrão" placeholder="Input padrão com sombra baixa" />
+          <Input type="email" label="Email" error="Email inválido" placeholder="Input com erro" />
+          <Input type="text" label="Sucesso" success placeholder="Input validado" />
+          <Input type="tel" label="Telefone" disabled placeholder="Input desabilitado" />
+          <Input type="text" label="Obrigatório" required placeholder="Campo obrigatório" />
         </div>
       </section>
 
       <section className="space-y-6 max-w-sm">
         <h2 className="h2 border-b pb-2">5. Selects & Dropdowns</h2>
         <div className="space-y-4">
-          <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="Select padrão" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1">Opção 1</SelectItem>
-              <SelectItem value="2">Opção 2</SelectItem>
-            </SelectContent>
-          </Select>
+          <Select
+            placeholder="Selecione uma opção..."
+            options={[
+              { label: 'Opção 1', value: '1' },
+              { label: 'Opção 2', value: '2' },
+            ]}
+          />
 
           <MultiSelect
             options={[
@@ -163,6 +166,7 @@ export default function DesignSystem() {
             selected={selectedItems}
             onChange={setSelectedItems}
             placeholder="Múltipla seleção..."
+            searchable
           />
         </div>
       </section>
@@ -170,66 +174,66 @@ export default function DesignSystem() {
       <section className="space-y-6">
         <h2 className="h2 border-b pb-2">6. Cards</h2>
         <div className="grid md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Título do Card</CardTitle>
-              <CardDescription>Descrição auxiliar do card</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="body-text">
-                Conteúdo principal do card com padding e formatação adequada. Elevação "low" no
-                estado normal e "medium" no hover.
-              </p>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <Button variant="outline">Cancelar</Button>
-              <Button>Salvar</Button>
-            </CardFooter>
+          <Card
+            title="Título do Card"
+            subtitle="Descrição auxiliar do card"
+            hoverable
+            footer={
+              <div className="flex w-full justify-between">
+                <Button variant="outline">Cancelar</Button>
+                <Button>Salvar</Button>
+              </div>
+            }
+          >
+            <p className="body-text">
+              Conteúdo principal do card utilizando props de atalho. Elevação "low" no estado normal
+              e "medium" no hover.
+            </p>
           </Card>
         </div>
       </section>
 
       <section className="space-y-6">
         <h2 className="h2 border-b pb-2">7. Modals / Dialogs</h2>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline">Abrir Modal</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="h2">Você tem certeza?</DialogTitle>
-              <DialogDescription className="body-text">
-                Esta ação não pode ser desfeita. Isso excluirá permanentemente os dados.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button variant="outline">Cancelar</Button>
-              <Button variant="destructive">Excluir</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Button variant="outline" onClick={() => setIsModalOpen(true)}>
+          Abrir Modal
+        </Button>
+
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title="Confirmar exclusão"
+          actions={
+            <div className="flex justify-end gap-2 w-full">
+              <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+                Cancelar
+              </Button>
+              <Button variant="danger" onClick={() => setIsModalOpen(false)}>
+                Excluir
+              </Button>
+            </div>
+          }
+        >
+          <p className="body-text text-muted-foreground">
+            Esta ação não pode ser desfeita. Isso excluirá permanentemente os dados da sua conta.
+          </p>
+        </Modal>
       </section>
 
       <section className="space-y-6 max-w-md">
         <h2 className="h2 border-b pb-2">8. Accordion</h2>
-        <Accordion type="single" collapsible>
-          <AccordionItem value="item-1">
-            <AccordionTrigger className="font-semibold text-[16px]">
-              Como funciona o sistema?
-            </AccordionTrigger>
-            <AccordionContent className="body-text">
-              O sistema permite capturar e organizar leads de forma eficiente.
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="item-2">
-            <AccordionTrigger className="font-semibold text-[16px]">
-              Posso integrar com outros apps?
-            </AccordionTrigger>
-            <AccordionContent className="body-text">
-              Sim, possuímos integrações via Edge Functions e Webhooks.
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        <Accordion
+          items={[
+            {
+              title: 'Como funciona o sistema?',
+              content: 'O sistema permite capturar e organizar leads de forma eficiente.',
+            },
+            {
+              title: 'Posso integrar com outros apps?',
+              content: 'Sim, possuímos integrações via Edge Functions e Webhooks.',
+            },
+          ]}
+        />
       </section>
 
       <section className="space-y-6">
@@ -242,7 +246,10 @@ export default function DesignSystem() {
           <Badge variant="success">Success</Badge>
           <Badge variant="warning">Warning</Badge>
           <Badge variant="info">Info</Badge>
-          <Badge variant="destructive">Destructive</Badge>
+          <Badge variant="error">Error</Badge>
+          <Badge size="md" variant="primary">
+            Medium Size
+          </Badge>
         </div>
       </section>
 
@@ -257,23 +264,13 @@ export default function DesignSystem() {
 
       <section className="space-y-6">
         <h2 className="h2 border-b pb-2">11. Breadcrumbs</h2>
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/">
-                <Home className="h-4 w-4" />
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/design-system">Componentes</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Design System</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+        <Breadcrumb
+          items={[
+            { label: 'Home', href: '/' },
+            { label: 'Componentes', href: '/design-system' },
+          ]}
+          current="Design System"
+        />
       </section>
 
       <section className="space-y-6">

@@ -5,7 +5,32 @@ import { Check, ChevronDown, ChevronUp } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
-const Select = SelectPrimitive.Root
+export interface SelectProps extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root> {
+  options?: Array<{ label: string; value: string }>
+  placeholder?: string
+  className?: string
+}
+
+const Select = ({ options, placeholder, className, children, ...props }: SelectProps) => {
+  if (options) {
+    return (
+      <SelectPrimitive.Root {...props}>
+        <SelectTrigger className={className}>
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((opt) => (
+            <SelectItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </SelectPrimitive.Root>
+    )
+  }
+
+  return <SelectPrimitive.Root {...props}>{children}</SelectPrimitive.Root>
+}
 
 const SelectGroup = SelectPrimitive.Group
 

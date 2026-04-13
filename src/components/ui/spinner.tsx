@@ -11,9 +11,9 @@ export function Spinner({ className, size = 'md', ...props }: SpinnerProps) {
       className={cn(
         'animate-spin text-muted-foreground',
         {
-          'h-4 w-4': size === 'sm' || size === 'icon',
-          'h-6 w-6': size === 'md',
-          'h-8 w-8': size === 'lg',
+          'h-5 w-5': size === 'sm' || size === 'icon',
+          'h-8 w-8': size === 'md',
+          'h-12 w-12': size === 'lg',
         },
         className,
       )}

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
-import { Zap, MapPin, Phone, Mail, Instagram, Facebook, Linkedin, Twitter } from 'lucide-react'
+import { MapPin, Phone, Mail, Instagram, Facebook, Linkedin, Twitter } from 'lucide-react'
 import React from 'react'
+import logoUrl from '@/assets/logo-principal-preto-sem-fundo-93506.png'
 
 export function Footer({
   children,
@@ -212,9 +213,7 @@ export function SiteFooter() {
       <FooterColumn
         title={
           <Link to="/" className="flex items-center gap-2 mb-2" aria-label="Era Digital Home">
-            <div className="bg-primary p-1.5 rounded-lg">
-              <Zap className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img src={logoUrl} alt="Era Digital Logo" className="h-8 w-auto object-contain" />
             <span className="font-bold text-lg tracking-tight">Era Digital</span>
           </Link>
         }

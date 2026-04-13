@@ -2,84 +2,73 @@ import { FileText } from 'lucide-react'
 
 export default function Termos() {
   return (
-    <div className="container max-w-4xl mx-auto py-12 px-4 animate-fade-in-up">
-      <div className="flex items-center gap-3 mb-8 border-b pb-6">
-        <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-          <FileText className="w-6 h-6 text-primary" />
-        </div>
-        <h1 className="text-3xl font-bold tracking-tight">Termos de Uso</h1>
+    <div className="container max-w-4xl mx-auto py-12 px-4 animate-fade-in">
+      <div className="flex items-center gap-3 mb-8">
+        <FileText className="w-8 h-8 text-primary" />
+        <h1 className="text-4xl font-bold">Termos de Uso</h1>
       </div>
-      <div className="prose prose-green dark:prose-invert max-w-none text-muted-foreground">
-        <p className="font-medium text-foreground">
-          Última atualização: {new Date().toLocaleDateString('pt-BR')}
+
+      <div className="prose prose-green dark:prose-invert max-w-none space-y-6 text-muted-foreground">
+        <p>
+          Bem-vindo à <strong>Era Digital</strong>. Ao acessar e utilizar nosso site e serviços,
+          você concorda em cumprir e estar vinculado aos seguintes Termos de Uso. Leia atentamente
+          antes de prosseguir.
         </p>
 
-        <h2 className="text-foreground text-xl font-semibold mt-8 mb-4">1. Aceitação dos Termos</h2>
-        <p className="mb-4">
-          Ao acessar e usar o site da Super Era Digital, você concorda em cumprir e ficar vinculado
-          aos seguintes termos e condições de uso. Se você não concordar com qualquer parte destes
-          termos, por favor, não use nosso site.
+        <h2 className="text-2xl font-semibold text-foreground mt-8">1. Aceitação dos Termos</h2>
+        <p>
+          O uso dos serviços da Era Digital implica na aceitação integral destes Termos de Uso e da
+          nossa Política de Privacidade. Caso não concorde com algum dos termos, solicitamos que não
+          utilize nossos serviços.
         </p>
 
-        <h2 className="text-foreground text-xl font-semibold mt-8 mb-4">2. Uso do Site</h2>
-        <p className="mb-4">
-          O conteúdo das páginas deste site é apenas para sua informação geral e uso. Ele está
-          sujeito a alterações sem aviso prévio.
-        </p>
-        <p className="mb-4">
-          Nem nós nem terceiros oferecemos qualquer garantia ou garantia quanto à precisão,
-          pontualidade, desempenho, integridade ou adequação das informações e materiais encontrados
-          ou oferecidos neste site para qualquer finalidade específica. Você reconhece que tais
-          informações e materiais podem conter imprecisões ou erros e nós expressamente excluímos a
-          responsabilidade por quaisquer imprecisões ou erros na extensão máxima permitida por lei.
+        <h2 className="text-2xl font-semibold text-foreground mt-8">2. Uso dos Serviços</h2>
+        <p>
+          Nossos serviços, incluindo a plataforma de currículos e geração de PDFs formatados, são
+          oferecidos para fins profissionais. Você se compromete a fornecer informações verdadeiras,
+          precisas e atualizadas ao preencher formulários.
         </p>
 
-        <h2 className="text-foreground text-xl font-semibold mt-8 mb-4">
-          3. Propriedade Intelectual
+        <h2 className="text-2xl font-semibold text-foreground mt-8">3. Propriedade Intelectual</h2>
+        <p>
+          Todo o conteúdo presente no site, incluindo textos, gráficos, logotipos, ícones, imagens e
+          software, é de propriedade exclusiva da Era Digital ou de seus licenciadores, sendo
+          protegido pelas leis de direitos autorais e propriedade intelectual.
+        </p>
+
+        <h2 className="text-2xl font-semibold text-foreground mt-8">
+          4. Responsabilidades do Usuário
         </h2>
-        <p className="mb-4">
-          Este site contém material que é de nossa propriedade ou licenciado para nós. Este material
-          inclui, mas não se limita a, design, layout, aparência, aparência e gráficos. A reprodução
-          é proibida, exceto de acordo com o aviso de direitos autorais, que faz parte destes termos
-          e condições.
-        </p>
-        <p className="mb-4">
-          Todas as marcas registradas reproduzidas neste site que não são de propriedade de, ou
-          licenciadas para, o operador são reconhecidas no site.
-        </p>
+        <ul className="list-disc pl-6 space-y-2">
+          <li>Não utilizar a plataforma para fins ilegais ou não autorizados;</li>
+          <li>Não tentar comprometer a segurança ou a integridade dos sistemas;</li>
+          <li>Garantir que os documentos e currículos gerados sejam usados de forma ética;</li>
+          <li>Não enviar conteúdo malicioso, vírus ou códigos destrutivos.</li>
+        </ul>
 
-        <h2 className="text-foreground text-xl font-semibold mt-8 mb-4">4. Uso Não Autorizado</h2>
-        <p className="mb-4">
-          O uso não autorizado deste site pode dar origem a uma reclamação por danos e/ou ser uma
-          ofensa criminal.
-        </p>
-
-        <h2 className="text-foreground text-xl font-semibold mt-8 mb-4">
-          5. Links para Outros Sites
+        <h2 className="text-2xl font-semibold text-foreground mt-8">
+          5. Limitação de Responsabilidade
         </h2>
-        <p className="mb-4">
-          De tempos em tempos, este site também pode incluir links para outros sites. Esses links
-          são fornecidos para sua conveniência para fornecer mais informações. Eles não significam
-          que endossamos o(s) site(s). Não temos responsabilidade pelo conteúdo do(s) site(s)
-          vinculado(s).
+        <p>
+          A Era Digital não se responsabiliza por eventuais danos diretos, indiretos, incidentais ou
+          consequenciais resultantes do uso ou da incapacidade de uso dos nossos serviços,
+          incluindo, mas não se limitando a, perda de dados ou lucros cessantes.
         </p>
 
-        <h2 className="text-foreground text-xl font-semibold mt-8 mb-4">
-          6. Banco de Talentos e Submissão de Dados
-        </h2>
-        <p className="mb-4">
-          Ao submeter seu currículo e informações através do nosso Banco de Talentos, você declara
-          que todas as informações fornecidas são verdadeiras e precisas. Você concorda que as
-          informações fornecidas, incluindo resultados de testes comportamentais (como o teste
-          DISC), serão utilizadas pela Super Era Digital para fins de recrutamento, seleção e
-          análise de perfil, conforme descrito em nossa Política de Privacidade.
+        <h2 className="text-2xl font-semibold text-foreground mt-8">6. Modificações dos Termos</h2>
+        <p>
+          Reservamo-nos o direito de alterar estes Termos de Uso a qualquer momento, sem aviso
+          prévio. As alterações entrarão em vigor imediatamente após a publicação no site. O uso
+          contínuo dos serviços constituirá sua aceitação das novas condições.
         </p>
 
-        <h2 className="text-foreground text-xl font-semibold mt-8 mb-4">7. Lei Aplicável</h2>
-        <p className="mb-4">
-          O uso deste site e qualquer disputa decorrente de tal uso do site estão sujeitos às leis
-          do Brasil, com foro na comarca de Floriano/PI para dirimir quaisquer questões.
-        </p>
+        <div className="mt-12 p-6 bg-muted rounded-lg border border-border">
+          <p className="font-medium text-foreground mb-2">Dúvidas?</p>
+          <p>
+            Caso tenha alguma dúvida sobre os nossos Termos de Uso, entre em contato através do
+            nosso WhatsApp Comercial: <strong>+55 89 9938-0203</strong>.
+          </p>
+        </div>
       </div>
     </div>
   )

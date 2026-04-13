@@ -2,96 +2,75 @@ import { Shield } from 'lucide-react'
 
 export default function Politicas() {
   return (
-    <div className="container max-w-4xl mx-auto py-12 px-4 animate-fade-in-up">
-      <div className="flex items-center gap-3 mb-8 border-b pb-6">
-        <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-          <Shield className="w-6 h-6 text-primary" />
-        </div>
-        <h1 className="text-3xl font-bold tracking-tight">Políticas de Privacidade</h1>
+    <div className="container max-w-4xl mx-auto py-12 px-4 animate-fade-in">
+      <div className="flex items-center gap-3 mb-8">
+        <Shield className="w-8 h-8 text-primary" />
+        <h1 className="text-4xl font-bold">Política de Privacidade</h1>
       </div>
-      <div className="prose prose-green dark:prose-invert max-w-none text-muted-foreground">
-        <p className="font-medium text-foreground">
-          Última atualização: {new Date().toLocaleDateString('pt-BR')}
+
+      <div className="prose prose-green dark:prose-invert max-w-none space-y-6 text-muted-foreground">
+        <p>
+          A <strong>Era Digital</strong> tem o compromisso de proteger a sua privacidade e garantir
+          a segurança dos seus dados pessoais. Esta Política de Privacidade explica como coletamos,
+          usamos, compartilhamos e protegemos as informações que você nos fornece.
         </p>
 
-        <h2 className="text-foreground text-xl font-semibold mt-8 mb-4">1. Introdução</h2>
-        <p className="mb-4">
-          A Super Era Digital ("nós", "nosso" ou "nossa") respeita a sua privacidade e está
-          comprometida em proteger os seus dados pessoais. Esta política de privacidade informa como
-          lidamos com os seus dados pessoais, seus direitos de privacidade e como a lei o protege,
-          em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018).
+        <h2 className="text-2xl font-semibold text-foreground mt-8">1. Coleta de Dados</h2>
+        <p>
+          Coletamos informações que você nos fornece diretamente ao preencher formulários, enviar
+          currículos, assinar newsletters ou entrar em contato conosco. Isso pode incluir seu nome,
+          e-mail, número de telefone, dados profissionais e outras informações relevantes.
         </p>
 
-        <h2 className="text-foreground text-xl font-semibold mt-8 mb-4">
-          2. Os dados que coletamos sobre você
-        </h2>
-        <p className="mb-4">
-          Podemos coletar, usar, armazenar e transferir diferentes tipos de dados pessoais sobre
-          você, que agrupamos da seguinte forma:
-        </p>
-        <ul className="list-disc pl-6 mb-6 space-y-2">
-          <li>
-            <strong className="text-foreground">Dados de Identidade:</strong> incluem nome,
-            sobrenome, nome de usuário ou identificador semelhante, estado civil, título, data de
-            nascimento e gênero.
-          </li>
-          <li>
-            <strong className="text-foreground">Dados de Contato:</strong> incluem endereço de
-            cobrança, endereço de entrega, endereço de e-mail e números de telefone.
-          </li>
-          <li>
-            <strong className="text-foreground">Dados Técnicos:</strong> incluem endereço de
-            protocolo de internet (IP), seus dados de login, tipo e versão do navegador,
-            configuração de fuso horário e localização, e outras tecnologias nos dispositivos que
-            você usa para acessar este site.
-          </li>
-          <li>
-            <strong className="text-foreground">Dados de Currículo:</strong> informações
-            profissionais, histórico acadêmico e resultados de avaliações (como DISC) quando
-            fornecidos voluntariamente através de nossa plataforma de Banco de Talentos.
-          </li>
+        <h2 className="text-2xl font-semibold text-foreground mt-8">2. Uso das Informações</h2>
+        <p>Utilizamos seus dados para:</p>
+        <ul className="list-disc pl-6 space-y-2">
+          <li>Fornecer, operar e manter nossos serviços;</li>
+          <li>Processar currículos e conectar talentos a oportunidades;</li>
+          <li>Enviar comunicações, atualizações e alertas relevantes;</li>
+          <li>Responder a dúvidas e prestar suporte técnico;</li>
+          <li>Melhorar e personalizar a experiência do usuário.</li>
         </ul>
 
-        <h2 className="text-foreground text-xl font-semibold mt-8 mb-4">
-          3. Como usamos os seus dados pessoais
+        <h2 className="text-2xl font-semibold text-foreground mt-8">
+          3. Compartilhamento de Dados
         </h2>
-        <p className="mb-4">
-          Só usaremos os seus dados pessoais quando a lei nos permitir. Mais comumente, usaremos
-          seus dados pessoais nas seguintes circunstâncias:
-        </p>
-        <ul className="list-disc pl-6 mb-6 space-y-2">
-          <li>
-            Quando precisarmos executar o contrato que estamos prestes a celebrar ou que já
-            celebramos com você.
-          </li>
-          <li>
-            Quando for necessário para os nossos interesses legítimos (ou de terceiros) e os seus
-            interesses e direitos fundamentais não se sobrepuserem a esses interesses.
-          </li>
-          <li>Quando precisarmos cumprir uma obrigação legal ou regulatória.</li>
-        </ul>
-
-        <h2 className="text-foreground text-xl font-semibold mt-8 mb-4">4. Segurança dos dados</h2>
-        <p className="mb-4">
-          Implementamos medidas de segurança apropriadas para evitar que seus dados pessoais sejam
-          acidentalmente perdidos, usados ou acessados de forma não autorizada, alterados ou
-          divulgados. Além disso, limitamos o acesso aos seus dados pessoais aos funcionários,
-          agentes, contratados e outros terceiros que têm uma necessidade comercial de conhecê-los.
+        <p>
+          Não vendemos ou alugamos seus dados pessoais para terceiros. Suas informações podem ser
+          compartilhadas apenas com parceiros de confiança que nos auxiliam na operação do sistema,
+          sempre sob rigorosos acordos de confidencialidade e em conformidade com a LGPD.
         </p>
 
-        <h2 className="text-foreground text-xl font-semibold mt-8 mb-4">5. Seus direitos legais</h2>
-        <p className="mb-4">
-          Sob certas circunstâncias, você tem direitos sob as leis de proteção de dados em relação
-          aos seus dados pessoais, incluindo o direito de solicitar acesso, correção, apagamento,
-          restrição, transferência ou o direito de objetar ao processamento. Para exercer qualquer
-          um desses direitos, entre em contato conosco.
+        <h2 className="text-2xl font-semibold text-foreground mt-8">4. Segurança</h2>
+        <p>
+          Implementamos medidas técnicas e organizacionais adequadas para proteger seus dados contra
+          acesso não autorizado, alteração, divulgação ou destruição. Seus dados são armazenados em
+          servidores seguros com acesso restrito.
         </p>
 
-        <h2 className="text-foreground text-xl font-semibold mt-8 mb-4">6. Contato</h2>
-        <p className="mb-4">
-          Para questões relacionadas a esta política de privacidade, entre em contato através do
-          e-mail: <strong className="text-foreground">comercial@areradigital.com.br</strong>
+        <h2 className="text-2xl font-semibold text-foreground mt-8">5. Seus Direitos</h2>
+        <p>
+          Você tem o direito de solicitar o acesso, correção, atualização ou exclusão dos seus dados
+          pessoais a qualquer momento. Para exercer esses direitos, entre em contato conosco através
+          dos nossos canais oficiais de suporte.
         </p>
+
+        <h2 className="text-2xl font-semibold text-foreground mt-8">
+          6. Alterações nesta Política
+        </h2>
+        <p>
+          Podemos atualizar esta Política de Privacidade periodicamente para refletir mudanças em
+          nossas práticas ou requisitos legais. Recomendamos que você revise esta página
+          regularmente.
+        </p>
+
+        <div className="mt-12 p-6 bg-muted rounded-lg border border-border">
+          <p className="font-medium text-foreground mb-2">Contato</p>
+          <p>
+            Se você tiver dúvidas sobre esta Política de Privacidade, entre em contato conosco pelo
+            WhatsApp de Suporte: <strong>+55 89 9418-4931</strong>.
+          </p>
+        </div>
       </div>
     </div>
   )

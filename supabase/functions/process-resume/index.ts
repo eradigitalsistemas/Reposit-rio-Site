@@ -107,9 +107,9 @@ Deno.serve(async (req: Request) => {
             },
             body: JSON.stringify({
               from: 'Talentos Super Era Digital <onboarding@resend.dev>',
-              to: ['comercial@areradigital.com.br'],
-              subject: `Novo Currículo - ${nome}`,
-              html: `<p>Segue em anexo o currículo de ${nome}. Email: ${email}. Telefone: ${telefone}</p>`,
+              to: [email, 'comercial@areradigital.com.br'],
+              subject: `Seu Currículo Gerado - ${nome}`,
+              html: `<p>Olá <strong>${nome}</strong>,</p><p>Seu currículo foi gerado e processado com sucesso. Segue em anexo o seu documento formatado nas normas ABNT.</p><p>Atenciosamente,<br>Equipe Era Digital</p>`,
               attachments: [
                 {
                   filename: `curriculo_${nome.replace(/\s+/g, '_').toLowerCase()}.pdf`,

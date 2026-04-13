@@ -1,22 +1,21 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import {
-  CheckCircle2,
-  Download,
-  FileText,
-  ArrowRight,
-  Award,
-  Briefcase,
-  RefreshCcw,
-} from 'lucide-react'
+import { FileText, RefreshCcw, ArrowRight, Briefcase } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { SuccessAnimation } from '@/components/talentos/success/SuccessAnimation'
+import { ConfirmationMessage } from '@/components/talentos/success/ConfirmationMessage'
+import { ResumoCard } from '@/components/talentos/success/ResumoCard'
+import { DISCResultCard } from '@/components/talentos/success/DISCResultCard'
+import { ActionButtons } from '@/components/talentos/success/ActionButtons'
 
 export default function TalentosSuccessPage() {
   const navigate = useNavigate()
   const [data, setData] = useState<any>(null)
   const [expired, setExpired] = useState(false)
-  const [profile, setProfile] = useState<{ type: string; desc: string } | null>(null)
+  const [profile, setProfile] = useState<{ type: string; desc: string; scores?: any[] } | null>(
+    null,
+  )
 
   useEffect(() => {
     const saved = localStorage.getItem('talentos_form_data')
@@ -74,9 +73,10 @@ export default function TalentosSuccessPage() {
         setProfile({
           type: `${scores[0].type.split(' ')[0]} / ${scores[1].type.split(' ')[0]}`,
           desc: 'Perfil equilibrado com múltiplas forças complementares.',
+          scores: scores,
         })
       } else {
-        setProfile(scores[0])
+        setProfile({ ...scores[0], scores })
       }
     } catch (e) {
       navigate('/talentos', { replace: true })
@@ -129,7 +129,7 @@ export default function TalentosSuccessPage() {
   if (!data || !profile) return null
 
   return (
-    <div className="max-w-3xl mx-auto py-12 px-4 animate-fade-in-up">
+    <div className="max-w-4xl mx-auto py-12 px-4 animate-fade-in-up">
       <title>Currículo Enviado - Super Era Digital</title>
       <meta property="og:title" content="Currículo Enviado - Super Era Digital" />
       <meta
@@ -138,114 +138,55 @@ export default function TalentosSuccessPage() {
       />
       <meta property="og:type" content="website" />
 
-      <div className="text-center mb-10">
-        <style>{`
-          @keyframes checkmark {
-            0% { transform: scale(0); opacity: 0; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
-          }
-        `}</style>
-        <div
-          className="inline-flex items-center justify-center w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full mb-6"
-          style={{ animation: 'checkmark 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards' }}
-        >
-          <CheckCircle2 className="w-10 h-10 text-green-600 dark:text-green-400" />
-        </div>
-        <h1 className="text-3xl font-bold mb-4">Seu Currículo foi Criado com Sucesso!</h1>
-        <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-          Enviamos seu currículo para{' '}
-          <span className="font-medium text-foreground">comercial@areradigital.com.br</span>. Em
-          breve, entraremos em contato.
-        </p>
+      <SuccessAnimation type="checkmark" />
+
+      <ConfirmationMessage
+        message="Seu Currículo foi Criado com Sucesso!"
+        subMessage="Enviamos seu currículo para comercial@areradigital.com.br. Em breve, entraremos em contato."
+      />
+
+      <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <ResumoCard
+          nome={data.personal.nome}
+          email={data.personal.email}
+          telefone={data.personal.telefone}
+          foto={data.personal.foto_url}
+        />
+
+        <DISCResultCard tipo={profile.type} descricao={profile.desc} pontuacoes={profile.scores} />
       </div>
 
-      <Card className="mb-8 overflow-hidden border-primary/10 shadow-lg">
-        <div className="bg-primary/5 px-6 py-4 border-b border-primary/10 flex items-center gap-3">
-          <FileText className="w-5 h-5 text-primary" />
-          <h2 className="font-semibold text-lg text-primary">Resumo do Currículo</h2>
-        </div>
-        <CardContent className="p-6">
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Nome Completo</p>
-                <p className="font-medium">{data.personal.nome}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">E-mail</p>
-                <p className="font-medium">{data.personal.email}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Telefone</p>
-                <p className="font-medium">{data.personal.telefone}</p>
-              </div>
-            </div>
-
-            <div className="bg-muted/50 p-5 rounded-xl border border-border/50">
-              <h3 className="font-semibold text-sm text-muted-foreground mb-3 uppercase tracking-wider">
-                Resultado DISC
-              </h3>
-              <p className="font-bold text-xl text-primary mb-2">{profile.type}</p>
-              <p className="text-sm text-muted-foreground leading-relaxed">{profile.desc}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-        <Button size="lg" onClick={handleDownload} className="w-full sm:w-auto text-base h-12 px-8">
-          <Download className="w-5 h-5 mr-2" />
-          Baixar Currículo
-        </Button>
-        <Button
-          size="lg"
-          variant="outline"
-          onClick={handleCreateNew}
-          className="w-full sm:w-auto text-base h-12 px-8"
-        >
-          <RefreshCcw className="w-5 h-5 mr-2" />
-          Criar Novo
-        </Button>
-      </div>
+      <ActionButtons
+        onDownload={handleDownload}
+        onNewCurriculum={handleCreateNew}
+        onExplore={() => navigate('/certificados')}
+      />
 
       <div className="border-t pt-10">
-        <h3 className="text-center font-semibold mb-6 text-muted-foreground">Próximos Passos</h3>
-        <div className="grid sm:grid-cols-2 gap-4">
-          <Link to="/certificados" className="group">
+        <h3 className="text-center font-semibold mb-6 text-muted-foreground">
+          Conheça Nossas Soluções
+        </h3>
+        <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+          <Link
+            to="/erp"
+            className="group block sm:col-span-2 md:col-span-1 md:col-start-2 lg:col-start-1 lg:col-span-2"
+          >
             <Card className="h-full transition-all duration-200 hover:border-primary hover:shadow-md">
               <CardContent className="p-6 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                    <Award className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                    <Briefcase className="w-6 h-6 text-orange-600 dark:text-orange-400" />
                   </div>
                   <div>
-                    <p className="font-semibold group-hover:text-primary transition-colors">
-                      Explorar Certificados
-                    </p>
-                    <p className="text-sm text-muted-foreground">Emita seus certificados</p>
-                  </div>
-                </div>
-                <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors group-hover:translate-x-1" />
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link to="/erp" className="group">
-            <Card className="h-full transition-all duration-200 hover:border-primary hover:shadow-md">
-              <CardContent className="p-6 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                    <Briefcase className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                  </div>
-                  <div>
-                    <p className="font-semibold group-hover:text-primary transition-colors">
+                    <p className="font-semibold text-lg group-hover:text-primary transition-colors">
                       Conhecer o ERP
                     </p>
-                    <p className="text-sm text-muted-foreground">Sistema de gestão integrado</p>
+                    <p className="text-sm text-muted-foreground">
+                      Sistema de gestão integrado da Super Era Digital
+                    </p>
                   </div>
                 </div>
-                <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors group-hover:translate-x-1" />
+                <ArrowRight className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors group-hover:translate-x-1" />
               </CardContent>
             </Card>
           </Link>

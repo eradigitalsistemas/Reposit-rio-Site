@@ -245,8 +245,8 @@ export function SiteFooter() {
       <FooterColumn title="Fale Conosco">
         <ContactInfo
           whatsapp={[
-            { label: 'WhatsApp Comercial', number: '5589999999999' },
-            { label: 'WhatsApp Suporte', number: '5589999999998' },
+            { label: 'WhatsApp Comercial', number: '558999380203' },
+            { label: 'WhatsApp Suporte', number: '558994184931' },
           ]}
           email="comercial@areradigital.com.br"
         />

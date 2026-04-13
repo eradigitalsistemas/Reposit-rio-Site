@@ -9,6 +9,156 @@ import { ResumoCard } from '@/components/talentos/success/ResumoCard'
 import { DISCResultCard } from '@/components/talentos/success/DISCResultCard'
 import { ActionButtons } from '@/components/talentos/success/ActionButtons'
 
+const generateAbntResumeHtml = (resumeData: any, userProfile: any) => {
+  const { personal, educations = [], experiences = [] } = resumeData
+
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return 'Atual'
+    const d = new Date(dateStr)
+    return new Date(d.getTime() + d.getTimezoneOffset() * 60000).toLocaleDateString('pt-BR', {
+      month: '2-digit',
+      year: 'numeric',
+    })
+  }
+
+  return `
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+      <meta charset="UTF-8">
+      <title>Currículo - ${personal.nome}</title>
+      <style>
+        @page {
+          size: A4;
+          margin: 3cm 2cm 2cm 3cm;
+        }
+        body {
+          font-family: "Arial", sans-serif;
+          font-size: 12pt;
+          line-height: 1.5;
+          color: #000;
+          margin: 0;
+          padding: 0;
+          max-width: 800px;
+          margin: 0 auto;
+        }
+        h1 {
+          font-size: 14pt;
+          font-weight: bold;
+          text-transform: uppercase;
+          text-align: center;
+          margin-bottom: 24pt;
+        }
+        h2 {
+          font-size: 12pt;
+          font-weight: bold;
+          text-transform: uppercase;
+          border-bottom: 1px solid #000;
+          margin-top: 24pt;
+          margin-bottom: 12pt;
+          padding-bottom: 2pt;
+        }
+        p {
+          margin: 0 0 12pt 0;
+          text-align: justify;
+        }
+        .header-info {
+          text-align: center;
+          margin-bottom: 24pt;
+        }
+        .header-info p {
+          margin: 0;
+          text-align: center;
+        }
+        .section-item {
+          margin-bottom: 12pt;
+        }
+        .item-title {
+          font-weight: bold;
+        }
+        .item-date {
+          font-style: italic;
+        }
+        .profile-desc {
+          margin-top: 6pt;
+          display: block;
+        }
+        ul {
+          margin: 0 0 12pt 0;
+          padding-left: 24pt;
+        }
+        li {
+          margin-bottom: 6pt;
+          text-align: justify;
+        }
+        @media print {
+          body { max-width: none; margin: 0; }
+        }
+      </style>
+    </head>
+    <body>
+      <h1>${personal.nome}</h1>
+      
+      <div class="header-info">
+        <p>${personal.endereco || 'Endereço não informado'}</p>
+        <p>Telefone: ${personal.telefone} | E-mail: ${personal.email}</p>
+        ${personal.data_nascimento ? `<p>Data de Nascimento: ${new Date(personal.data_nascimento + 'T00:00:00').toLocaleDateString('pt-BR')}</p>` : ''}
+      </div>
+
+      <h2>Resumo Profissional e Perfil Comportamental</h2>
+      <p>
+        <strong>Perfil DISC:</strong> ${userProfile.type}<br/>
+        <span class="profile-desc">${userProfile.desc}</span>
+      </p>
+
+      <h2>Formação Acadêmica</h2>
+      ${
+        educations.length > 0
+          ? educations
+              .map(
+                (ed: any) => `
+        <div class="section-item">
+          <p>
+            <span class="item-title">${ed.curso}</span><br/>
+            ${ed.instituicao} <br/>
+            <span class="item-date">${formatDate(ed.data_inicio)} a ${formatDate(ed.data_fim)}</span>
+          </p>
+        </div>
+      `,
+              )
+              .join('')
+          : '<p>Não informada.</p>'
+      }
+
+      <h2>Experiência Profissional</h2>
+      ${
+        experiences.length > 0
+          ? experiences
+              .map(
+                (exp: any) => `
+        <div class="section-item">
+          <p>
+            <span class="item-title">${exp.cargo}</span> - ${exp.empresa}<br/>
+            <span class="item-date">${formatDate(exp.data_inicio)} a ${formatDate(exp.data_fim)}</span><br/>
+            ${exp.descricao ? exp.descricao : ''}
+          </p>
+        </div>
+      `,
+              )
+              .join('')
+          : '<p>Não informada.</p>'
+      }
+
+      <script>
+        window.onload = function() {
+          window.print();
+        }
+      </script>
+    </body>
+    </html>
+  `
+}
+
 export default function TalentosSuccessPage() {
   const navigate = useNavigate()
   const [data, setData] = useState<any>(null)
@@ -84,18 +234,17 @@ export default function TalentosSuccessPage() {
   }, [navigate])
 
   const handleDownload = () => {
-    const pdfBase64 = localStorage.getItem('talentos_pdf_base64')
-    if (pdfBase64) {
-      const link = document.createElement('a')
-      link.href = `data:application/pdf;base64,${pdfBase64}`
-      link.download = `Curriculo_${data.personal.nome.replace(/\s+/g, '_')}.pdf`
-      link.click()
+    const htmlContent = generateAbntResumeHtml(data, profile)
+    const printWindow = window.open('', '_blank')
+    if (printWindow) {
+      printWindow.document.write(htmlContent)
+      printWindow.document.close()
     } else {
-      const content = `Currículo de ${data?.personal?.nome}\nEmail: ${data?.personal?.email}\nTelefone: ${data?.personal?.telefone}\n\nPerfil DISC: ${profile?.type}\n${profile?.desc}`
-      const blob = new Blob([content], { type: 'text/plain' })
+      // Fallback if popup blocked
+      const blob = new Blob([htmlContent], { type: 'text/html' })
       const link = document.createElement('a')
       link.href = URL.createObjectURL(blob)
-      link.download = `Curriculo_${data?.personal?.nome?.replace(/\s+/g, '_')}.txt`
+      link.download = `Curriculo_${data?.personal?.nome?.replace(/\s+/g, '_')}.html`
       link.click()
     }
   }

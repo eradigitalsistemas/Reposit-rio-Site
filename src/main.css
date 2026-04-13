@@ -6,58 +6,58 @@
 
 @layer base {
   :root {
-    --background: 0 0% 96%; /* #F5F5F5 */
-    --foreground: 0 0% 20%; /* #333333 */
+    --background: 0 0% 100%; /* #FFFFFF */
+    --foreground: 0 0% 9%; /* #171717 */
 
     --card: 0 0% 100%; /* #FFFFFF */
-    --card-foreground: 0 0% 20%; /* #333333 */
+    --card-foreground: 0 0% 9%; /* #171717 */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 20%;
+    --popover-foreground: 0 0% 9%;
 
-    --primary: 216 100% 40%; /* #0052CC */
+    --primary: 142 76% 36%; /* #16a34a - Green */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 158 100% 25%; /* #008052 (Accessible Teal) */
+    --secondary: 0 0% 9%; /* #171717 - Black */
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 0 0% 90%; /* #E5E5E5 */
+    --muted: 0 0% 96%; /* #F5F5F5 */
     --muted-foreground: 0 0% 40%; /* #666666 */
 
-    --accent: 16 100% 60%; /* #FF6B35 */
+    --accent: 142 76% 36%; /* #16a34a - Green */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 355 78% 59%; /* #E63946 */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 83%; /* #D4D4D4 */
-    --input: 0 0% 83%;
-    --ring: 216 100% 40%; /* #0052CC */
+    --border: 0 0% 90%; /* #E5E5E5 */
+    --input: 0 0% 90%;
+    --ring: 142 76% 36%; /* #16a34a - Green */
 
     --radius: 0.5rem; /* 8px */
   }
 
   .dark {
     /* MVP is light mode only, falling back to light colors */
-    --background: 0 0% 96%;
-    --foreground: 0 0% 20%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 20%;
+    --card-foreground: 0 0% 9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 20%;
-    --primary: 216 100% 40%;
+    --popover-foreground: 0 0% 9%;
+    --primary: 142 76% 36%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 158 100% 25%;
+    --secondary: 0 0% 9%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 0 0% 90%;
+    --muted: 0 0% 96%;
     --muted-foreground: 0 0% 40%;
-    --accent: 16 100% 60%;
+    --accent: 142 76% 36%;
     --accent-foreground: 0 0% 100%;
     --destructive: 355 78% 59%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 83%;
-    --input: 0 0% 83%;
-    --ring: 216 100% 40%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 142 76% 36%;
   }
 
   * {

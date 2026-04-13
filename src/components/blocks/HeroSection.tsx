@@ -46,10 +46,15 @@ export function HeroSection({
       </div>
       {imageSrc && (
         <div className="flex-1 w-full max-w-md mx-auto relative animate-fade-in">
-          <div className="aspect-video md:aspect-square rounded-2xl overflow-hidden shadow-2xl relative z-10">
-            <img src={imageSrc} alt="Hero" className="object-cover w-full h-full" />
+          <div className="aspect-video md:aspect-square rounded-2xl overflow-hidden shadow-2xl relative z-10 group">
+            <img
+              src={imageSrc}
+              alt="Hero"
+              className="object-cover w-full h-full grayscale opacity-90 group-hover:grayscale-0 transition-all duration-700"
+            />
+            <div className="absolute inset-0 bg-primary/30 mix-blend-multiply pointer-events-none transition-opacity duration-700 group-hover:opacity-0"></div>
           </div>
-          <div className="absolute -inset-4 bg-secondary/20 rounded-full blur-3xl -z-10"></div>
+          <div className="absolute -inset-4 bg-primary/20 rounded-full blur-3xl -z-10"></div>
         </div>
       )}
     </section>

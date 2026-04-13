@@ -25,6 +25,12 @@ export default {
       },
     },
     extend: {
+      boxShadow: {
+        none: 'none',
+        low: '0 2px 4px rgba(0,0,0,0.1)',
+        medium: '0 4px 12px rgba(0,0,0,0.15)',
+        high: '0 12px 24px rgba(0,0,0,0.2)',
+      },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         display: ['Inter', 'system-ui', 'sans-serif'],

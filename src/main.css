@@ -6,57 +6,58 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%; /* #F8FAFC */
-    --foreground: 222.2 47.4% 11.2%; /* #0F172A */
+    --background: 0 0% 96%; /* #F5F5F5 */
+    --foreground: 0 0% 20%; /* #333333 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
+    --card: 0 0% 100%; /* #FFFFFF */
+    --card-foreground: 0 0% 20%; /* #333333 */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
+    --popover-foreground: 0 0% 20%;
 
-    --primary: 222.2 47.4% 11.2%; /* Deep Slate #0F172A */
-    --primary-foreground: 210 40% 98%;
+    --primary: 216 100% 40%; /* #0052CC */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 221.2 83.2% 53.3%; /* Corporate Blue #2563EB */
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 158 100% 25%; /* #008052 (Accessible Teal) */
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 214.3 31.8% 91.4%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 0 0% 90%; /* #E5E5E5 */
+    --muted-foreground: 0 0% 40%; /* #666666 */
 
-    --accent: 160.1 84.1% 39.4%; /* Success Green #10B981 */
-    --accent-foreground: 210 40% 98%;
+    --accent: 16 100% 60%; /* #FF6B35 */
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%; /* Destructive Red #EF4444 */
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 355 78% 59%; /* #E63946 */
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%; /* Focus rings use secondary blue */
+    --border: 0 0% 83%; /* #D4D4D4 */
+    --input: 0 0% 83%;
+    --ring: 216 100% 40%; /* #0052CC */
 
-    --radius: 0.5rem;
+    --radius: 0.5rem; /* 8px */
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 221.2 83.2% 53.3%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 222.2 84% 4.9%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 160.1 84.1% 39.4%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 222.2 84% 4.9%;
-    --input: 222.2 84% 4.9%;
-    --ring: 214.3 31.8% 91.4%;
+    /* MVP is light mode only, falling back to light colors */
+    --background: 0 0% 96%;
+    --foreground: 0 0% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 20%;
+    --primary: 216 100% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 158 100% 25%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 16 100% 60%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 355 78% 59%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 83%;
+    --input: 0 0% 83%;
+    --ring: 216 100% 40%;
   }
 
   * {
@@ -64,6 +65,43 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  h1,
+  .h1 {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  h2,
+  .h2 {
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  h3,
+  .h3 {
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  p,
+  .body-text {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0;
+  }
+  small,
+  .text-small {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0;
   }
 
   section[aria-label='Notifications alt+T'] {

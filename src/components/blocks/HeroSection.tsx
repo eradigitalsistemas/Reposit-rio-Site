@@ -32,7 +32,9 @@ export function HeroSection({
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-primary">
           {title}
         </h1>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto md:mx-0">
+        <p
+          className={`text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto ${imageSrc ? 'md:mx-0' : ''}`}
+        >
           {subtitle}
         </p>
         {cta && onCTA && (

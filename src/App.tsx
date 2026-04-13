@@ -7,6 +7,7 @@ import Index from './pages/Index'
 import Certificados from './pages/Certificados'
 import ERP from './pages/ERP'
 import TalentosPage from './pages/talentos/TalentosPage'
+import TalentosSuccessPage from './pages/talentos/TalentosSuccessPage'
 import DesignSystem from './pages/DesignSystem'
 import NotFound from './pages/NotFound'
 
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/certificados" element={<Certificados />} />
           <Route path="/erp" element={<ERP />} />
           <Route path="/talentos" element={<TalentosPage />} />
+          <Route path="/talentos/sucesso" element={<TalentosSuccessPage />} />
           <Route path="/design-system" element={<DesignSystem />} />
         </Route>
         <Route path="*" element={<NotFound />} />

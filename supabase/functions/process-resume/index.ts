@@ -52,12 +52,7 @@ Deno.serve(async (req: Request) => {
         .email('Email inválido. Formato esperado: usuario@dominio.com')
         .max(255)
         .transform(sanitizeHtml),
-      nome: z
-        .string()
-        .min(3)
-        .max(100)
-        .regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/, 'Nome deve conter apenas letras e espaços')
-        .transform(sanitizeHtml),
+      nome: z.string().min(3).max(100).transform(sanitizeHtml),
       pdf_base64: z.string().min(10, 'PDF inválido ou não fornecido'),
     })
 
@@ -82,93 +77,89 @@ Deno.serve(async (req: Request) => {
     const { data: userRecord } = await supabase.from('users').select('*').eq('id', user_id).single()
     const telefone = userRecord?.telefone || 'Não informado'
 
-    // Armazenar registro de envio como "pending"
-    const { data: emailRecord, error: insertError } = await supabase
-      .from('emails_sent')
-      .insert({ user_id, email, status: 'pending' })
-      .select()
-      .single()
-
-    if (insertError) {
-      console.error('Erro ao inserir em emails_sent:', insertError)
-    }
-    const emailId = emailRecord?.id
-
-    // Envio de Email com Retry Automático e Backoff
-    const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || 're_dummy_for_testing'
-    let emailSent = false
-    let lastEmailError = ''
-
-    for (let attempt = 0; attempt < 3; attempt++) {
-      try {
-        const pdfContent = pdf_base64.includes(',') ? pdf_base64.split(',')[1] : pdf_base64
-
-        const res = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${RESEND_API_KEY}`,
-          },
-          body: JSON.stringify({
-            from: 'Talentos Super Era Digital <onboarding@resend.dev>',
-            to: ['comercial@areradigital.com.br'],
-            subject: `Novo Currículo - ${nome}`,
-            html: `<p>Segue em anexo o currículo de ${nome}. Email: ${email}. Telefone: ${telefone}</p>`,
-            attachments: [
-              {
-                filename: `curriculo_${nome.replace(/\s+/g, '_').toLowerCase()}.pdf`,
-                content: pdfContent,
-              },
-            ],
-          }),
-        })
-
-        if (res.ok) {
-          emailSent = true
-          console.log(
-            `Email enviado com sucesso para ${nome} (${email}) na tentativa ${attempt + 1}`,
-          )
-          break
-        } else {
-          lastEmailError = `Status ${res.status}: ${await res.text()}`
-          console.error(`Tentativa ${attempt + 1} de envio falhou com status ${res.status}`)
-        }
-      } catch (err: any) {
-        lastEmailError = err.message || 'Erro desconhecido'
-        console.error(`Tentativa ${attempt + 1} falhou com erro:`, err)
-      }
-
-      if (!emailSent && attempt < 2) {
-        // Exponencial backoff: 1s, 2s
-        await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000))
-      }
-    }
-
-    // Atualizar status na tabela emails_sent
-    if (emailId) {
-      await supabase
+    const runBackgroundTasks = async () => {
+      // Armazenar registro de envio como "pending"
+      const { data: emailRecord, error: insertError } = await supabase
         .from('emails_sent')
-        .update({ status: emailSent ? 'sent' : 'failed' })
-        .eq('id', emailId)
-    }
+        .insert({ user_id, email, status: 'pending' })
+        .select()
+        .single()
 
-    if (!emailSent) {
-      // Log email failure in sync_logs too
-      await supabase.from('sync_logs').insert({
-        entity_type: 'email',
-        entity_id: emailId || user_id,
-        status: 'failed',
-        attempts: 3,
-        error_message: lastEmailError,
-      })
-      return new Response(JSON.stringify({ error: 'Erro ao enviar email, tente novamente' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
+      if (insertError) {
+        console.error('Erro ao inserir em emails_sent:', insertError)
+      }
+      const emailId = emailRecord?.id
 
-    // Sincronização com o sistema interno Super Era Digital (Assíncrono com Retry)
-    const syncWithSuperEra = async () => {
+      // Envio de Email com Retry Automático e Backoff
+      const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || 're_dummy_for_testing'
+      let emailSent = false
+      let lastEmailError = ''
+
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const pdfContent = pdf_base64.includes(',') ? pdf_base64.split(',')[1] : pdf_base64
+
+          const res = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${RESEND_API_KEY}`,
+            },
+            body: JSON.stringify({
+              from: 'Talentos Super Era Digital <onboarding@resend.dev>',
+              to: ['comercial@areradigital.com.br'],
+              subject: `Novo Currículo - ${nome}`,
+              html: `<p>Segue em anexo o currículo de ${nome}. Email: ${email}. Telefone: ${telefone}</p>`,
+              attachments: [
+                {
+                  filename: `curriculo_${nome.replace(/\s+/g, '_').toLowerCase()}.pdf`,
+                  content: pdfContent,
+                },
+              ],
+            }),
+          })
+
+          if (res.ok) {
+            emailSent = true
+            console.log(
+              `Email enviado com sucesso para ${nome} (${email}) na tentativa ${attempt + 1}`,
+            )
+            break
+          } else {
+            lastEmailError = `Status ${res.status}: ${await res.text()}`
+            console.error(`Tentativa ${attempt + 1} de envio falhou com status ${res.status}`)
+          }
+        } catch (err: any) {
+          lastEmailError = err.message || 'Erro desconhecido'
+          console.error(`Tentativa ${attempt + 1} falhou com erro:`, err)
+        }
+
+        if (!emailSent && attempt < 2) {
+          // Exponencial backoff: 1s, 2s
+          await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000))
+        }
+      }
+
+      // Atualizar status na tabela emails_sent
+      if (emailId) {
+        await supabase
+          .from('emails_sent')
+          .update({ status: emailSent ? 'sent' : 'failed' })
+          .eq('id', emailId)
+      }
+
+      if (!emailSent) {
+        // Log email failure in sync_logs too
+        await supabase.from('sync_logs').insert({
+          entity_type: 'email',
+          entity_id: emailId || user_id,
+          status: 'failed',
+          attempts: 3,
+          error_message: lastEmailError,
+        })
+      }
+
+      // Sincronização com o sistema interno Super Era Digital (Assíncrono com Retry)
       try {
         const [edu, exp, disc] = await Promise.all([
           supabase.from('educations').select('*').eq('user_id', user_id),
@@ -224,8 +215,8 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // Execute sync asynchronously
-    await syncWithSuperEra()
+    // Execute everything in background
+    runBackgroundTasks().catch(console.error)
 
     return new Response(
       JSON.stringify({ success: true, message: 'Currículo processado e sincronizado com sucesso' }),

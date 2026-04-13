@@ -27,12 +27,7 @@ const sanitizeHtml = (str: string) => {
 }
 
 const personalSchema = z.object({
-  nome: z
-    .string()
-    .min(3)
-    .max(100)
-    .regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/, 'Nome deve conter apenas letras e espaços')
-    .transform(sanitizeHtml),
+  nome: z.string().min(3).max(100).transform(sanitizeHtml),
   email: z
     .string()
     .email('Email inválido. Formato esperado: usuario@dominio.com')
@@ -43,9 +38,6 @@ const personalSchema = z.object({
   endereco: z.string().min(5).max(200).transform(sanitizeHtml),
   foto_url: z
     .string()
-    .url()
-    .regex(/^https:\/\//, 'Apenas HTTPS é permitido')
-    .regex(/\.(jpg|jpeg|png|webp)(\?.*)?$/i, 'Formato de imagem inválido (JPG, PNG, WebP)')
     .optional()
     .or(z.literal(''))
     .transform((s) => sanitizeHtml(s || '')),
@@ -184,29 +176,43 @@ Deno.serve(async (req: Request) => {
       .eq('email', data.personal.email)
       .maybeSingle()
 
-    if (existingUser) {
-      console.warn(`Duplicate email attempt: ${data.personal.email}`)
-      return new Response(JSON.stringify({ error: 'Email já cadastrado' }), {
-        status: 409,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+    let userId = existingUser?.id
+
+    if (userId) {
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({
+          nome: data.personal.nome,
+          telefone: data.personal.telefone,
+          data_nascimento: data.personal.data_nascimento || null,
+          endereco: data.personal.endereco,
+          foto_url: data.personal.foto_url || null,
+        })
+        .eq('id', userId)
+
+      if (updateError) throw new Error(`Failed to update user: ${updateError.message}`)
+
+      // Remover dados antigos para inserir os novos
+      await supabase.from('educations').delete().eq('user_id', userId)
+      await supabase.from('experiences').delete().eq('user_id', userId)
+      await supabase.from('disc_results').delete().eq('user_id', userId)
+    } else {
+      const { data: newUser, error: userError } = await supabase
+        .from('users')
+        .insert({
+          email: data.personal.email,
+          nome: data.personal.nome,
+          telefone: data.personal.telefone,
+          data_nascimento: data.personal.data_nascimento || null,
+          endereco: data.personal.endereco,
+          foto_url: data.personal.foto_url || null,
+        })
+        .select()
+        .single()
+
+      if (userError || !newUser) throw new Error(`Failed to create user: ${userError?.message}`)
+      userId = newUser.id
     }
-
-    const { data: newUser, error: userError } = await supabase
-      .from('users')
-      .insert({
-        email: data.personal.email,
-        nome: data.personal.nome,
-        telefone: data.personal.telefone,
-        data_nascimento: data.personal.data_nascimento,
-        endereco: data.personal.endereco,
-        foto_url: data.personal.foto_url || null,
-      })
-      .select()
-      .single()
-
-    if (userError || !newUser) throw new Error(`Failed to create user: ${userError?.message}`)
-    const userId = newUser.id
 
     if (data.educations.length > 0) {
       await supabase.from('educations').insert(

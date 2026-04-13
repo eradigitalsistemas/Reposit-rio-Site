@@ -11,6 +11,7 @@ import { StepPersonal } from './StepPersonal'
 import { StepEducation } from './StepEducation'
 import { StepExperience } from './StepExperience'
 import { StepDisc } from './StepDisc'
+import { StepReview } from './StepReview'
 
 const STORAGE_KEY = 'talentos_form_data'
 
@@ -192,31 +193,21 @@ export default function TalentosPage() {
                 {currentStep === 1 && <StepEducation />}
                 {currentStep === 2 && <StepExperience />}
                 {currentStep === 3 && <StepDisc />}
-                {currentStep > 3 && (
-                  <div className="text-center py-24 space-y-4 animate-fade-in-up">
-                    <div className="mx-auto w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6">
-                      <CheckCircle2 className="w-8 h-8" />
-                    </div>
-                    <h3 className="text-2xl font-bold">Quase lá!</h3>
-                    <p className="text-muted-foreground max-w-md mx-auto text-lg">
-                      Sua etapa de revisão e submissão estará disponível em breve.
-                    </p>
-                  </div>
-                )}
+                {currentStep === 4 && <StepReview setCurrentStep={setCurrentStep} />}
               </div>
 
-              <div className="flex justify-between items-center mt-12 pt-6 border-t">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setCurrentStep((prev) => prev - 1)}
-                  disabled={currentStep === 0 || isCheckingEmail}
-                  className="min-w-[100px]"
-                >
-                  <ChevronLeft className="mr-2 h-4 w-4" /> Voltar
-                </Button>
+              {currentStep < 4 && (
+                <div className="flex justify-between items-center mt-12 pt-6 border-t">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setCurrentStep((prev) => prev - 1)}
+                    disabled={currentStep === 0 || isCheckingEmail}
+                    className="min-w-[100px]"
+                  >
+                    <ChevronLeft className="mr-2 h-4 w-4" /> Voltar
+                  </Button>
 
-                {currentStep < 4 ? (
                   <Button
                     type="button"
                     onClick={handleNext}
@@ -227,12 +218,8 @@ export default function TalentosPage() {
                     {!isCheckingEmail && 'Próximo'}
                     {!isCheckingEmail && <ChevronRight className="ml-2 h-4 w-4" />}
                   </Button>
-                ) : (
-                  <Button type="button" disabled className="min-w-[120px]">
-                    Finalizar
-                  </Button>
-                )}
-              </div>
+                </div>
+              )}
             </form>
           </FormProvider>
         </CardContent>

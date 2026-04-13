@@ -112,6 +112,10 @@ export const talentosSchema = z.object({
     q11: z.string().min(1, 'Responda a esta pergunta'),
     q12: z.string().min(1, 'Responda a esta pergunta'),
   }),
+  lgpd: z
+    .boolean()
+    .refine((val) => val === true, 'Você deve aceitar os termos de privacidade')
+    .optional(),
 })
 
 export type TalentosFormValues = z.infer<typeof talentosSchema>
@@ -141,4 +145,5 @@ export const defaultTalentosValues: Partial<TalentosFormValues> = {
     q11: '',
     q12: '',
   },
+  lgpd: false,
 }

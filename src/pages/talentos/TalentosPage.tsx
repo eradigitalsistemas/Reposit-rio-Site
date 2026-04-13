@@ -83,7 +83,19 @@ export default function TalentosPage() {
     }, 500)
   }
 
+  const forceNextStep = () => {
+    saveData()
+    setCurrentStep((prev) => prev + 1)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   const handleNext = async () => {
+    // Force transition if we are on DISC step
+    if (currentStep === 3) {
+      forceNextStep()
+      return
+    }
+
     const fieldsToValidate = steps[currentStep].fields
     const isStepValid = await trigger(fieldsToValidate as any)
 
@@ -111,9 +123,7 @@ export default function TalentosPage() {
         setIsCheckingEmail(false)
       }
 
-      saveData()
-      setCurrentStep((prev) => prev + 1)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      forceNextStep()
     }
   }
 
@@ -158,11 +168,13 @@ export default function TalentosPage() {
       if (errors.experiences && Object.keys(errors.experiences).length > 0) return true
     }
     if (currentStep === 3) {
-      const d = formValues.disc
-      if (!d) return true
-      const answeredCount = Object.values(d).filter(Boolean).length
+      const d = formValues.disc || {}
+      const answeredCount = Object.values(d).filter(
+        (v) => typeof v === 'string' && v.trim() !== '',
+      ).length
       if (answeredCount < 12) return true
-      if (errors.disc && Object.keys(errors.disc).length > 0) return true
+      // Remove strict validation dependency to avoid locking UI
+      return false
     }
     return false
   }
@@ -198,7 +210,7 @@ export default function TalentosPage() {
                 {currentStep === 0 && <StepPersonal />}
                 {currentStep === 1 && <StepEducation />}
                 {currentStep === 2 && <StepExperience />}
-                {currentStep === 3 && <StepDisc onComplete={handleNext} />}
+                {currentStep === 3 && <StepDisc onComplete={forceNextStep} />}
                 {currentStep === 4 && <StepReview setCurrentStep={setCurrentStep} />}
               </div>
 

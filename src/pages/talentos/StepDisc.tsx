@@ -153,12 +153,16 @@ export function StepDisc({ onComplete }: { onComplete?: () => void }) {
   const progress = ((currentIndex + 1) / discQuestions.length) * 100
   const isFinished = Object.values(allAnswers).filter(Boolean).length === 12
 
-  // Force validation to update parent form's isValid state when finished
+  // Notify parent form explicitly to clear errors if needed
   useEffect(() => {
     if (isFinished) {
-      trigger('disc')
+      trigger('disc').catch(() => {})
     }
   }, [isFinished, trigger])
+
+  const handleFinish = () => {
+    if (onComplete) onComplete()
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -204,18 +208,22 @@ export function StepDisc({ onComplete }: { onComplete?: () => void }) {
                         className="sr-only"
                         value={opt.value}
                         checked={field.value === opt.value}
-                        onChange={async (e) => {
+                        onChange={(e) => {
                           field.onChange(e.target.value)
-                          await trigger(`disc.${currentQ.id}`)
+                          trigger(`disc.${currentQ.id}`).catch(() => {})
 
                           if (currentIndex < discQuestions.length - 1) {
                             setTimeout(() => handleNext(), 350)
                           } else {
-                            // Ensure overall form validation gets updated when clicking the last option
-                            const isValid = await trigger('disc')
-                            if (isValid && onComplete) {
-                              setTimeout(() => onComplete(), 600)
-                            }
+                            // On the last question, auto-advance after a small delay
+                            // We use a safe try-catch wrapper in case of any unhandled promise issues
+                            setTimeout(() => {
+                              try {
+                                if (onComplete) onComplete()
+                              } catch (err) {
+                                console.error('Error auto-advancing:', err)
+                              }
+                            }, 800)
                           }
                         }}
                       />
@@ -253,13 +261,14 @@ export function StepDisc({ onComplete }: { onComplete?: () => void }) {
               Próxima Pergunta <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
           ) : (
-            <div className="text-green-600 dark:text-green-500 font-medium flex items-center">
-              {isFinished && (
-                <>
-                  <CheckCircle2 className="w-5 h-5 mr-2" /> Teste Concluído
-                </>
-              )}
-            </div>
+            <Button
+              type="button"
+              onClick={handleFinish}
+              disabled={!isFinished}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[140px]"
+            >
+              Concluir e Avançar <CheckCircle2 className="w-4 h-4 ml-2" />
+            </Button>
           )}
         </div>
       </div>

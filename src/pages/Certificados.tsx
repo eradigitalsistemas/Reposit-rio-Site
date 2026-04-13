@@ -2,16 +2,11 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import {
-  Loader2,
-  CheckCircle2,
-  MessageCircle,
-  FileKey2,
-  ShieldCheck,
-  Clock,
-  Building2,
-} from 'lucide-react'
+import { Loader2, CheckCircle2, MessageCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { HeroSection } from '@/components/blocks/HeroSection'
+import { CertificateCard } from '@/components/blocks/CertificateCard'
+import { FAQAccordion } from '@/components/blocks/FAQAccordion'
 import { formatPhone } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
@@ -35,12 +30,6 @@ import {
 } from '@/components/ui/form'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { trackAndOpenWhatsApp, WHATSAPP_SUPORTE } from '@/lib/whatsapp'
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion'
 
 const formSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -104,97 +93,92 @@ export default function Certificados() {
   return (
     <div className="space-y-16 pb-10 animate-fade-in">
       {/* Header */}
-      <section className="text-center max-w-3xl mx-auto space-y-6 pt-8">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-primary">
-          Certificados Digitais
-        </h1>
-        <p className="text-lg text-muted-foreground">
-          Segurança, validade jurídica e agilidade para suas transações online. Escolha o
-          certificado ideal para você ou sua empresa.
-        </p>
-        <div className="flex justify-center pt-4">
-          <Button
-            size="lg"
-            className="bg-[#25D366] hover:bg-[#20bd5a] text-white"
-            onClick={handleWhatsAppHero}
-          >
-            <MessageCircle className="mr-2 h-5 w-5" />
-            Solicitar via WhatsApp
-          </Button>
-        </div>
-      </section>
+      <HeroSection
+        title="Certificados Digitais"
+        subtitle="Segurança, validade jurídica e agilidade para suas transações online. Escolha o certificado ideal para você ou sua empresa."
+        cta="Solicitar via WhatsApp"
+        onCTA={handleWhatsAppHero}
+        ctaIcon={<MessageCircle className="h-5 w-5" />}
+        ctaClassName="bg-[#25D366] hover:bg-[#20bd5a] text-white"
+      />
 
       {/* Types of Certificates */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           {
             title: 'e-CPF A1',
-            icon: FileKey2,
             desc: 'Instalado no computador, validade de 1 ano. Ideal para pessoas físicas.',
+            benefits: [
+              'Instalado no computador',
+              'Validade de 1 ano',
+              'Emissão online',
+              'Acesso rápido',
+            ],
           },
           {
             title: 'e-CPF A3',
-            icon: ShieldCheck,
             desc: 'Armazenado em token ou cartão, validade de 1 a 3 anos. Maior segurança física.',
+            benefits: [
+              'Armazenado em token/cartão',
+              'Validade de 1 a 3 anos',
+              'Alta segurança',
+              'Portabilidade',
+            ],
           },
           {
             title: 'e-CNPJ A1',
-            icon: Building2,
             desc: 'Identidade digital da sua empresa no computador, validade de 1 ano.',
+            benefits: [
+              'Emissão de NF-e rápida',
+              'Instalação em múltiplos PCs',
+              'Validade de 1 ano',
+              'Automação fácil',
+            ],
           },
           {
             title: 'e-CNPJ A3',
-            icon: Clock,
             desc: 'Identidade PJ em mídia física, validade de 1 a 3 anos.',
+            benefits: [
+              'Mídia física (Token)',
+              'Validade de até 3 anos',
+              'Máxima segurança',
+              'Uso restrito',
+            ],
           },
         ].map((cert, i) => (
-          <Card key={i} className="hover:shadow-md transition-shadow flex flex-col">
-            <CardHeader>
-              <cert.icon className="h-8 w-8 text-secondary mb-2" />
-              <CardTitle>{cert.title}</CardTitle>
-            </CardHeader>
-            <CardContent className="text-muted-foreground text-sm flex-1">{cert.desc}</CardContent>
-            <div className="p-6 pt-0 mt-auto">
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => handleWhatsAppCard(cert.title)}
-              >
-                Solicitar Informações
-              </Button>
-            </div>
-          </Card>
+          <CertificateCard
+            key={i}
+            type={cert.title}
+            description={cert.desc}
+            benefits={cert.benefits}
+            onAction={() => handleWhatsAppCard(cert.title)}
+          />
         ))}
       </section>
 
       <div className="grid md:grid-cols-2 gap-12 items-start">
         {/* FAQ Section */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold">Dúvidas Frequentes</h2>
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="item-1">
-              <AccordionTrigger>O que é um Certificado Digital?</AccordionTrigger>
-              <AccordionContent>
-                É a identidade eletrônica de uma pessoa ou empresa. Ele funciona como uma carteira
-                de identidade virtual que permite assinar documentos com validade jurídica.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-2">
-              <AccordionTrigger>Qual a diferença entre A1 e A3?</AccordionTrigger>
-              <AccordionContent>
-                O certificado A1 é emitido e armazenado no computador (software) com validade de 1
-                ano. O A3 é armazenado em mídia criptográfica (Token ou Cartão Inteligente) com
-                validade de até 3 anos.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-3">
-              <AccordionTrigger>Preciso ir presencialmente para emitir?</AccordionTrigger>
-              <AccordionContent>
-                Em muitos casos, se você já possui biometria cadastrada no sistema ou CNH digital, a
-                emissão pode ser feita 100% por videoconferência.
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+          <FAQAccordion
+            category="Dúvidas Frequentes"
+            items={[
+              {
+                question: 'O que é um Certificado Digital?',
+                answer:
+                  'É a identidade eletrônica de uma pessoa ou empresa. Ele funciona como uma carteira de identidade virtual que permite assinar documentos com validade jurídica.',
+              },
+              {
+                question: 'Qual a diferença entre A1 e A3?',
+                answer:
+                  'O certificado A1 é emitido e armazenado no computador (software) com validade de 1 ano. O A3 é armazenado em mídia criptográfica (Token ou Cartão Inteligente) com validade de até 3 anos.',
+              },
+              {
+                question: 'Preciso ir presencialmente para emitir?',
+                answer:
+                  'Em muitos casos, se você já possui biometria cadastrada no sistema ou CNH digital, a emissão pode ser feita 100% por videoconferência.',
+              },
+            ]}
+          />
         </section>
 
         {/* Lead Form */}

@@ -1,13 +1,8 @@
 import { useState, useMemo } from 'react'
-import { Search, HelpCircle } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion'
+import { HelpCircle } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
+import { FAQSearch } from '@/components/blocks/FAQSearch'
+import { FAQAccordion } from '@/components/blocks/FAQAccordion'
 
 const faqsData = [
   {
@@ -103,15 +98,7 @@ export default function FAQ() {
         </p>
       </div>
 
-      <div className="relative max-w-xl mx-auto">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-        <Input
-          placeholder="Buscar perguntas..."
-          className="pl-10 h-12 text-base"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
+      <FAQSearch onSearch={setSearchTerm} />
 
       {Object.keys(groupedFaqs).length === 0 ? (
         <Card className="text-center py-12">
@@ -122,19 +109,11 @@ export default function FAQ() {
       ) : (
         <div className="space-y-8">
           {Object.entries(groupedFaqs).map(([category, questions]) => (
-            <div key={category} className="space-y-4">
-              <h2 className="text-2xl font-semibold text-primary/80 border-b pb-2">{category}</h2>
-              <Accordion type="multiple" className="w-full">
-                {questions.map((faq, idx) => (
-                  <AccordionItem key={idx} value={`item-${category}-${idx}`}>
-                    <AccordionTrigger className="text-left font-medium">{faq.q}</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground leading-relaxed">
-                      {faq.a}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </div>
+            <FAQAccordion
+              key={category}
+              category={category}
+              items={questions.map((q) => ({ question: q.q, answer: q.a }))}
+            />
           ))}
         </div>
       )}

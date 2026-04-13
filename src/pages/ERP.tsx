@@ -14,6 +14,9 @@ import {
   Users,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { HeroSection } from '@/components/blocks/HeroSection'
+import { FeatureCard } from '@/components/blocks/FeatureCard'
+import { FAQAccordion } from '@/components/blocks/FAQAccordion'
 import { formatPhone } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
@@ -30,12 +33,6 @@ import {
 } from '@/components/ui/form'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { trackAndOpenWhatsApp, WHATSAPP_COMERCIAL } from '@/lib/whatsapp'
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion'
 
 const formSchema = z.object({
   empresa: z.string().min(2, 'Nome da empresa é obrigatório'),
@@ -112,34 +109,24 @@ export default function ERP() {
   return (
     <div className="space-y-16 pb-10 animate-fade-in">
       {/* Header */}
-      <section className="text-center max-w-4xl mx-auto space-y-6 pt-8">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-primary">Sistemas ERP</h1>
-        <p className="text-lg text-muted-foreground">
-          Assuma o controle total do seu negócio. Nossas soluções ERP oferecem gestão inteligente,
-          integrações robustas e a flexibilidade que sua empresa precisa para crescer.
-        </p>
-        <div className="flex justify-center pt-4">
-          <Button
-            size="lg"
-            className="bg-[#25D366] hover:bg-[#20bd5a] text-white"
-            onClick={handleWhatsAppHero}
-          >
-            <MessageCircle className="mr-2 h-5 w-5" />
-            Solicitar Análise no WhatsApp
-          </Button>
-        </div>
-      </section>
+      <HeroSection
+        title="Sistemas ERP"
+        subtitle="Assuma o controle total do seu negócio. Nossas soluções ERP oferecem gestão inteligente, integrações robustas e a flexibilidade que sua empresa precisa para crescer."
+        cta="Solicitar Análise no WhatsApp"
+        onCTA={handleWhatsAppHero}
+        ctaIcon={<MessageCircle className="h-5 w-5" />}
+        ctaClassName="bg-[#25D366] hover:bg-[#20bd5a] text-white"
+      />
 
       {/* Benefits */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {benefits.map((b, i) => (
-          <Card key={i} className="hover:border-secondary/50 transition-colors">
-            <CardHeader className="pb-2">
-              <b.icon className="h-8 w-8 text-secondary mb-2" />
-              <CardTitle className="text-xl">{b.title}</CardTitle>
-            </CardHeader>
-            <CardContent className="text-muted-foreground">{b.desc}</CardContent>
-          </Card>
+          <FeatureCard
+            key={i}
+            icon={<b.icon className="w-full h-full" />}
+            title={b.title}
+            description={b.desc}
+          />
         ))}
       </section>
 
@@ -248,38 +235,31 @@ export default function ERP() {
 
         {/* FAQ Section */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold">Dúvidas Frequentes sobre ERP</h2>
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="item-1">
-              <AccordionTrigger>O sistema é em nuvem ou local?</AccordionTrigger>
-              <AccordionContent>
-                Nosso ERP é 100% em nuvem (Cloud), permitindo que você acesse as informações da sua
-                empresa de qualquer lugar, a qualquer momento e com total segurança.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-2">
-              <AccordionTrigger>Como funciona o processo de implantação?</AccordionTrigger>
-              <AccordionContent>
-                Realizamos um mapeamento dos seus processos, configuramos os módulos necessários,
-                migramos seus dados atuais e realizamos o treinamento com sua equipe. O tempo médio
-                varia de 15 a 45 dias.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-3">
-              <AccordionTrigger>Posso integrar com minha loja virtual?</AccordionTrigger>
-              <AccordionContent>
-                Sim! Nosso sistema possui APIs robustas que permitem integração com as principais
-                plataformas de e-commerce e marketplaces do mercado.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-4">
-              <AccordionTrigger>O suporte é cobrado à parte?</AccordionTrigger>
-              <AccordionContent>
-                Não. Todo o suporte técnico via chat e ticket está incluso na sua mensalidade,
-                garantindo que sua operação nunca pare.
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+          <FAQAccordion
+            category="Dúvidas Frequentes sobre ERP"
+            items={[
+              {
+                question: 'O sistema é em nuvem ou local?',
+                answer:
+                  'Nosso ERP é 100% em nuvem (Cloud), permitindo que você acesse as informações da sua empresa de qualquer lugar, a qualquer momento e com total segurança.',
+              },
+              {
+                question: 'Como funciona o processo de implantação?',
+                answer:
+                  'Realizamos um mapeamento dos seus processos, configuramos os módulos necessários, migramos seus dados atuais e realizamos o treinamento com sua equipe. O tempo médio varia de 15 a 45 dias.',
+              },
+              {
+                question: 'Posso integrar com minha loja virtual?',
+                answer:
+                  'Sim! Nosso sistema possui APIs robustas que permitem integração com as principais plataformas de e-commerce e marketplaces do mercado.',
+              },
+              {
+                question: 'O suporte é cobrado à parte?',
+                answer:
+                  'Não. Todo o suporte técnico via chat e ticket está incluso na sua mensalidade, garantindo que sua operação nunca pare.',
+              },
+            ]}
+          />
         </section>
       </div>
     </div>

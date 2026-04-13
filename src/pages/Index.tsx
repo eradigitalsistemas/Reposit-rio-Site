@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   FileBadge,
   Briefcase,
@@ -11,8 +11,11 @@ import {
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { BenefitsSection } from '@/components/blocks/BenefitsSection'
+import { CTASection } from '@/components/blocks/CTASection'
 
 const Index = () => {
+  const navigate = useNavigate()
   return (
     <div className="space-y-24 pb-10">
       {/* Hero Section */}
@@ -126,39 +129,41 @@ const Index = () => {
         <div className="text-center max-w-2xl mx-auto">
           <h2 className="text-3xl font-bold tracking-tight">Por que escolher a Era Digital?</h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            { icon: Zap, title: 'Agilidade', desc: 'Processos otimizados e sem burocracia.' },
-            { icon: Shield, title: 'Segurança', desc: 'Conformidade total com a LGPD.' },
-            { icon: Headphones, title: 'Suporte', desc: 'Atendimento humanizado e rápido.' },
-            { icon: Rocket, title: 'Inovação', desc: 'Tecnologia de ponta atualizada.' },
-          ].map((benefit, i) => (
-            <Card key={i} className="border-none shadow-none bg-transparent">
-              <CardHeader className="items-center text-center pb-2">
-                <div className="h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-2">
-                  <benefit.icon className="h-6 w-6" />
-                </div>
-                <CardTitle className="text-xl">{benefit.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="text-center text-muted-foreground">
-                <p>{benefit.desc}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <BenefitsSection
+          columns={4}
+          benefits={[
+            {
+              icon: <Zap className="h-6 w-6" />,
+              title: 'Agilidade',
+              description: 'Processos otimizados e sem burocracia.',
+            },
+            {
+              icon: <Shield className="h-6 w-6" />,
+              title: 'Segurança',
+              description: 'Conformidade total com a LGPD.',
+            },
+            {
+              icon: <Headphones className="h-6 w-6" />,
+              title: 'Suporte',
+              description: 'Atendimento humanizado e rápido.',
+            },
+            {
+              icon: <Rocket className="h-6 w-6" />,
+              title: 'Inovação',
+              description: 'Tecnologia de ponta atualizada.',
+            },
+          ]}
+        />
       </section>
 
       {/* Final CTA */}
-      <section className="text-center space-y-6 max-w-2xl mx-auto pb-10">
-        <h2 className="text-3xl font-bold">Pronto para começar?</h2>
-        <p className="text-muted-foreground text-lg">
-          Junte-se a centenas de empresas e profissionais que já transformaram seus resultados com
-          nossas soluções.
-        </p>
-        <Button size="lg" className="px-8 mt-4" asChild>
-          <Link to="/tecnologia">Entenda nossa tecnologia</Link>
-        </Button>
-      </section>
+      <CTASection
+        title="Pronto para começar?"
+        description="Junte-se a centenas de empresas e profissionais que já transformaram seus resultados com nossas soluções."
+        buttonText="Entenda nossa tecnologia"
+        onCTA={() => navigate('/tecnologia')}
+        variant="secondary"
+      />
     </div>
   )
 }

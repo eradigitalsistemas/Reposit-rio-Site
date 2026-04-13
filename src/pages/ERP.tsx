@@ -29,6 +29,7 @@ import {
   FormDescription,
 } from '@/components/ui/form'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
+import { trackAndOpenWhatsApp, WHATSAPP_COMERCIAL } from '@/lib/whatsapp'
 import {
   Accordion,
   AccordionContent,
@@ -75,8 +76,13 @@ export default function ERP() {
     }
   }
 
-  const whatsappUrl =
-    'https://wa.me/5511999999999?text=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20uma%20an%C3%A1lise%20para%20o%20sistema%20ERP.'
+  const handleWhatsAppHero = () => {
+    trackAndOpenWhatsApp(
+      WHATSAPP_COMERCIAL,
+      'Olá, gostaria de solicitar uma análise de ERP para minha empresa',
+      'erp_hero',
+    )
+  }
 
   const benefits = [
     {
@@ -113,11 +119,13 @@ export default function ERP() {
           integrações robustas e a flexibilidade que sua empresa precisa para crescer.
         </p>
         <div className="flex justify-center pt-4">
-          <Button size="lg" className="bg-[#25D366] hover:bg-[#20bd5a] text-white" asChild>
-            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-              <MessageCircle className="mr-2 h-5 w-5" />
-              Solicitar Análise no WhatsApp
-            </a>
+          <Button
+            size="lg"
+            className="bg-[#25D366] hover:bg-[#20bd5a] text-white"
+            onClick={handleWhatsAppHero}
+          >
+            <MessageCircle className="mr-2 h-5 w-5" />
+            Solicitar Análise no WhatsApp
           </Button>
         </div>
       </section>

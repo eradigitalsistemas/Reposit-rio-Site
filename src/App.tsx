@@ -12,6 +12,7 @@ import Tecnologia from './pages/Tecnologia'
 import TalentosPage from './pages/talentos/TalentosPage'
 import TalentosSuccessPage from './pages/talentos/TalentosSuccessPage'
 import DesignSystem from './pages/DesignSystem'
+import IntegrationsDashboard from './pages/admin/IntegrationsDashboard'
 import NotFound from './pages/NotFound'
 
 const App = () => (
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/talentos" element={<TalentosPage />} />
           <Route path="/talentos/sucesso" element={<TalentosSuccessPage />} />
           <Route path="/design-system" element={<DesignSystem />} />
+          <Route path="/admin/integracoes" element={<IntegrationsDashboard />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

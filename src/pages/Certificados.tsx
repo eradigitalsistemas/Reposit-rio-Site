@@ -34,6 +34,7 @@ import {
   FormDescription,
 } from '@/components/ui/form'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
+import { trackAndOpenWhatsApp, WHATSAPP_SUPORTE } from '@/lib/whatsapp'
 import {
   Accordion,
   AccordionContent,
@@ -84,8 +85,21 @@ export default function Certificados() {
     }
   }
 
-  const whatsappUrl =
-    'https://wa.me/5511999999999?text=Ol%C3%A1%2C%20gostaria%20de%20saber%20mais%20sobre%20os%20Certificados%20Digitais.'
+  const handleWhatsAppHero = () => {
+    trackAndOpenWhatsApp(
+      WHATSAPP_SUPORTE,
+      'Olá, gostaria de saber mais sobre os Certificados Digitais',
+      'certificados_hero',
+    )
+  }
+
+  const handleWhatsAppCard = (title: string) => {
+    trackAndOpenWhatsApp(
+      WHATSAPP_SUPORTE,
+      `Olá, gostaria de saber mais sobre ${title}`,
+      'certificados_card',
+    )
+  }
 
   return (
     <div className="space-y-16 pb-10 animate-fade-in">
@@ -99,11 +113,13 @@ export default function Certificados() {
           certificado ideal para você ou sua empresa.
         </p>
         <div className="flex justify-center pt-4">
-          <Button size="lg" className="bg-[#25D366] hover:bg-[#20bd5a] text-white" asChild>
-            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-              <MessageCircle className="mr-2 h-5 w-5" />
-              Solicitar via WhatsApp
-            </a>
+          <Button
+            size="lg"
+            className="bg-[#25D366] hover:bg-[#20bd5a] text-white"
+            onClick={handleWhatsAppHero}
+          >
+            <MessageCircle className="mr-2 h-5 w-5" />
+            Solicitar via WhatsApp
           </Button>
         </div>
       </section>
@@ -132,12 +148,21 @@ export default function Certificados() {
             desc: 'Identidade PJ em mídia física, validade de 1 a 3 anos.',
           },
         ].map((cert, i) => (
-          <Card key={i} className="hover:shadow-md transition-shadow">
+          <Card key={i} className="hover:shadow-md transition-shadow flex flex-col">
             <CardHeader>
               <cert.icon className="h-8 w-8 text-secondary mb-2" />
               <CardTitle>{cert.title}</CardTitle>
             </CardHeader>
-            <CardContent className="text-muted-foreground text-sm">{cert.desc}</CardContent>
+            <CardContent className="text-muted-foreground text-sm flex-1">{cert.desc}</CardContent>
+            <div className="p-6 pt-0 mt-auto">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => handleWhatsAppCard(cert.title)}
+              >
+                Solicitar Informações
+              </Button>
+            </div>
           </Card>
         ))}
       </section>

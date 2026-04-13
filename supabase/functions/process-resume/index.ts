@@ -78,6 +78,10 @@ Deno.serve(async (req: Request) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     )
 
+    // Fetch user details for the email body and sync
+    const { data: userRecord } = await supabase.from('users').select('*').eq('id', user_id).single()
+    const telefone = userRecord?.telefone || 'Não informado'
+
     // Armazenar registro de envio como "pending"
     const { data: emailRecord, error: insertError } = await supabase
       .from('emails_sent')
@@ -93,9 +97,12 @@ Deno.serve(async (req: Request) => {
     // Envio de Email com Retry Automático e Backoff
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || 're_dummy_for_testing'
     let emailSent = false
+    let lastEmailError = ''
 
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
+        const pdfContent = pdf_base64.includes(',') ? pdf_base64.split(',')[1] : pdf_base64
+
         const res = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
@@ -105,12 +112,12 @@ Deno.serve(async (req: Request) => {
           body: JSON.stringify({
             from: 'Talentos Super Era Digital <onboarding@resend.dev>',
             to: ['comercial@areradigital.com.br'],
-            subject: `Novo Currículo Recebido: ${nome}`,
-            html: `<p>Um novo currículo foi submetido por <strong>${nome}</strong> (${email}).</p><p>O currículo detalhado e os resultados DISC encontram-se em anexo no formato PDF.</p>`,
+            subject: `Novo Currículo - ${nome}`,
+            html: `<p>Segue em anexo o currículo de ${nome}. Email: ${email}. Telefone: ${telefone}</p>`,
             attachments: [
               {
                 filename: `curriculo_${nome.replace(/\s+/g, '_').toLowerCase()}.pdf`,
-                content: pdf_base64,
+                content: pdfContent,
               },
             ],
           }),
@@ -123,13 +130,15 @@ Deno.serve(async (req: Request) => {
           )
           break
         } else {
+          lastEmailError = `Status ${res.status}: ${await res.text()}`
           console.error(`Tentativa ${attempt + 1} de envio falhou com status ${res.status}`)
         }
-      } catch (err) {
+      } catch (err: any) {
+        lastEmailError = err.message || 'Erro desconhecido'
         console.error(`Tentativa ${attempt + 1} falhou com erro:`, err)
       }
 
-      if (!emailSent) {
+      if (!emailSent && attempt < 2) {
         // Exponencial backoff: 1s, 2s
         await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000))
       }
@@ -144,25 +153,82 @@ Deno.serve(async (req: Request) => {
     }
 
     if (!emailSent) {
+      // Log email failure in sync_logs too
+      await supabase.from('sync_logs').insert({
+        entity_type: 'email',
+        entity_id: emailId || user_id,
+        status: 'failed',
+        attempts: 3,
+        error_message: lastEmailError,
+      })
       return new Response(JSON.stringify({ error: 'Erro ao enviar email, tente novamente' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    // Sincronização com o sistema interno Super Era Digital (Assíncrono Mock)
-    try {
-      await fetch('https://api.supereradigital.com.br/webhook/resume', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id, email, nome, status: 'processed' }),
-      }).catch((err) => console.error('Erro na sinc com Super Era Digital (ignorado):', err))
-    } catch (syncError) {
-      console.error('Falha inesperada ao tentar sincronizar:', syncError)
+    // Sincronização com o sistema interno Super Era Digital (Assíncrono com Retry)
+    const syncWithSuperEra = async () => {
+      try {
+        const [edu, exp, disc] = await Promise.all([
+          supabase.from('educations').select('*').eq('user_id', user_id),
+          supabase.from('experiences').select('*').eq('user_id', user_id),
+          supabase.from('disc_results').select('*').eq('user_id', user_id).maybeSingle(),
+        ])
+
+        const syncPayload = {
+          user: userRecord,
+          educations: edu.data || [],
+          experiences: exp.data || [],
+          disc: disc.data || null,
+        }
+
+        let syncSuccess = false
+        let syncErrorMsg = ''
+        const maxAttempts = 5
+
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+          try {
+            const res = await fetch('https://api.supereradigital.com.br/webhook/resume', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(syncPayload),
+            })
+
+            if (res.ok) {
+              syncSuccess = true
+              break
+            } else {
+              syncErrorMsg = `HTTP ${res.status}: ${await res.text()}`
+            }
+          } catch (err: any) {
+            syncErrorMsg = err.message || 'Erro de rede'
+          }
+
+          if (!syncSuccess && attempt < maxAttempts - 1) {
+            // Exponential backoff: 1s, 2s, 4s, 8s
+            await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000))
+          }
+        }
+
+        // Log sync result
+        await supabase.from('sync_logs').insert({
+          entity_type: 'super_era_sync',
+          entity_id: user_id,
+          status: syncSuccess ? 'success' : 'failed',
+          attempts: syncSuccess ? 1 : maxAttempts,
+          error_message: syncSuccess ? null : syncErrorMsg,
+        })
+      } catch (err) {
+        console.error('Falha inesperada ao tentar sincronizar:', err)
+      }
     }
 
+    // Execute sync asynchronously
+    await syncWithSuperEra()
+
     return new Response(
-      JSON.stringify({ success: true, message: 'Currículo processado com sucesso' }),
+      JSON.stringify({ success: true, message: 'Currículo processado e sincronizado com sucesso' }),
       {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -10,13 +10,25 @@ export default function Layout() {
         to="/certificados"
         className="text-sm font-medium hover:text-secondary transition-colors"
       >
-        Lead de Certificados
+        Certificados
       </Link>
       <Link to="/erp" className="text-sm font-medium hover:text-secondary transition-colors">
-        Interesse ERP
+        Sistemas ERP
       </Link>
       <Link to="/talentos" className="text-sm font-medium hover:text-secondary transition-colors">
-        Banco de Talentos
+        Talentos
+      </Link>
+      <Link to="/tecnologia" className="text-sm font-medium hover:text-secondary transition-colors">
+        Tecnologia
+      </Link>
+      <Link
+        to="/base-conhecimento"
+        className="text-sm font-medium hover:text-secondary transition-colors"
+      >
+        Conteúdo
+      </Link>
+      <Link to="/faq" className="text-sm font-medium hover:text-secondary transition-colors">
+        FAQ
       </Link>
     </>
   )

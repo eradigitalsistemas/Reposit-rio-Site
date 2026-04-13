@@ -6,6 +6,9 @@ import Layout from './components/Layout'
 import Index from './pages/Index'
 import Certificados from './pages/Certificados'
 import ERP from './pages/ERP'
+import FAQ from './pages/FAQ'
+import BaseConhecimento from './pages/BaseConhecimento'
+import Tecnologia from './pages/Tecnologia'
 import TalentosPage from './pages/talentos/TalentosPage'
 import TalentosSuccessPage from './pages/talentos/TalentosSuccessPage'
 import DesignSystem from './pages/DesignSystem'
@@ -21,6 +24,9 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/certificados" element={<Certificados />} />
           <Route path="/erp" element={<ERP />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/base-conhecimento" element={<BaseConhecimento />} />
+          <Route path="/tecnologia" element={<Tecnologia />} />
           <Route path="/talentos" element={<TalentosPage />} />
           <Route path="/talentos/sucesso" element={<TalentosSuccessPage />} />
           <Route path="/design-system" element={<DesignSystem />} />

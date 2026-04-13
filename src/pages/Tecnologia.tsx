@@ -18,12 +18,13 @@ export default function Tecnologia() {
 
       {/* Main Image */}
       <section className="max-w-5xl mx-auto">
-        <div className="aspect-[21/9] rounded-2xl overflow-hidden shadow-xl">
+        <div className="aspect-[21/9] rounded-2xl overflow-hidden shadow-xl relative group">
           <img
-            src="https://img.usecurling.com/p/1200/500?q=data%20analysis&color=blue"
+            src="https://img.usecurling.com/p/1200/500?q=data%20analysis&color=green"
             alt="Análise de Dados e Tecnologia"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover grayscale opacity-90 group-hover:grayscale-0 transition-all duration-700"
           />
+          <div className="absolute inset-0 bg-primary/20 mix-blend-multiply pointer-events-none transition-opacity duration-700 group-hover:opacity-0"></div>
         </div>
       </section>
 
@@ -52,7 +53,7 @@ export default function Tecnologia() {
         </div>
         <div className="grid grid-cols-1 gap-6">
           <div className="bg-slate-50 p-6 rounded-xl border flex items-start gap-4">
-            <div className="bg-blue-100 p-3 rounded-lg text-blue-600">
+            <div className="bg-primary/10 p-3 rounded-lg text-primary">
               <Activity className="h-6 w-6" />
             </div>
             <div>
@@ -63,7 +64,7 @@ export default function Tecnologia() {
             </div>
           </div>
           <div className="bg-slate-50 p-6 rounded-xl border flex items-start gap-4">
-            <div className="bg-purple-100 p-3 rounded-lg text-purple-600">
+            <div className="bg-primary/10 p-3 rounded-lg text-primary">
               <LineChart className="h-6 w-6" />
             </div>
             <div>
@@ -74,7 +75,7 @@ export default function Tecnologia() {
             </div>
           </div>
           <div className="bg-slate-50 p-6 rounded-xl border flex items-start gap-4">
-            <div className="bg-emerald-100 p-3 rounded-lg text-emerald-600">
+            <div className="bg-primary/10 p-3 rounded-lg text-primary">
               <Globe className="h-6 w-6" />
             </div>
             <div>

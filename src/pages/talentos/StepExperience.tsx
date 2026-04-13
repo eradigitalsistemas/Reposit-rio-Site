@@ -75,7 +75,7 @@ export function StepExperience() {
                       id={`experiences.${index}.empresa`}
                       placeholder="Nome da empresa"
                       {...register(`experiences.${index}.empresa`)}
-                      className={cn(fieldErrors?.empresa && 'border-destructive')}
+                      error={!!fieldErrors?.empresa}
                     />
                     {fieldErrors?.empresa && (
                       <p className="text-xs text-destructive">{fieldErrors.empresa.message}</p>
@@ -88,7 +88,7 @@ export function StepExperience() {
                       id={`experiences.${index}.cargo`}
                       placeholder="Seu cargo/função"
                       {...register(`experiences.${index}.cargo`)}
-                      className={cn(fieldErrors?.cargo && 'border-destructive')}
+                      error={!!fieldErrors?.cargo}
                     />
                     {fieldErrors?.cargo && (
                       <p className="text-xs text-destructive">{fieldErrors.cargo.message}</p>
@@ -101,7 +101,7 @@ export function StepExperience() {
                       type="date"
                       id={`experiences.${index}.data_inicio`}
                       {...register(`experiences.${index}.data_inicio`)}
-                      className={cn(fieldErrors?.data_inicio && 'border-destructive')}
+                      error={!!fieldErrors?.data_inicio}
                     />
                     {fieldErrors?.data_inicio && (
                       <p className="text-xs text-destructive">{fieldErrors.data_inicio.message}</p>
@@ -114,7 +114,7 @@ export function StepExperience() {
                       type="date"
                       id={`experiences.${index}.data_fim`}
                       {...register(`experiences.${index}.data_fim`)}
-                      className={cn(fieldErrors?.data_fim && 'border-destructive')}
+                      error={!!fieldErrors?.data_fim}
                     />
                     {fieldErrors?.data_fim && (
                       <p className="text-xs text-destructive">{fieldErrors.data_fim.message}</p>

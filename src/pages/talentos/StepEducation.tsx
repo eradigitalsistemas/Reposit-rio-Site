@@ -79,11 +79,7 @@ export function StepEducation() {
                       <Input
                         placeholder="Ex: Universidade de São Paulo"
                         {...field}
-                        className={
-                          fieldState.invalid
-                            ? 'border-destructive focus-visible:ring-destructive'
-                            : ''
-                        }
+                        error={fieldState.invalid}
                       />
                     </FormControl>
                     <FormMessage />
@@ -102,11 +98,7 @@ export function StepEducation() {
                       <Input
                         placeholder="Ex: Engenharia de Software"
                         {...field}
-                        className={
-                          fieldState.invalid
-                            ? 'border-destructive focus-visible:ring-destructive'
-                            : ''
-                        }
+                        error={fieldState.invalid}
                       />
                     </FormControl>
                     <FormMessage />
@@ -126,11 +118,7 @@ export function StepEducation() {
                         type="date"
                         max={new Date().toISOString().split('T')[0]}
                         {...field}
-                        className={
-                          fieldState.invalid
-                            ? 'border-destructive focus-visible:ring-destructive'
-                            : ''
-                        }
+                        error={fieldState.invalid}
                       />
                     </FormControl>
                     <FormMessage />
@@ -142,17 +130,9 @@ export function StepEducation() {
                 name={`educations.${index}.data_fim`}
                 render={({ field, fieldState }) => (
                   <FormItem>
-                    <FormLabel>Data de Término (ou Previsão)</FormLabel>
+                    <FormLabel>Data de Término (Opcional)</FormLabel>
                     <FormControl>
-                      <Input
-                        type="date"
-                        {...field}
-                        className={
-                          fieldState.invalid
-                            ? 'border-destructive focus-visible:ring-destructive'
-                            : ''
-                        }
-                      />
+                      <Input type="date" {...field} error={fieldState.invalid} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

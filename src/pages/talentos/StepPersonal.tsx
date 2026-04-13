@@ -1,5 +1,5 @@
 import { useFormContext } from 'react-hook-form'
-import { Camera, Trash2, CheckCircle2, XCircle } from 'lucide-react'
+import { Camera, Trash2 } from 'lucide-react'
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -43,26 +43,6 @@ export function StepPersonal() {
       })
     }
     reader.readAsDataURL(file)
-  }
-
-  const InputWithFeedback = ({ field, fieldState, ...props }: any) => {
-    const isSuccess = fieldState.isDirty && !fieldState.invalid && field.value
-    const isError = fieldState.invalid
-    return (
-      <div className="relative flex items-center">
-        <Input
-          {...field}
-          {...props}
-          className={`pr-10 ${isError ? 'border-destructive focus-visible:ring-destructive' : isSuccess ? 'border-green-500 focus-visible:ring-green-500' : ''}`}
-        />
-        {isSuccess && (
-          <CheckCircle2 className="absolute right-3 h-4 w-4 text-green-500 pointer-events-none" />
-        )}
-        {isError && (
-          <XCircle className="absolute right-3 h-4 w-4 text-destructive pointer-events-none" />
-        )}
-      </div>
-    )
   }
 
   return (
@@ -131,10 +111,11 @@ export function StepPersonal() {
                 Nome Completo <span className="text-destructive">*</span>
               </FormLabel>
               <FormControl>
-                <InputWithFeedback
-                  field={field}
-                  fieldState={fieldState}
+                <Input
+                  {...field}
                   placeholder="Ex: João da Silva"
+                  error={fieldState.invalid}
+                  success={fieldState.isDirty && !fieldState.invalid && !!field.value}
                 />
               </FormControl>
               <FormMessage />
@@ -152,11 +133,12 @@ export function StepPersonal() {
                   E-mail <span className="text-destructive">*</span>
                 </FormLabel>
                 <FormControl>
-                  <InputWithFeedback
-                    field={field}
-                    fieldState={fieldState}
+                  <Input
+                    {...field}
                     type="email"
                     placeholder="joao@exemplo.com"
+                    error={fieldState.invalid}
+                    success={fieldState.isDirty && !fieldState.invalid && !!field.value}
                   />
                 </FormControl>
                 <FormMessage />
@@ -173,10 +155,11 @@ export function StepPersonal() {
                   Telefone / WhatsApp <span className="text-destructive">*</span>
                 </FormLabel>
                 <FormControl>
-                  <InputWithFeedback
-                    field={field}
-                    fieldState={fieldState}
+                  <Input
+                    {...field}
                     placeholder="Ex: (11) 99999-9999"
+                    error={fieldState.invalid}
+                    success={fieldState.isDirty && !fieldState.invalid && !!field.value}
                   />
                 </FormControl>
                 <FormMessage />
@@ -193,11 +176,12 @@ export function StepPersonal() {
               <FormItem>
                 <FormLabel>Data de Nascimento (Opcional)</FormLabel>
                 <FormControl>
-                  <InputWithFeedback
-                    field={field}
-                    fieldState={fieldState}
+                  <Input
+                    {...field}
                     type="date"
                     max={new Date().toISOString().split('T')[0]}
+                    error={fieldState.invalid}
+                    success={fieldState.isDirty && !fieldState.invalid && !!field.value}
                   />
                 </FormControl>
                 <FormMessage />

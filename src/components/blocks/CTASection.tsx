@@ -29,7 +29,7 @@ export function CTASection({
       </p>
       <Button
         size="lg"
-        className="px-8 mt-4"
+        className="px-8 mt-6"
         variant={variant === 'primary' ? 'secondary' : 'default'}
         onClick={onCTA}
       >

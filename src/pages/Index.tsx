@@ -33,18 +33,24 @@ const Index = () => {
             <Button size="lg" asChild className="text-lg px-8">
               <Link to="/talentos">Crie seu Currículo</Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="text-lg px-8">
+            <Button
+              size="lg"
+              variant="outline"
+              asChild
+              className="text-lg px-8 border-primary text-primary hover:bg-primary/5"
+            >
               <Link to="/erp">Conhecer Soluções</Link>
             </Button>
           </div>
         </div>
         <div className="flex-1 w-full max-w-md mx-auto relative animate-fade-in">
-          <div className="aspect-video md:aspect-square rounded-2xl overflow-hidden shadow-2xl relative z-10">
+          <div className="aspect-video md:aspect-square rounded-2xl overflow-hidden shadow-2xl relative z-10 group">
             <img
-              src="https://img.usecurling.com/p/800/800?q=digital%20business&color=blue"
+              src="https://img.usecurling.com/p/800/800?q=digital%20business&color=green"
               alt="Business Technology"
-              className="object-cover w-full h-full"
+              className="object-cover w-full h-full grayscale opacity-90 group-hover:grayscale-0 transition-all duration-700"
             />
+            <div className="absolute inset-0 bg-primary/20 mix-blend-multiply pointer-events-none transition-opacity duration-700 group-hover:opacity-0"></div>
           </div>
           <div className="absolute -inset-4 bg-secondary/20 rounded-full blur-3xl -z-10"></div>
         </div>
@@ -60,9 +66,9 @@ const Index = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Link to="/certificados" className="block group">
-            <Card className="h-full transition-all duration-300 hover:shadow-lg hover:border-secondary/50 group-hover:-translate-y-1">
+            <Card className="h-full transition-all duration-300 hover:shadow-lg hover:border-primary/50 group-hover:-translate-y-1">
               <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mb-4">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-4">
                   <FileBadge className="h-6 w-6" />
                 </div>
                 <CardTitle className="group-hover:text-secondary transition-colors">
@@ -81,9 +87,9 @@ const Index = () => {
           </Link>
 
           <Link to="/erp" className="block group">
-            <Card className="h-full transition-all duration-300 hover:shadow-lg hover:border-secondary/50 group-hover:-translate-y-1">
+            <Card className="h-full transition-all duration-300 hover:shadow-lg hover:border-primary/50 group-hover:-translate-y-1">
               <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center mb-4">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-4">
                   <Briefcase className="h-6 w-6" />
                 </div>
                 <CardTitle className="group-hover:text-secondary transition-colors">
@@ -102,9 +108,9 @@ const Index = () => {
           </Link>
 
           <Link to="/talentos" className="block group">
-            <Card className="h-full transition-all duration-300 hover:shadow-lg hover:border-secondary/50 group-hover:-translate-y-1">
+            <Card className="h-full transition-all duration-300 hover:shadow-lg hover:border-primary/50 group-hover:-translate-y-1">
               <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-4">
                   <Users className="h-6 w-6" />
                 </div>
                 <CardTitle className="group-hover:text-secondary transition-colors">

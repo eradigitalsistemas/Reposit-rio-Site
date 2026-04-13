@@ -181,7 +181,7 @@ export default function TalentosPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-6 px-4 animate-fade-in">
-      <div className="mb-8 sticky top-16 bg-background/95 pb-4 z-10 pt-4 -mt-4 border-b">
+      <div className="mb-8 sticky top-[80px] bg-background/95 pb-4 z-10 pt-4 -mt-4 border-b">
         <div className="flex justify-between items-center text-sm font-medium mb-3">
           <div className="text-muted-foreground flex items-center gap-2">
             <span>

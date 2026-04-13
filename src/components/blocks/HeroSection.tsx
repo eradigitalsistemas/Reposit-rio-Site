@@ -26,7 +26,9 @@ export function HeroSection({
 
   return (
     <section className={`${flexClass} items-center gap-10 pt-8 animate-slide-up`}>
-      <div className={`flex-1 space-y-6 max-w-4xl mx-auto w-full ${alignClass}`}>
+      <div
+        className={`flex-1 space-y-6 max-w-4xl w-full ${alignClass} ${!imageSrc ? 'mx-auto' : ''}`}
+      >
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-primary">
           {title}
         </h1>
@@ -52,7 +54,7 @@ export function HeroSection({
               alt="Hero"
               className="object-cover w-full h-full grayscale opacity-90 group-hover:grayscale-0 transition-all duration-700"
             />
-            <div className="absolute inset-0 bg-primary/30 mix-blend-multiply pointer-events-none transition-opacity duration-700 group-hover:opacity-0"></div>
+            <div className="absolute inset-0 bg-primary/20 mix-blend-multiply pointer-events-none transition-opacity duration-700 group-hover:opacity-0"></div>
           </div>
           <div className="absolute -inset-4 bg-primary/20 rounded-full blur-3xl -z-10"></div>
         </div>

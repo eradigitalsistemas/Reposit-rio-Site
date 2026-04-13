@@ -136,6 +136,14 @@ const discSchema = z.object({
   q2: z.string().min(1).transform(sanitizeHtml),
   q3: z.string().min(1).transform(sanitizeHtml),
   q4: z.string().min(1).transform(sanitizeHtml),
+  q5: z.string().min(1).transform(sanitizeHtml),
+  q6: z.string().min(1).transform(sanitizeHtml),
+  q7: z.string().min(1).transform(sanitizeHtml),
+  q8: z.string().min(1).transform(sanitizeHtml),
+  q9: z.string().min(1).transform(sanitizeHtml),
+  q10: z.string().min(1).transform(sanitizeHtml),
+  q11: z.string().min(1).transform(sanitizeHtml),
+  q12: z.string().min(1).transform(sanitizeHtml),
 })
 
 const formSchema = z.object({
@@ -234,13 +242,37 @@ Deno.serve(async (req: Request) => {
       )
     }
 
+    let scoreD = 0,
+      scoreI = 0,
+      scoreS = 0,
+      scoreC = 0
+    Object.values(data.disc).forEach((answer) => {
+      if (answer === 'D') scoreD++
+      if (answer === 'I') scoreI++
+      if (answer === 'S') scoreS++
+      if (answer === 'C') scoreC++
+    })
+
+    const scores = [
+      { type: 'Dominância (D)', value: scoreD },
+      { type: 'Influência (I)', value: scoreI },
+      { type: 'Estabilidade (S)', value: scoreS },
+      { type: 'Conformidade (C)', value: scoreC },
+    ]
+    scores.sort((a, b) => b.value - a.value)
+
+    let tipoPerfil = scores[0].type
+    if (scores[0].value === scores[1].value) {
+      tipoPerfil = `${scores[0].type} / ${scores[1].type}`
+    }
+
     await supabase.from('disc_results').insert({
       user_id: userId,
-      tipo_perfil: 'Aguardando Processamento',
-      pontuacao_d: 0,
-      pontuacao_i: 0,
-      pontuacao_s: 0,
-      pontuacao_c: 0,
+      tipo_perfil: tipoPerfil,
+      pontuacao_d: scoreD,
+      pontuacao_i: scoreI,
+      pontuacao_s: scoreS,
+      pontuacao_c: scoreC,
     })
 
     // Sincronizar via Edge Function existente para envio de e-mail e integração ERP

@@ -63,6 +63,55 @@ export const talentosSchema = z.object({
         }
       })
     }),
+  experiences: z
+    .array(
+      z.object({
+        empresa: z.string().min(2, 'Empresa é obrigatória').max(150, 'Máximo 150 caracteres'),
+        cargo: z.string().min(2, 'Cargo é obrigatório').max(150, 'Máximo 150 caracteres'),
+        data_inicio: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato inválido (YYYY-MM-DD)')
+          .refine((date) => {
+            const d = new Date(date)
+            return d >= new Date('1950-01-01') && d <= new Date()
+          }, 'Data fora do intervalo permitido'),
+        data_fim: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato inválido (YYYY-MM-DD)')
+          .optional()
+          .or(z.literal('')),
+        descricao: z.string().max(500, 'Máximo 500 caracteres').optional().or(z.literal('')),
+      }),
+    )
+    .min(1, 'Adicione pelo menos uma experiência profissional')
+    .max(15, 'Máximo de 15 experiências permitidas')
+    .superRefine((exps, ctx) => {
+      exps.forEach((exp, index) => {
+        if (exp.data_fim && exp.data_fim !== '') {
+          if (new Date(exp.data_fim) < new Date(exp.data_inicio)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: 'Data de término deve ser posterior à data de início',
+              path: [index, 'data_fim'],
+            })
+          }
+        }
+      })
+    }),
+  disc: z.object({
+    q1: z.string().min(1, 'Responda a esta pergunta'),
+    q2: z.string().min(1, 'Responda a esta pergunta'),
+    q3: z.string().min(1, 'Responda a esta pergunta'),
+    q4: z.string().min(1, 'Responda a esta pergunta'),
+    q5: z.string().min(1, 'Responda a esta pergunta'),
+    q6: z.string().min(1, 'Responda a esta pergunta'),
+    q7: z.string().min(1, 'Responda a esta pergunta'),
+    q8: z.string().min(1, 'Responda a esta pergunta'),
+    q9: z.string().min(1, 'Responda a esta pergunta'),
+    q10: z.string().min(1, 'Responda a esta pergunta'),
+    q11: z.string().min(1, 'Responda a esta pergunta'),
+    q12: z.string().min(1, 'Responda a esta pergunta'),
+  }),
 })
 
 export type TalentosFormValues = z.infer<typeof talentosSchema>
@@ -77,4 +126,19 @@ export const defaultTalentosValues: Partial<TalentosFormValues> = {
     foto_url: '',
   },
   educations: [{ instituicao: '', curso: '', data_inicio: '', data_fim: '' }],
+  experiences: [{ empresa: '', cargo: '', data_inicio: '', data_fim: '', descricao: '' }],
+  disc: {
+    q1: '',
+    q2: '',
+    q3: '',
+    q4: '',
+    q5: '',
+    q6: '',
+    q7: '',
+    q8: '',
+    q9: '',
+    q10: '',
+    q11: '',
+    q12: '',
+  },
 }

@@ -9,6 +9,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { talentosSchema, defaultTalentosValues, TalentosFormValues } from './schema'
 import { StepPersonal } from './StepPersonal'
 import { StepEducation } from './StepEducation'
+import { StepExperience } from './StepExperience'
+import { StepDisc } from './StepDisc'
 
 const STORAGE_KEY = 'talentos_form_data'
 
@@ -26,9 +28,9 @@ const steps = [
     ],
   },
   { id: 'education', title: 'Educação', fields: ['educations'] },
-  { id: 'experience', title: 'Experiência (Em Breve)', fields: [] },
-  { id: 'disc', title: 'Perfil DISC (Em Breve)', fields: [] },
-  { id: 'review', title: 'Revisão (Em Breve)', fields: [] },
+  { id: 'experience', title: 'Experiência', fields: ['experiences'] },
+  { id: 'disc', title: 'Perfil DISC', fields: ['disc'] },
+  { id: 'review', title: 'Revisão', fields: [] },
 ]
 
 export default function TalentosPage() {
@@ -138,6 +140,23 @@ export default function TalentosPage() {
       if (hasInvalidEdu) return true
       if (errors.educations) return true
     }
+    if (currentStep === 2) {
+      const exps = getValues('experiences')
+      if (!exps || exps.length === 0) return true
+      const hasInvalidExp = exps.some(
+        (e: any) =>
+          !e.empresa || e.empresa.length < 2 || !e.cargo || e.cargo.length < 2 || !e.data_inicio,
+      )
+      if (hasInvalidExp) return true
+      if (errors.experiences) return true
+    }
+    if (currentStep === 3) {
+      const d = getValues('disc')
+      if (!d) return true
+      const answeredCount = Object.values(d).filter(Boolean).length
+      if (answeredCount < 12) return true
+      if (errors.disc) return true
+    }
     return false
   }
 
@@ -171,15 +190,16 @@ export default function TalentosPage() {
               <div className="min-h-[400px]">
                 {currentStep === 0 && <StepPersonal />}
                 {currentStep === 1 && <StepEducation />}
-                {currentStep > 1 && (
+                {currentStep === 2 && <StepExperience />}
+                {currentStep === 3 && <StepDisc />}
+                {currentStep > 3 && (
                   <div className="text-center py-24 space-y-4 animate-fade-in-up">
                     <div className="mx-auto w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6">
                       <CheckCircle2 className="w-8 h-8" />
                     </div>
-                    <h3 className="text-2xl font-bold">Parabéns!</h3>
+                    <h3 className="text-2xl font-bold">Quase lá!</h3>
                     <p className="text-muted-foreground max-w-md mx-auto text-lg">
-                      Você concluiu as duas primeiras etapas. O restante do formulário será liberado
-                      em breve na próxima atualização do sistema.
+                      Sua etapa de revisão e submissão estará disponível em breve.
                     </p>
                   </div>
                 )}
@@ -196,7 +216,7 @@ export default function TalentosPage() {
                   <ChevronLeft className="mr-2 h-4 w-4" /> Voltar
                 </Button>
 
-                {currentStep < 2 ? (
+                {currentStep < 4 ? (
                   <Button
                     type="button"
                     onClick={handleNext}

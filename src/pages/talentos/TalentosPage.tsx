@@ -59,7 +59,9 @@ export default function TalentosPage() {
       try {
         const parsed = JSON.parse(saved)
         reset(parsed)
-      } catch (e) {}
+      } catch (e) {
+        // Ignore parse error
+      }
     }
     setTimeout(() => {
       isInitialMount.current = false

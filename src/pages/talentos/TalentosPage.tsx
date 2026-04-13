@@ -1,17 +1,16 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CheckCircle2, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
-import { useToast } from '@/hooks/use-toast'
+import { CheckCircle2, ChevronLeft, ChevronRight, Loader2, Save } from 'lucide-react'
+import { supabase } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Card, CardContent } from '@/components/ui/card'
 import { talentosSchema, defaultTalentosValues, TalentosFormValues } from './schema'
 import { StepPersonal } from './StepPersonal'
 import { StepEducation } from './StepEducation'
-import { StepExperience } from './StepExperience'
-import { StepDisc } from './StepDisc'
+
+const STORAGE_KEY = 'talentos_form_data'
 
 const steps = [
   {
@@ -23,110 +22,91 @@ const steps = [
       'personal.telefone',
       'personal.data_nascimento',
       'personal.endereco',
+      'personal.foto_url',
     ],
   },
   { id: 'education', title: 'Educação', fields: ['educations'] },
-  { id: 'experience', title: 'Experiência', fields: ['experiences'] },
-  {
-    id: 'disc',
-    title: 'Perfil DISC',
-    fields: ['disc.q1', 'disc.q2', 'disc.q3', 'disc.q4', 'lgpd'],
-  },
+  { id: 'experience', title: 'Experiência (Em Breve)', fields: [] },
+  { id: 'disc', title: 'Perfil DISC (Em Breve)', fields: [] },
+  { id: 'review', title: 'Revisão (Em Breve)', fields: [] },
 ]
 
 export default function TalentosPage() {
-  const { toast } = useToast()
   const [currentStep, setCurrentStep] = useState(0)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSuccess, setIsSuccess] = useState(false)
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<'Salvando...' | 'Salvo' | ''>('')
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const isInitialMount = useRef(true)
 
   const methods = useForm<TalentosFormValues>({
     resolver: zodResolver(talentosSchema),
-    defaultValues: defaultTalentosValues,
-    mode: 'onTouched',
+    defaultValues: defaultTalentosValues as any,
+    mode: 'onChange',
   })
 
-  const { trigger, handleSubmit } = methods
+  const {
+    trigger,
+    watch,
+    reset,
+    getValues,
+    setError,
+    formState: { errors },
+  } = methods
 
-  const processDisc = (discData: any) => {
-    const scores = { D: 0, I: 0, S: 0, C: 0 }
-    Object.values(discData).forEach((val: any) => {
-      if (val === 'D') scores.D += 25
-      if (val === 'I') scores.I += 25
-      if (val === 'S') scores.S += 25
-      if (val === 'C') scores.C += 25
-    })
-    // Simple logic to find predominant profile
-    const profile = Object.keys(scores).reduce((a, b) =>
-      scores[a as keyof typeof scores] > scores[b as keyof typeof scores] ? a : b,
-    )
-    return { scores, profile }
-  }
-
-  const onSubmit = async (data: TalentosFormValues) => {
-    setIsSubmitting(true)
-    try {
-      // 1. Insert User
-      const userRes = await supabase.from('users').insert(data.personal)
-      if (userRes.error) throw userRes.error
-      const userId = userRes.data.id
-
-      // 2. Insert Educations
-      const eduData = data.educations.map((e) => ({ ...e, user_id: userId }))
-      await supabase.from('educations').insert(eduData)
-
-      // 3. Insert Experiences
-      const expData = data.experiences.map((e) => ({ ...e, user_id: userId }))
-      await supabase.from('experiences').insert(expData)
-
-      // 4. Process & Insert DISC
-      const { scores, profile } = processDisc(data.disc)
-      await supabase.from('disc_results').insert({
-        user_id: userId,
-        tipo_perfil: profile,
-        pontuacao_d: scores.D,
-        pontuacao_i: scores.I,
-        pontuacao_s: scores.S,
-        pontuacao_c: scores.C,
-        data_teste: new Date().toISOString(),
-      })
-
-      // Gerar PDF em base64 mockado para o anexo e envio à Edge Function.
-      // Em produção, isso seria gerado dinamicamente com base nos dados do formulário.
-      const dummyPdfBase64 =
-        'JVBERi0xLjcKCjEgMCBvYmogICUgZW50cnkgcG9pbnQKPDwKICAvVHlwZSAvQ2F0YWxvZwogIC9QYWdlcyAyIDAgUgo+PgplbmRvYmoKCjIgMCBvYmoKPDwKICAvVHlwZSAvUGFnZXMKICAvTWVkaWFCb3ggWyAwIDAgMjAwIDIwMCBdCiAgL0NvdW50IDEKICAvS2lkcyBbIDMgMCBSIF0KPj4KZW5kb2JqCgozIDAgb2JqCjw8CiAgL1R5cGUgL1BhZ2UKICAvUGFyZW50IDIgMCBSCiAgL1Jlc291cmNlcyA8PAogICAgL0ZvbnQgPDwKICAgICAgL0YxIDQgMCBSCidJRjAgUmVzb3VyY2VzCiAgICA+PgogID4+CiAgL0NvbnRlbnRzIDUgMCBSCj4+CmVuZG9iagoKNCAwIG9iago8PAogIC9UeXBlIC9Gb250CiAgL1N1YnR5cGUgL1R5cGUxCiAgL0Jhc2VGb250IC9UaW1lcy1Sb21hbgo+PgplbmRvYmoKCjUgMCBvYmoKPDwgL0xlbmd0aCAzNiA+PgpzdHJlYW0KQlQKL0YxIDE4IFRmCjAgMCBUZAooQ3VycmljdWxvIEdlcmFkbyBjb20gU3VjZXNzbykgVGoKRVQKZW5kc3RyZWFtCmVuZG9iagoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNzkgMDAwMDAgbiAKMDAwMDAwMDE3MyAwMDAwMCBuIAowMDAwMDAwMzAxIDAwMDAwIG4gCjAwMDAwMDAzODAgMDAwMDAgbiAKdHJhaWxlcgo8PAogIC9TaXplIDYKICAvUm9vdCAxIDAgUgo+PgpzdGFydHhyZWYKNDc3CiUlRU9GCg=='
-
-      // Dispara a Edge Function para o envio assíncrono do email e sincronização com ERP
-      const { error: fnError } = await supabase.functions.invoke('process-resume', {
-        body: {
-          user_id: userId,
-          email: data.personal.email,
-          nome: data.personal.nome,
-          pdf_base64: dummyPdfBase64,
-        },
-      })
-
-      if (fnError) {
-        console.error('Aviso: Os dados foram salvos mas o envio do currículo falhou.', fnError)
-      }
-
-      setIsSuccess(true)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    } catch (err: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao cadastrar',
-        description: err.message || 'Ocorreu um erro na submissão.',
-      })
-    } finally {
-      setIsSubmitting(false)
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        reset(parsed)
+      } catch (e) {}
     }
-  }
+    setTimeout(() => {
+      isInitialMount.current = false
+    }, 100)
+  }, [reset])
+
+  useEffect(() => {
+    const subscription = watch((value) => {
+      if (isInitialMount.current) return
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(value))
+      setSaveStatus('Salvando...')
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      timeoutRef.current = setTimeout(() => {
+        setSaveStatus('Salvo')
+      }, 2000)
+    })
+    return () => subscription.unsubscribe()
+  }, [watch])
 
   const handleNext = async () => {
     const fieldsToValidate = steps[currentStep].fields
     const isStepValid = await trigger(fieldsToValidate as any)
+
     if (isStepValid) {
+      if (currentStep === 0) {
+        setIsCheckingEmail(true)
+        const email = getValues('personal.email')
+        try {
+          const { data } = await supabase
+            .from('users')
+            .select('id')
+            .eq('email', email)
+            .maybeSingle()
+          if (data) {
+            setError('personal.email', {
+              type: 'manual',
+              message: 'Email já cadastrado. Deseja editar o currículo existente?',
+            })
+            setIsCheckingEmail(false)
+            return
+          }
+        } catch (e) {
+          // Ignora erros de rede localmente
+        }
+        setIsCheckingEmail(false)
+      }
+
       setCurrentStep((prev) => prev + 1)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
@@ -134,45 +114,73 @@ export default function TalentosPage() {
 
   const progress = ((currentStep + 1) / steps.length) * 100
 
-  if (isSuccess) {
-    return (
-      <div className="max-w-2xl mx-auto mt-10 text-center space-y-6 animate-fade-in">
-        <div className="bg-accent/10 p-6 rounded-full inline-block">
-          <CheckCircle2 className="h-24 w-24 text-accent" />
-        </div>
-        <h2 className="text-3xl font-bold">Perfil Cadastrado com Sucesso!</h2>
-        <p className="text-lg text-muted-foreground">
-          Obrigado por se juntar ao Banco de Talentos da Super Era Digital. Sua análise DISC e
-          currículo já estão em nossa base.
-        </p>
-        <Button onClick={() => (window.location.href = '/')} variant="outline" className="mt-4">
-          Voltar para Início
-        </Button>
-      </div>
-    )
+  const isNextDisabled = () => {
+    if (currentStep === 0) {
+      const p = getValues('personal')
+      if (!p?.nome || p.nome.length < 3) return true
+      if (!p?.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.email)) return true
+      if (!p?.telefone || !/^\+55 \d{2} \d{4,5}-\d{4}$/.test(p.telefone)) return true
+      if (errors.personal) return true
+    }
+    if (currentStep === 1) {
+      const eds = getValues('educations')
+      if (!eds || eds.length === 0) return true
+      const hasInvalidEdu = eds.some(
+        (e: any) =>
+          !e.instituicao ||
+          e.instituicao.length < 2 ||
+          !e.curso ||
+          e.curso.length < 2 ||
+          !e.data_inicio,
+      )
+      if (hasInvalidEdu) return true
+      if (errors.educations) return true
+    }
+    return false
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-6 animate-fade-in">
-      <div className="mb-8 sticky top-16 bg-background/95 pb-4 z-10 pt-4 -mt-4">
-        <div className="flex justify-between text-sm font-medium mb-2 text-muted-foreground">
-          <span>
-            Passo {currentStep + 1} de {steps.length}
-          </span>
-          <span className="text-primary">{steps[currentStep].title}</span>
+    <div className="max-w-4xl mx-auto py-6 px-4 animate-fade-in">
+      <div className="mb-8 sticky top-16 bg-background/95 pb-4 z-10 pt-4 -mt-4 border-b">
+        <div className="flex justify-between items-center text-sm font-medium mb-3">
+          <div className="text-muted-foreground flex items-center gap-2">
+            <span>
+              Passo {currentStep + 1} de {steps.length}
+            </span>
+            <span className="hidden sm:inline-block">—</span>
+            <span className="text-primary font-semibold">{steps[currentStep].title}</span>
+          </div>
+          <div className="text-xs flex items-center text-muted-foreground font-normal">
+            {saveStatus === 'Salvando...' && <span className="animate-pulse">{saveStatus}</span>}
+            {saveStatus === 'Salvo' && (
+              <span className="flex items-center text-green-600 dark:text-green-500">
+                <Save className="w-3.5 h-3.5 mr-1.5" /> Todos os dados salvos
+              </span>
+            )}
+          </div>
         </div>
-        <Progress value={progress} className="h-2" />
+        <Progress value={progress} className="h-2 rounded-full" />
       </div>
 
       <Card className="shadow-lg border-muted">
-        <CardContent className="p-6 md:p-8">
+        <CardContent className="p-6 md:p-10">
           <FormProvider {...methods}>
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={(e) => e.preventDefault()}>
               <div className="min-h-[400px]">
                 {currentStep === 0 && <StepPersonal />}
                 {currentStep === 1 && <StepEducation />}
-                {currentStep === 2 && <StepExperience />}
-                {currentStep === 3 && <StepDisc />}
+                {currentStep > 1 && (
+                  <div className="text-center py-24 space-y-4 animate-fade-in-up">
+                    <div className="mx-auto w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6">
+                      <CheckCircle2 className="w-8 h-8" />
+                    </div>
+                    <h3 className="text-2xl font-bold">Parabéns!</h3>
+                    <p className="text-muted-foreground max-w-md mx-auto text-lg">
+                      Você concluiu as duas primeiras etapas. O restante do formulário será liberado
+                      em breve na próxima atualização do sistema.
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-between items-center mt-12 pt-6 border-t">
@@ -180,23 +188,26 @@ export default function TalentosPage() {
                   type="button"
                   variant="outline"
                   onClick={() => setCurrentStep((prev) => prev - 1)}
-                  disabled={currentStep === 0 || isSubmitting}
+                  disabled={currentStep === 0 || isCheckingEmail}
+                  className="min-w-[100px]"
                 >
                   <ChevronLeft className="mr-2 h-4 w-4" /> Voltar
                 </Button>
 
-                {currentStep < steps.length - 1 ? (
-                  <Button type="button" onClick={handleNext}>
-                    Próximo <ChevronRight className="ml-2 h-4 w-4" />
+                {currentStep < 2 ? (
+                  <Button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={isCheckingEmail || isNextDisabled()}
+                    className="min-w-[120px]"
+                  >
+                    {isCheckingEmail && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {!isCheckingEmail && 'Próximo'}
+                    {!isCheckingEmail && <ChevronRight className="ml-2 h-4 w-4" />}
                   </Button>
                 ) : (
-                  <Button
-                    type="submit"
-                    className="bg-accent hover:bg-accent/90"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Finalizar Cadastro
+                  <Button type="button" disabled className="min-w-[120px]">
+                    Finalizar
                   </Button>
                 )}
               </div>

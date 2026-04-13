@@ -1,76 +1,226 @@
 import { useFormContext } from 'react-hook-form'
+import { Camera, Trash2, CheckCircle2, XCircle } from 'lucide-react'
 import { formatPhone } from '@/lib/utils'
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-  FormDescription,
-} from '@/components/ui/form'
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@/components/ui/button'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { TalentosFormValues } from './schema'
 
 export function StepPersonal() {
-  const { control } = useFormContext<TalentosFormValues>()
+  const {
+    control,
+    setValue,
+    watch,
+    setError,
+    clearErrors,
+    formState: { errors },
+  } = useFormContext<TalentosFormValues>()
+  const fotoUrl = watch('personal.foto_url')
 
-  const formatDate = (val: string) => {
-    const v = val.replace(/\D/g, '').slice(0, 8)
-    if (v.length >= 5) return `${v.slice(0, 2)}/${v.slice(2, 4)}/${v.slice(4)}`
-    if (v.length >= 3) return `${v.slice(0, 2)}/${v.slice(2)}`
-    return v
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('personal.foto_url', { type: 'manual', message: 'Arquivo deve ter no máximo 5MB' })
+      return
+    }
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setError('personal.foto_url', {
+        type: 'manual',
+        message: 'Formato de imagem inválido (JPG, PNG, WebP)',
+      })
+      return
+    }
+
+    clearErrors('personal.foto_url')
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setValue('personal.foto_url', reader.result as string, {
+        shouldValidate: true,
+        shouldDirty: true,
+      })
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const InputWithFeedback = ({ field, fieldState, ...props }: any) => {
+    const isSuccess = fieldState.isDirty && !fieldState.invalid && field.value
+    const isError = fieldState.invalid
+    return (
+      <div className="relative flex items-center">
+        <Input
+          {...field}
+          {...props}
+          className={`pr-10 ${isError ? 'border-destructive focus-visible:ring-destructive' : isSuccess ? 'border-green-500 focus-visible:ring-green-500' : ''}`}
+        />
+        {isSuccess && (
+          <CheckCircle2 className="absolute right-3 h-4 w-4 text-green-500 pointer-events-none" />
+        )}
+        {isError && (
+          <XCircle className="absolute right-3 h-4 w-4 text-destructive pointer-events-none" />
+        )}
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6 animate-fade-in-up">
       <div className="space-y-2">
-        <h3 className="text-xl font-semibold">Dados Pessoais</h3>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="text-2xl font-bold">Dados Pessoais</h3>
+        <p className="text-muted-foreground">
           Comece nos contando quem você é e como podemos contatá-lo.
         </p>
       </div>
 
-      <FormField
-        control={control}
-        name="personal.nome"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Nome Completo</FormLabel>
-            <FormControl>
-              <Input placeholder="João da Silva" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8 p-4 bg-muted/30 rounded-lg border border-border">
+        <Avatar className="w-24 h-24 border-2 border-primary/20 shadow-sm">
+          <AvatarImage src={fotoUrl} className="object-cover" />
+          <AvatarFallback className="bg-muted">
+            <Camera className="h-8 w-8 text-muted-foreground/50" />
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 space-y-2">
+          <h4 className="font-medium text-sm">Foto de Perfil (Opcional)</h4>
+          <p className="text-xs text-muted-foreground">
+            Formatos suportados: JPG, PNG, WebP. Tamanho máximo: 5MB.
+          </p>
+          <div className="flex flex-wrap gap-2 pt-1">
+            <Input
+              type="file"
+              accept="image/jpeg, image/png, image/webp"
+              onChange={handleFileChange}
+              className="hidden"
+              id="foto-upload"
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => document.getElementById('foto-upload')?.click()}
+            >
+              <Camera className="w-4 h-4 mr-2" /> Escolher Foto
+            </Button>
+            {fotoUrl && (
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={() => setValue('personal.foto_url', '', { shouldValidate: true })}
+              >
+                <Trash2 className="h-4 w-4 mr-2" /> Remover
+              </Button>
+            )}
+          </div>
+          {errors.personal?.foto_url && (
+            <p className="text-sm text-destructive font-medium">
+              {errors.personal.foto_url.message}
+            </p>
+          )}
+        </div>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-6">
         <FormField
           control={control}
-          name="personal.email"
-          render={({ field }) => (
+          name="personal.nome"
+          render={({ field, fieldState }) => (
             <FormItem>
-              <FormLabel>E-mail</FormLabel>
+              <FormLabel>
+                Nome Completo <span className="text-destructive">*</span>
+              </FormLabel>
               <FormControl>
-                <Input placeholder="joao@exemplo.com" {...field} />
+                <InputWithFeedback
+                  field={field}
+                  fieldState={fieldState}
+                  placeholder="Ex: João da Silva"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={control}
+            name="personal.email"
+            render={({ field, fieldState }) => (
+              <FormItem>
+                <FormLabel>
+                  E-mail <span className="text-destructive">*</span>
+                </FormLabel>
+                <FormControl>
+                  <InputWithFeedback
+                    field={field}
+                    fieldState={fieldState}
+                    type="email"
+                    placeholder="joao@exemplo.com"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name="personal.telefone"
+            render={({ field: { onChange, ...field }, fieldState }) => (
+              <FormItem>
+                <FormLabel>
+                  Telefone / WhatsApp <span className="text-destructive">*</span>
+                </FormLabel>
+                <FormControl>
+                  <InputWithFeedback
+                    field={field}
+                    fieldState={fieldState}
+                    placeholder="+55 11 99999-9999"
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      onChange(formatPhone(e.target.value))
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={control}
+            name="personal.data_nascimento"
+            render={({ field, fieldState }) => (
+              <FormItem>
+                <FormLabel>Data de Nascimento (Opcional)</FormLabel>
+                <FormControl>
+                  <InputWithFeedback
+                    field={field}
+                    fieldState={fieldState}
+                    type="date"
+                    max={new Date().toISOString().split('T')[0]}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
         <FormField
           control={control}
-          name="personal.telefone"
-          render={({ field: { onChange, value, ...rest } }) => (
+          name="personal.endereco"
+          render={({ field }) => (
             <FormItem>
-              <FormLabel>Telefone / WhatsApp</FormLabel>
+              <FormLabel>Endereço (Opcional)</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="(00) 00000-0000"
-                  value={value}
-                  onChange={(e) => onChange(formatPhone(e.target.value))}
-                  {...rest}
+                <Textarea
+                  placeholder="Ex: Rua das Flores, 123, São Paulo - SP"
+                  className="resize-none h-20"
+                  {...field}
                 />
               </FormControl>
               <FormMessage />
@@ -78,58 +228,6 @@ export function StepPersonal() {
           )}
         />
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          control={control}
-          name="personal.data_nascimento"
-          render={({ field: { onChange, value, ...rest } }) => (
-            <FormItem>
-              <FormLabel>Data de Nascimento</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="DD/MM/AAAA"
-                  value={value}
-                  onChange={(e) => onChange(formatDate(e.target.value))}
-                  {...rest}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={control}
-          name="personal.foto_url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>URL da Foto (Opcional)</FormLabel>
-              <FormControl>
-                <Input placeholder="https://..." {...field} />
-              </FormControl>
-              <FormDescription>
-                Link para sua foto de perfil (LinkedIn, Github, etc).
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      <FormField
-        control={control}
-        name="personal.endereco"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Endereço</FormLabel>
-            <FormControl>
-              <Input placeholder="Rua, Número, Cidade - Estado" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
     </div>
   )
 }

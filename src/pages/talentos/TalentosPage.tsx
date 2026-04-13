@@ -131,7 +131,7 @@ export default function TalentosPage() {
       if (!p?.nome || p.nome.length < 3) return true
       if (!p?.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.email)) return true
       if (!p?.telefone) return true
-      if (errors.personal) return true
+      if (errors.personal && Object.keys(errors.personal).length > 0) return true
     }
     if (currentStep === 1) {
       const eds = formValues.educations
@@ -145,7 +145,7 @@ export default function TalentosPage() {
           !e.data_inicio,
       )
       if (hasInvalidEdu) return true
-      if (errors.educations) return true
+      if (errors.educations && Object.keys(errors.educations).length > 0) return true
     }
     if (currentStep === 2) {
       const exps = formValues.experiences
@@ -155,14 +155,14 @@ export default function TalentosPage() {
           !e.empresa || e.empresa.length < 2 || !e.cargo || e.cargo.length < 2 || !e.data_inicio,
       )
       if (hasInvalidExp) return true
-      if (errors.experiences) return true
+      if (errors.experiences && Object.keys(errors.experiences).length > 0) return true
     }
     if (currentStep === 3) {
       const d = formValues.disc
       if (!d) return true
       const answeredCount = Object.values(d).filter(Boolean).length
       if (answeredCount < 12) return true
-      if (errors.disc) return true
+      if (errors.disc && Object.keys(errors.disc).length > 0) return true
     }
     return false
   }

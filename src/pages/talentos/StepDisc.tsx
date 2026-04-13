@@ -156,7 +156,7 @@ export function StepDisc({ onComplete }: { onComplete?: () => void }) {
   // Force validation to update parent form's isValid state when finished
   useEffect(() => {
     if (isFinished) {
-      trigger()
+      trigger('disc')
     }
   }, [isFinished, trigger])
 
@@ -212,7 +212,7 @@ export function StepDisc({ onComplete }: { onComplete?: () => void }) {
                             setTimeout(() => handleNext(), 350)
                           } else {
                             // Ensure overall form validation gets updated when clicking the last option
-                            const isValid = await trigger()
+                            const isValid = await trigger('disc')
                             if (isValid && onComplete) {
                               setTimeout(() => onComplete(), 600)
                             }

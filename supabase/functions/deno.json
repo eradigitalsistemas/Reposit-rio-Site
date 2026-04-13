@@ -5,6 +5,7 @@
     "notify-push": 1,
     "notify-automation": 2,
     "manage-client-documents": 1,
-    "functions": 1
+    "functions": 1,
+    "process-resume": 1
   }
 }

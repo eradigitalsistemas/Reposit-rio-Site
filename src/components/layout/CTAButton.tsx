@@ -14,7 +14,7 @@ export function CTAButton({ text, onClick, className }: CTAButtonProps) {
       asChild
       className={cn('font-semibold shadow-md hover:shadow-lg transition-all', className)}
     >
-      <Link to="/talentos" onClick={onClick}>
+      <Link to="/talentos" onClick={onClick} aria-label={text}>
         {text}
       </Link>
     </Button>

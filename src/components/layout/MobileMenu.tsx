@@ -59,14 +59,14 @@ export function MobileMenu({ isOpen, onToggle, items, currentPage }: MobileMenuP
       {/* Sidebar */}
       <div
         className={cn(
-          'fixed inset-y-0 right-0 z-50 w-[300px] sm:w-[350px] bg-background border-l shadow-2xl pt-[80px] p-6 flex flex-col transition-transform duration-300 ease-in-out',
+          'fixed inset-y-0 right-0 z-50 w-[85%] max-w-[350px] bg-background border-l shadow-2xl pt-[80px] p-6 flex flex-col transition-transform duration-300 ease-in-out',
           isOpen ? 'translate-x-0' : 'translate-x-full',
         )}
         role="dialog"
         aria-modal="true"
-        aria-label="Menu Mobile"
+        aria-label="Menu Principal"
       >
-        <nav className="flex flex-col gap-2 overflow-y-auto pb-4">
+        <nav className="flex flex-col gap-3 overflow-y-auto pb-4 mt-2">
           {items.map((item) => {
             const isActive =
               item.href === '/' ? currentPage === '/' : currentPage.startsWith(item.href)
@@ -78,7 +78,7 @@ export function MobileMenu({ isOpen, onToggle, items, currentPage }: MobileMenuP
                 href={item.href}
                 isActive={isActive}
                 onClick={onToggle}
-                className="text-base py-3 px-4 rounded-lg"
+                className="text-lg py-4 px-4 rounded-lg active:scale-95 transition-transform"
               />
             )
           })}

@@ -66,7 +66,7 @@ export function Header({ currentPage: propCurrentPage, onNavigate }: HeaderProps
     >
       <div className="container max-w-[1200px] mx-auto flex h-full items-center justify-between px-4">
         {/* Logo Section */}
-        <div className="flex-shrink-0 relative z-[60]">
+        <div className="flex-shrink-0 relative z-[60] py-2">
           <Logo
             onClick={() => {
               setIsOpen(false)

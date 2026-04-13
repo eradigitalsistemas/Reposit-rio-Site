@@ -11,9 +11,9 @@ export function Footer({
   copyright?: React.ReactNode
 }) {
   return (
-    <footer className="border-t bg-muted/20 pt-16 pb-8 mt-auto">
-      <div className="container max-w-[1200px] mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+    <footer className="border-t bg-muted/20 pt-12 md:pt-16 pb-8 mt-auto relative z-10">
+      <div className="container max-w-[1200px] mx-auto px-4 md:px-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8 mb-12">
           {children}
         </div>
         {copyright}
@@ -32,11 +32,15 @@ export function FooterColumn({
   return (
     <div className="flex flex-col gap-4">
       {typeof title === 'string' ? (
-        <h3 className="font-semibold text-foreground tracking-tight">{title}</h3>
+        <h3 className="font-semibold text-foreground tracking-tight text-lg md:text-base">
+          {title}
+        </h3>
       ) : (
         title
       )}
-      <nav className="flex flex-col gap-3 text-sm text-muted-foreground">{children}</nav>
+      <nav className="flex flex-col gap-2 md:gap-3 text-base md:text-sm text-muted-foreground">
+        {children}
+      </nav>
     </div>
   )
 }
@@ -50,7 +54,8 @@ export function FooterLink({
   children: React.ReactNode
   external?: boolean
 }) {
-  const className = 'hover:text-primary transition-colors focus-visible:text-primary outline-none'
+  const className =
+    'py-2 md:py-1 hover:text-primary transition-colors focus-visible:text-primary outline-none relative z-10'
   return external ? (
     <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
       {children}
@@ -83,33 +88,39 @@ export function ContactInfo({
           href={`https://wa.me/${wa.number.replace(/\D/g, '')}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 hover:text-primary transition-colors focus-visible:text-primary outline-none"
+          className="flex items-center gap-3 py-2 md:py-1 hover:text-primary transition-colors focus-visible:text-primary outline-none relative z-10"
+          aria-label={`Contato via WhatsApp: ${wa.label}`}
         >
-          <Phone className="h-4 w-4" />
-          <span>{wa.label}</span>
+          <Phone className="h-5 w-5 md:h-4 md:w-4" aria-hidden="true" />
+          <span className="text-base md:text-sm">{wa.label}</span>
         </a>
       ))}
       {phone && (
         <a
           href={`tel:${phone.replace(/\D/g, '')}`}
-          className="flex items-center gap-2 hover:text-primary transition-colors focus-visible:text-primary outline-none"
+          className="flex items-center gap-3 py-2 md:py-1 hover:text-primary transition-colors focus-visible:text-primary outline-none relative z-10"
+          aria-label={`Ligar para ${phone}`}
         >
-          <Phone className="h-4 w-4" />
-          <span>{phone}</span>
+          <Phone className="h-5 w-5 md:h-4 md:w-4" aria-hidden="true" />
+          <span className="text-base md:text-sm">{phone}</span>
         </a>
       )}
       {email && (
         <a
           href={`mailto:${email}`}
-          className="flex items-center gap-2 hover:text-primary transition-colors focus-visible:text-primary outline-none"
+          className="flex items-center gap-3 py-2 md:py-1 hover:text-primary transition-colors focus-visible:text-primary outline-none relative z-10"
+          aria-label={`Enviar e-mail para ${email}`}
         >
-          <Mail className="h-4 w-4" />
-          <span className="truncate">{email}</span>
+          <Mail className="h-5 w-5 md:h-4 md:w-4" aria-hidden="true" />
+          <span className="truncate text-base md:text-sm">{email}</span>
         </a>
       )}
       {address && (
-        <div className="flex items-start gap-3 mt-2 text-sm text-muted-foreground">
-          <MapPin className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
+        <div className="flex items-start gap-3 py-2 md:py-1 mt-2 text-base md:text-sm text-muted-foreground">
+          <MapPin
+            className="h-5 w-5 md:h-4 md:w-4 mt-0.5 shrink-0 text-primary"
+            aria-hidden="true"
+          />
           <span>{address}</span>
         </div>
       )}
@@ -129,16 +140,16 @@ export function SocialLinks({
   twitter?: string
 }) {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2 md:gap-3">
       {instagram && (
         <a
           href={`https://instagram.com/${instagram.replace('@', '')}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors focus-visible:text-primary outline-none"
-          aria-label="Instagram"
+          className="flex items-center gap-3 py-2 md:py-1 text-base md:text-sm text-muted-foreground hover:text-primary transition-colors focus-visible:text-primary outline-none relative z-10"
+          aria-label={`Siga-nos no Instagram: ${instagram}`}
         >
-          <Instagram className="h-4 w-4" />
+          <Instagram className="h-5 w-5 md:h-4 md:w-4" aria-hidden="true" />
           <span>{instagram}</span>
         </a>
       )}
@@ -147,10 +158,10 @@ export function SocialLinks({
           href={facebook}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors focus-visible:text-primary outline-none"
-          aria-label="Facebook"
+          className="flex items-center gap-3 py-2 md:py-1 text-base md:text-sm text-muted-foreground hover:text-primary transition-colors focus-visible:text-primary outline-none relative z-10"
+          aria-label="Siga-nos no Facebook"
         >
-          <Facebook className="h-4 w-4" />
+          <Facebook className="h-5 w-5 md:h-4 md:w-4" aria-hidden="true" />
           <span>Facebook</span>
         </a>
       )}
@@ -159,10 +170,10 @@ export function SocialLinks({
           href={twitter}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors focus-visible:text-primary outline-none"
-          aria-label="Twitter"
+          className="flex items-center gap-3 py-2 md:py-1 text-base md:text-sm text-muted-foreground hover:text-primary transition-colors focus-visible:text-primary outline-none relative z-10"
+          aria-label="Siga-nos no Twitter"
         >
-          <Twitter className="h-4 w-4" />
+          <Twitter className="h-5 w-5 md:h-4 md:w-4" aria-hidden="true" />
           <span>Twitter</span>
         </a>
       )}
@@ -171,10 +182,10 @@ export function SocialLinks({
           href={linkedin}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors focus-visible:text-primary outline-none"
-          aria-label="LinkedIn"
+          className="flex items-center gap-3 py-2 md:py-1 text-base md:text-sm text-muted-foreground hover:text-primary transition-colors focus-visible:text-primary outline-none relative z-10"
+          aria-label="Siga-nos no LinkedIn"
         >
-          <Linkedin className="h-4 w-4" />
+          <Linkedin className="h-5 w-5 md:h-4 md:w-4" aria-hidden="true" />
           <span>LinkedIn</span>
         </a>
       )}
@@ -212,13 +223,22 @@ export function SiteFooter() {
     <Footer copyright={<Copyright year={2024} company="Era Digital" />}>
       <FooterColumn
         title={
-          <Link to="/" className="flex items-center gap-2 mb-2" aria-label="Era Digital Home">
-            <img src={logoUrl} alt="Era Digital Logo" className="h-8 w-auto object-contain" />
-            <span className="font-bold text-lg tracking-tight">Era Digital</span>
+          <Link
+            to="/"
+            className="flex items-center gap-2 mb-2 focus-visible:outline-primary py-2 md:py-0 relative z-10"
+            aria-label="Era Digital - Voltar para a página inicial"
+          >
+            <img
+              src={logoUrl}
+              alt="Era Digital Logo"
+              className="h-8 w-auto object-contain"
+              aria-hidden="true"
+            />
+            <span className="font-bold text-xl md:text-lg tracking-tight">Era Digital</span>
           </Link>
         }
       >
-        <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mb-2">
+        <p className="text-base md:text-sm text-muted-foreground leading-relaxed max-w-xs mb-2">
           Transformando processos gerenciais com tecnologia, eficiência e inovação para o seu
           negócio.
         </p>

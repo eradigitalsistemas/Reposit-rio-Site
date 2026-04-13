@@ -161,7 +161,9 @@ export function DISCQuiz({
               setCurrentIndex(questions.length - 1)
             }
           }
-        } catch (e) {}
+        } catch (e) {
+          // ignore parsing error
+        }
       }
       setIsLoaded(true)
     }

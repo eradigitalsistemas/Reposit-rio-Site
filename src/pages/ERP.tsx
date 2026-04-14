@@ -13,7 +13,7 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase/client'
 import { HeroSection } from '@/components/blocks/HeroSection'
 import { FeatureCard } from '@/components/blocks/FeatureCard'
 import { FAQAccordion } from '@/components/blocks/FAQAccordion'

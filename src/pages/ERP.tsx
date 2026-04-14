@@ -7,11 +7,11 @@ import {
   CheckCircle2,
   MessageCircle,
   BarChart4,
-  Cpu,
   Layers,
   Lock,
-  TrendingUp,
   Users,
+  Receipt,
+  MonitorSmartphone,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { HeroSection } from '@/components/blocks/HeroSection'
@@ -85,14 +85,14 @@ export default function ERP() {
 
   const benefits = [
     {
-      title: 'Otimização',
-      desc: 'Automatize tarefas manuais e reduza erros operacionais.',
-      icon: Cpu,
+      title: 'Emissão de Notas Fiscais',
+      desc: 'Emita suas notas fiscais de forma ágil, segura e em total conformidade com a legislação.',
+      icon: Receipt,
     },
     {
-      title: 'Redução de Custos',
-      desc: 'Identifique gargalos financeiros e maximize seus lucros.',
-      icon: TrendingUp,
+      title: 'Tela de Caixa',
+      desc: 'Frente de caixa (PDV) intuitiva para agilizar suas vendas e o controle financeiro diário.',
+      icon: MonitorSmartphone,
     },
     {
       title: 'Integração',
@@ -266,13 +266,12 @@ export default function ERP() {
             items={[
               {
                 question: 'O sistema é em nuvem ou local?',
-                answer:
-                  'Nosso ERP é 100% em nuvem (Cloud), permitindo que você acesse as informações da sua empresa de qualquer lugar, a qualquer momento e com total segurança.',
+                answer: 'Nossos sistemas funcionam tanto em nuvem, quanto em dados locais.',
               },
               {
                 question: 'Como funciona o processo de implantação?',
                 answer:
-                  'Realizamos um mapeamento dos seus processos, configuramos os módulos necessários, migramos seus dados atuais e realizamos o treinamento com sua equipe. O tempo médio varia de 15 a 45 dias.',
+                  'Realizamos um mapeamento dos seus processos, configuramos os módulos necessários, migramos seus dados atuais e realizamos o treinamento com sua equipe. O tempo médio de implantação varia entre 7 a 15 dias. Mas pode ser realizado antes do prazo.',
               },
               {
                 question: 'Posso integrar com minha loja virtual?',

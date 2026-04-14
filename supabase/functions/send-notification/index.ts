@@ -14,7 +14,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const body = await req.json()
-    
+
     let to: string[] = ['comercial@areradigital.com.br']
     let subject = 'Nova Notificação'
     let html = '<p>Você tem uma nova notificação.</p>'
@@ -25,7 +25,7 @@ Deno.serve(async (req: Request) => {
     // Processamento de gatilho do banco de dados (Webhook)
     if (isWebhook && body.type === 'INSERT' && body.table) {
       const { table, record } = body
-      
+
       if (table === 'leads') {
         subject = `Novo Lead de Contato: ${record.nome}`
         html = `
@@ -56,14 +56,14 @@ Deno.serve(async (req: Request) => {
           <p><strong>Tipo de Certificado:</strong> ${record.tipo_certificado || 'Não informado'}</p>
         `
         reply_to = record.email
-      } else if (table === 'candidates') {
-        subject = `Novo Candidato no Banco de Talentos: ${record.name}`
+      } else if (table === 'usuarios') {
+        subject = `Novo Cadastro no Sistema: ${record.nome || record.email}`
         html = `
-          <h2>Novo Currículo Recebido</h2>
-          <p><strong>Nome:</strong> ${record.name}</p>
+          <h2>Novo Cadastro Realizado</h2>
+          <p><strong>Nome:</strong> ${record.nome || 'Não informado'}</p>
           <p><strong>Email:</strong> ${record.email}</p>
-          <p><strong>Profissão:</strong> ${record.profession || 'Não informado'}</p>
-          <p>Acesse o painel administrativo para ver os detalhes completos.</p>
+          <p><strong>Telefone:</strong> ${record.telefone || 'Não informado'}</p>
+          <p><strong>Perfil:</strong> ${record.perfil}</p>
         `
         reply_to = record.email
       } else {

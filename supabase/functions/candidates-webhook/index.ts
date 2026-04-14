@@ -156,6 +156,28 @@ async function handleRequest(
 
   console.log(`[${requestId}] Successfully created candidate ${newCandidate.id}`)
 
+  // Notificação comercial
+  fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-notification`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-webhook-secret': 'super-secret-webhook-key-123',
+    },
+    body: JSON.stringify({
+      to: ['comercial@areradigital.com.br'],
+      subject: `Novo Candidato via Webhook: ${data.name}`,
+      html: `
+        <h2>Novo Currículo Recebido (Webhook)</h2>
+        <p><strong>Nome:</strong> ${data.name}</p>
+        <p><strong>Email:</strong> ${data.email}</p>
+        <p><strong>Telefone:</strong> ${data.phone || 'Não informado'}</p>
+        <p><strong>Perfil DISC:</strong> ${data.disc_result}</p>
+        <p>Acesse o painel administrativo para ver os detalhes completos.</p>
+      `,
+      reply_to: data.email,
+    }),
+  }).catch((err) => console.error('Background fetch send-notification failed:', err))
+
   return new Response(
     JSON.stringify({
       success: true,

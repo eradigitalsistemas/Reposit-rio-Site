@@ -1,7 +1,13 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'jsr:@supabase/supabase-js@2'
-import { corsHeaders } from '../_shared/cors.ts'
 import { z } from 'npm:zod@3.22.4'
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers':
+    'authorization, x-client-info, x-supabase-client-platform, apikey, content-type, x-cron-secret',
+}
 
 const rateLimit = new Map<string, { count: number; resetTime: number }>()
 

@@ -1,1 +1,25 @@
-{}
+{
+  "_versions": {
+    "update-demand-priority": 5,
+    "admin-users": 6,
+    "notify-push": 4,
+    "notify-automation": 7,
+    "manage-client-documents": 4,
+    "functions": 1,
+    "process-resume": 11,
+    "submit-talento": 14,
+    "custom-auth": 3,
+    "candidates-webhook": 4,
+    "employees": 4,
+    "candidates": 2,
+    "time-entries": 6,
+    "vacation-balance": 4,
+    "vacation-requests": 2,
+    "onboarding": 3,
+    "productivity": 2,
+    "notifications": 2,
+    "cron-hr-jobs": 2,
+    "monthly-timesheets": 2,
+    "send-notification": 5
+  }
+}

@@ -21,20 +21,20 @@ Deno.serve(async (req: Request) => {
 
   try {
     const body = await req.json()
-
+    
     const emailsToSend: Array<{
-      from: string
-      to: string[]
-      subject: string
-      html: string
-      reply_to?: string
-      attachments?: any[]
+      from: string;
+      to: string[];
+      subject: string;
+      html: string;
+      reply_to?: string;
+      attachments?: any[];
     }> = []
 
     // Processamento de gatilho do banco de dados (Webhook)
     if (isWebhook && body.type === 'INSERT' && body.table) {
       const { table, record } = body
-
+      
       let internalSubject = ''
       let internalHtml = ''
       let userSubject = ''
@@ -138,7 +138,7 @@ Deno.serve(async (req: Request) => {
         to: [COMERCIAL_EMAIL],
         subject: internalSubject,
         html: internalHtml,
-        reply_to: record.email,
+        reply_to: record.email
       })
 
       // Adiciona o e-mail para o usuário (confirmação comercial e direta)
@@ -147,9 +147,10 @@ Deno.serve(async (req: Request) => {
           from: 'Super Era Digital <onboarding@resend.dev>',
           to: [record.email],
           subject: userSubject,
-          html: userHtml,
+          html: userHtml
         })
       }
+
     } else {
       // Envio direto via API (ex: para outras Edge Functions que chamam send-notification)
       if (body.to && body.subject && body.html) {
@@ -159,7 +160,7 @@ Deno.serve(async (req: Request) => {
           subject: body.subject,
           html: body.html,
           reply_to: body.reply_to,
-          attachments: body.attachments,
+          attachments: body.attachments
         })
       } else {
         throw new Error('Payload inválido ou webhook não autorizado')
@@ -184,7 +185,7 @@ Deno.serve(async (req: Request) => {
     })
 
     const results = await Promise.all(emailPromises)
-    const hasError = results.some((r) => !r.success)
+    const hasError = results.some(r => !r.success)
 
     if (hasError) {
       throw new Error('Falha no envio de um ou mais emails')

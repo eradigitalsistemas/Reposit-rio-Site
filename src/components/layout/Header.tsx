@@ -91,4 +91,9 @@ export function Header({ currentPage: propCurrentPage, onNavigate }: HeaderProps
           isOpen={isOpen}
           onToggle={toggleMenu}
           items={navItems}
-          currentPage=
+          currentPage={currentPage}
+        />
+      </div>
+    </header>
+  )
+}

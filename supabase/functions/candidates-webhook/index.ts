@@ -174,9 +174,9 @@ async function handleRequest(
         <p><strong>Perfil DISC:</strong> ${data.disc_result}</p>
         <p>Acesse o painel administrativo para ver os detalhes completos.</p>
       `,
-      reply_to: data.email,
+      reply_to: data.email
     }),
-  }).catch((err) => console.error('Background fetch send-notification failed:', err))
+  }).catch(err => console.error('Background fetch send-notification failed:', err))
 
   return new Response(
     JSON.stringify({

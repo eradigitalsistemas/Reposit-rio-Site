@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import { jsPDF } from 'jspdf'
 import { supabase } from '@/lib/supabase/client'
 import { TalentosFormValues } from './schema'
-import { Loader2, Pencil, CheckCircle2, AlertCircle } from 'lucide-react'
+import { Loader2, Pencil, AlertCircle } from 'lucide-react'
 
 interface StepReviewProps {
   setCurrentStep: (step: number) => void
@@ -21,9 +21,9 @@ export function StepReview({ setCurrentStep }: StepReviewProps) {
     formState: { errors },
   } = useFormContext<TalentosFormValues>()
 
+  const navigate = useNavigate()
   const [isSending, setIsSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
 
   const lgpd = watch('lgpd')
   const values = getValues()
@@ -57,85 +57,6 @@ export function StepReview({ setCurrentStep }: StepReviewProps) {
   }
 
   const discResult = calculateDisc()
-
-  const generatePDF = async (): Promise<string> => {
-    const doc = new jsPDF()
-    const margin = 20
-    const maxWidth = 170
-    let y = margin
-
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(16)
-    doc.text(values.personal.nome, margin, y)
-    y += 8
-
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(12)
-    doc.text(values.personal.email, margin, y)
-    y += 6
-    doc.text(values.personal.telefone, margin, y)
-    y += 6
-    if (values.personal.endereco) {
-      doc.text(values.personal.endereco, margin, y)
-      y += 6
-    }
-
-    y += 10
-
-    const drawSection = (title: string) => {
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(12)
-      doc.text(title, margin, y)
-      doc.line(margin, y + 2, margin + maxWidth, y + 2)
-      y += 10
-    }
-
-    const checkPageBreak = (neededSpace: number) => {
-      if (y + neededSpace > 280) {
-        doc.addPage()
-        y = margin
-      }
-    }
-
-    drawSection('Formação Acadêmica')
-    doc.setFont('helvetica', 'normal')
-    values.educations.forEach((ed) => {
-      checkPageBreak(20)
-      doc.setFont('helvetica', 'bold')
-      doc.text(`${ed.curso} - ${ed.instituicao}`, margin, y)
-      y += 6
-      doc.setFont('helvetica', 'normal')
-      doc.text(`Período: ${ed.data_inicio} a ${ed.data_fim || 'Atual'}`, margin, y)
-      y += 10
-    })
-
-    y += 5
-    checkPageBreak(20)
-    drawSection('Experiência Profissional')
-    doc.setFont('helvetica', 'normal')
-    values.experiences.forEach((exp) => {
-      checkPageBreak(25)
-      doc.setFont('helvetica', 'bold')
-      doc.text(`${exp.cargo} - ${exp.empresa}`, margin, y)
-      y += 6
-      doc.setFont('helvetica', 'normal')
-      doc.text(`Período: ${exp.data_inicio} a ${exp.data_fim || 'Atual'}`, margin, y)
-      y += 6
-      if (exp.descricao) {
-        const lines = doc.splitTextToSize(exp.descricao, maxWidth)
-        checkPageBreak(lines.length * 6 + 5)
-        doc.text(lines, margin, y)
-        y += lines.length * 6
-      }
-      y += 8
-    })
-
-    const dateStr = new Date().toLocaleDateString('pt-BR')
-    doc.setFontSize(10)
-    doc.text(`Gerado em ${dateStr}`, margin, 285)
-
-    return doc.output('datauristring')
-  }
 
   const handleSubmit = async () => {
     setError(null)
@@ -172,29 +93,9 @@ export function StepReview({ setCurrentStep }: StepReviewProps) {
     }
 
     setIsSending(false)
-    setSuccess(true)
     localStorage.setItem('talentos_form_data', JSON.stringify(values))
     localStorage.setItem('talentos_generated_at', new Date().toISOString())
-  }
-
-  if (success) {
-    return (
-      <div className="text-center py-16 animate-fade-in space-y-6">
-        <div className="mx-auto w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
-          <CheckCircle2 className="w-10 h-10" />
-        </div>
-        <h2 className="text-3xl font-bold text-foreground">Currículo Enviado!</h2>
-        <p className="text-muted-foreground text-lg max-w-md mx-auto">
-          Seus dados foram processados com sucesso. O seu perfil DISC e o currículo gerado foram
-          encaminhados para a nossa equipe.
-        </p>
-        <div className="pt-8">
-          <Button onClick={() => (window.location.href = '/')} size="lg">
-            Voltar para o Início
-          </Button>
-        </div>
-      </div>
-    )
+    navigate('/talentos/sucesso')
   }
 
   return (
@@ -322,12 +223,7 @@ export function StepReview({ setCurrentStep }: StepReviewProps) {
       )}
 
       <div className="flex flex-col sm:flex-row gap-4 justify-end pt-8 border-t">
-        <Button
-          variant="outline"
-          size="lg"
-          onClick={() => setCurrentStep(3)}
-          disabled={isGenerating || isSending}
-        >
+        <Button variant="outline" size="lg" onClick={() => setCurrentStep(3)} disabled={isSending}>
           Voltar para Teste DISC
         </Button>
         <Button

@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { FileText, RefreshCcw, ArrowRight, Briefcase } from 'lucide-react'
+import {
+  FileText,
+  RefreshCcw,
+  ArrowRight,
+  Briefcase,
+  CheckCircle2,
+  Download,
+  User,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { SuccessAnimation } from '@/components/talentos/success/SuccessAnimation'
-import { ConfirmationMessage } from '@/components/talentos/success/ConfirmationMessage'
-import { ResumoCard } from '@/components/talentos/success/ResumoCard'
-import { DISCResultCard } from '@/components/talentos/success/DISCResultCard'
-import { ActionButtons } from '@/components/talentos/success/ActionButtons'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 const generateAbntResumeHtml = (resumeData: any, userProfile: any) => {
   const { personal, educations = [], experiences = [] } = resumeData
@@ -229,8 +232,8 @@ export default function TalentosSuccessPage() {
   }, [navigate])
 
   const handleDownload = () => {
+    if (!data || !profile) return
     const htmlContent = generateAbntResumeHtml(data, profile)
-    // Exportação simples utilizando MIME type MS Word para que o usuário baixe um .doc facilmente editável
     const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' })
     const link = document.createElement('a')
     link.href = URL.createObjectURL(blob)
@@ -271,36 +274,83 @@ export default function TalentosSuccessPage() {
   return (
     <div className="max-w-4xl mx-auto py-12 px-4 animate-fade-in-up">
       <title>Currículo Enviado - Super Era Digital</title>
-      <meta property="og:title" content="Currículo Enviado - Super Era Digital" />
-      <meta
-        property="og:description"
-        content="Meu currículo foi enviado com sucesso e já está em análise!"
-      />
-      <meta property="og:type" content="website" />
 
-      <SuccessAnimation type="checkmark" />
-
-      <ConfirmationMessage
-        message="Seu Currículo foi Adicionado ao Banco de Talentos!"
-        subMessage="Seu perfil já está disponível para nossa equipe de recrutamento. Você também pode baixar o arquivo no formato Word abaixo."
-      />
-
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
-        <ResumoCard
-          nome={data.personal.nome}
-          email={data.personal.email}
-          telefone={data.personal.telefone}
-          foto={data.personal.foto_url}
-        />
-
-        <DISCResultCard tipo={profile.type} descricao={profile.desc} pontuacoes={profile.scores} />
+      <div className="text-center mb-12">
+        <div className="mx-auto w-24 h-24 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mb-6">
+          <CheckCircle2 className="w-12 h-12" />
+        </div>
+        <h1 className="text-3xl font-bold text-foreground mb-4">
+          Seu Currículo foi Adicionado ao Banco de Talentos!
+        </h1>
+        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          Seu perfil já está disponível para nossa equipe de recrutamento. Você também pode baixar o
+          arquivo no formato Word abaixo.
+        </p>
       </div>
 
-      <ActionButtons
-        onDownload={handleDownload}
-        onNewCurriculum={handleCreateNew}
-        onExplore={() => navigate('/certificados')}
-      />
+      <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <Card>
+          <CardHeader className="pb-3 border-b mb-4">
+            <CardTitle className="text-lg flex items-center">
+              <User className="w-5 h-5 mr-2 text-primary" /> Dados Pessoais
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-4 mb-4">
+              {data.personal.foto_url ? (
+                <img
+                  src={data.personal.foto_url}
+                  alt="Foto de perfil"
+                  className="w-16 h-16 rounded-full object-cover border-2 border-primary/20"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                  <User className="w-8 h-8 text-muted-foreground" />
+                </div>
+              )}
+              <div>
+                <p className="font-bold text-lg">{data.personal.nome}</p>
+                <p className="text-sm text-muted-foreground">{data.personal.email}</p>
+                <p className="text-sm text-muted-foreground">{data.personal.telefone}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-primary/5 border-primary/20">
+          <CardHeader className="pb-3 border-b border-primary/10 mb-4">
+            <CardTitle className="text-lg flex items-center text-primary">
+              <FileText className="w-5 h-5 mr-2" /> Seu Perfil DISC
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="font-bold text-xl mb-2">{profile.type}</p>
+            <p className="text-muted-foreground">{profile.desc}</p>
+            <div className="mt-4 space-y-2">
+              {profile.scores?.map((s, i) => (
+                <div key={i} className="flex justify-between text-sm">
+                  <span className="font-medium">{s.type}</span>
+                  <span className="text-primary font-bold">{s.value} pts</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+        <Button size="lg" onClick={handleDownload} className="min-w-[200px] text-base">
+          <Download className="w-5 h-5 mr-2" /> Baixar Currículo (.doc)
+        </Button>
+        <Button
+          size="lg"
+          variant="outline"
+          onClick={handleCreateNew}
+          className="min-w-[200px] text-base"
+        >
+          <RefreshCcw className="w-5 h-5 mr-2" /> Gerar Novo
+        </Button>
+      </div>
 
       <div className="border-t pt-10">
         <h3 className="text-center font-semibold mb-6 text-muted-foreground">

@@ -13,8 +13,20 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { format } from 'date-fns'
-import { Search, Eye, RefreshCw, Inbox } from 'lucide-react'
+import { Search, Eye, RefreshCw, Inbox, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 export default function LeadsTab() {
   const [leads, setLeads] = useState<any[]>([])
@@ -85,6 +97,23 @@ export default function LeadsTab() {
       (l.email || '').toLowerCase().includes(search.toLowerCase()) ||
       (l.type || '').toLowerCase().includes(search.toLowerCase()),
   )
+
+  const handleDelete = async (id: string, type: string, rawId: string) => {
+    try {
+      let table = 'leads'
+      if (type === 'Sistema ERP') table = 'leads_erp'
+      else if (type === 'Certificados') table = 'leads_certificados'
+
+      const { error } = await supabase.from(table).delete().eq('id', rawId)
+      if (error) throw error
+
+      toast.success('Lead excluído com sucesso!')
+      setLeads((prev) => prev.filter((l) => l.id !== id))
+    } catch (err) {
+      console.error(err)
+      toast.error('Erro ao excluir lead')
+    }
+  }
 
   const getTypeStyle = (type: string) => {
     switch (type) {
@@ -157,177 +186,204 @@ export default function LeadsTab() {
                     <div className="text-xs text-muted-foreground mt-0.5">{l.phone || '-'}</div>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Sheet>
-                      <SheetTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Eye className="w-4 h-4 mr-2" /> Detalhes
-                        </Button>
-                      </SheetTrigger>
-                      <SheetContent className="w-full sm:max-w-md">
-                        <SheetHeader>
-                          <SheetTitle className="flex items-center gap-2">
-                            Detalhes do Lead
-                            <span
-                              className={cn(
-                                'text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full border',
-                                getTypeStyle(l.type),
-                              )}
-                            >
-                              {l.type}
-                            </span>
-                          </SheetTitle>
-                        </SheetHeader>
-                        <ScrollArea className="h-[calc(100vh-100px)] mt-6 pr-4">
-                          <div className="space-y-6">
-                            {/* Data section */}
-                            <div className="space-y-1">
-                              <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                                Informações da Solicitação
-                              </h4>
-                              <div className="grid grid-cols-2 gap-4 mt-2 p-4 bg-muted/30 rounded-lg border">
-                                <div>
-                                  <span className="text-xs text-muted-foreground block mb-1">
-                                    Data
-                                  </span>
-                                  <span className="text-sm font-medium">
-                                    {format(new Date(l.date), 'dd/MM/yyyy HH:mm')}
-                                  </span>
-                                </div>
-                                <div>
-                                  <span className="text-xs text-muted-foreground block mb-1">
-                                    Serviço
-                                  </span>
-                                  <span className="text-sm font-medium">{l.type}</span>
+                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Sheet>
+                        <SheetTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <Eye className="w-4 h-4 mr-2" /> Detalhes
+                          </Button>
+                        </SheetTrigger>
+                        <SheetContent className="w-full sm:max-w-md">
+                          <SheetHeader>
+                            <SheetTitle className="flex items-center gap-2">
+                              Detalhes do Lead
+                              <span
+                                className={cn(
+                                  'text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full border',
+                                  getTypeStyle(l.type),
+                                )}
+                              >
+                                {l.type}
+                              </span>
+                            </SheetTitle>
+                          </SheetHeader>
+                          <ScrollArea className="h-[calc(100vh-100px)] mt-6 pr-4">
+                            <div className="space-y-6">
+                              {/* Data section */}
+                              <div className="space-y-1">
+                                <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                                  Informações da Solicitação
+                                </h4>
+                                <div className="grid grid-cols-2 gap-4 mt-2 p-4 bg-muted/30 rounded-lg border">
+                                  <div>
+                                    <span className="text-xs text-muted-foreground block mb-1">
+                                      Data
+                                    </span>
+                                    <span className="text-sm font-medium">
+                                      {format(new Date(l.date), 'dd/MM/yyyy HH:mm')}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className="text-xs text-muted-foreground block mb-1">
+                                      Serviço
+                                    </span>
+                                    <span className="text-sm font-medium">{l.type}</span>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
 
-                            <div className="space-y-3">
-                              <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                                Dados do Cliente
-                              </h4>
-                              <div className="space-y-4 p-4 bg-muted/10 rounded-lg border">
-                                {l.type === 'Sistema ERP' && (
-                                  <>
-                                    <div>
-                                      <span className="text-xs text-muted-foreground block mb-1">
-                                        Empresa
-                                      </span>
-                                      <span className="text-sm font-medium">
-                                        {l.raw.empresa || '-'}
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <span className="text-xs text-muted-foreground block mb-1">
-                                        Nome do Contato
-                                      </span>
-                                      <span className="text-sm font-medium">
-                                        {l.raw.nome || '-'}
-                                      </span>
-                                    </div>
-                                  </>
-                                )}
+                              <div className="space-y-3">
+                                <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                                  Dados do Cliente
+                                </h4>
+                                <div className="space-y-4 p-4 bg-muted/10 rounded-lg border">
+                                  {l.type === 'Sistema ERP' && (
+                                    <>
+                                      <div>
+                                        <span className="text-xs text-muted-foreground block mb-1">
+                                          Empresa
+                                        </span>
+                                        <span className="text-sm font-medium">
+                                          {l.raw.empresa || '-'}
+                                        </span>
+                                      </div>
+                                      <div>
+                                        <span className="text-xs text-muted-foreground block mb-1">
+                                          Nome do Contato
+                                        </span>
+                                        <span className="text-sm font-medium">
+                                          {l.raw.nome || '-'}
+                                        </span>
+                                      </div>
+                                    </>
+                                  )}
 
-                                {l.type === 'Certificados' && (
-                                  <>
-                                    <div>
-                                      <span className="text-xs text-muted-foreground block mb-1">
-                                        Nome
-                                      </span>
-                                      <span className="text-sm font-medium">
-                                        {l.raw.nome || '-'}
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <span className="text-xs text-muted-foreground block mb-1">
-                                        Tipo de Certificado
-                                      </span>
-                                      <span className="text-sm font-medium">
-                                        {l.raw.tipo_certificado || '-'}
-                                      </span>
-                                    </div>
-                                  </>
-                                )}
+                                  {l.type === 'Certificados' && (
+                                    <>
+                                      <div>
+                                        <span className="text-xs text-muted-foreground block mb-1">
+                                          Nome
+                                        </span>
+                                        <span className="text-sm font-medium">
+                                          {l.raw.nome || '-'}
+                                        </span>
+                                      </div>
+                                      <div>
+                                        <span className="text-xs text-muted-foreground block mb-1">
+                                          Tipo de Certificado
+                                        </span>
+                                        <span className="text-sm font-medium">
+                                          {l.raw.tipo_certificado || '-'}
+                                        </span>
+                                      </div>
+                                    </>
+                                  )}
 
-                                {l.type === 'Contato Geral' && (
-                                  <>
-                                    <div>
-                                      <span className="text-xs text-muted-foreground block mb-1">
-                                        Nome
-                                      </span>
-                                      <span className="text-sm font-medium">
-                                        {l.raw.nome || '-'}
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <span className="text-xs text-muted-foreground block mb-1">
-                                        Empresa
-                                      </span>
-                                      <span className="text-sm font-medium">
-                                        {l.raw.empresa || '-'}
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <span className="text-xs text-muted-foreground block mb-1">
-                                        Estágio
-                                      </span>
-                                      <span className="text-sm font-medium">
-                                        {l.raw.estagio || '-'}
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <span className="text-xs text-muted-foreground block mb-1">
-                                        Observações
-                                      </span>
-                                      <p className="text-sm whitespace-pre-wrap bg-background p-3 rounded border mt-1">
-                                        {l.raw.observacoes || 'Nenhuma observação informada.'}
-                                      </p>
-                                    </div>
-                                  </>
-                                )}
+                                  {l.type === 'Contato Geral' && (
+                                    <>
+                                      <div>
+                                        <span className="text-xs text-muted-foreground block mb-1">
+                                          Nome
+                                        </span>
+                                        <span className="text-sm font-medium">
+                                          {l.raw.nome || '-'}
+                                        </span>
+                                      </div>
+                                      <div>
+                                        <span className="text-xs text-muted-foreground block mb-1">
+                                          Empresa
+                                        </span>
+                                        <span className="text-sm font-medium">
+                                          {l.raw.empresa || '-'}
+                                        </span>
+                                      </div>
+                                      <div>
+                                        <span className="text-xs text-muted-foreground block mb-1">
+                                          Estágio
+                                        </span>
+                                        <span className="text-sm font-medium">
+                                          {l.raw.estagio || '-'}
+                                        </span>
+                                      </div>
+                                      <div>
+                                        <span className="text-xs text-muted-foreground block mb-1">
+                                          Observações
+                                        </span>
+                                        <p className="text-sm whitespace-pre-wrap bg-background p-3 rounded border mt-1">
+                                          {l.raw.observacoes || 'Nenhuma observação informada.'}
+                                        </p>
+                                      </div>
+                                    </>
+                                  )}
 
-                                <div className="pt-2 border-t mt-4">
-                                  <div className="grid gap-4 mt-2">
-                                    <div>
-                                      <span className="text-xs text-muted-foreground block mb-1">
-                                        E-mail
-                                      </span>
-                                      <a
-                                        href={`mailto:${l.raw.email}`}
-                                        className="text-sm font-medium text-primary hover:underline"
-                                      >
-                                        {l.raw.email}
-                                      </a>
-                                    </div>
-                                    <div>
-                                      <span className="text-xs text-muted-foreground block mb-1">
-                                        WhatsApp / Telefone
-                                      </span>
-                                      {l.raw.telefone ? (
+                                  <div className="pt-2 border-t mt-4">
+                                    <div className="grid gap-4 mt-2">
+                                      <div>
+                                        <span className="text-xs text-muted-foreground block mb-1">
+                                          E-mail
+                                        </span>
                                         <a
-                                          href={`https://wa.me/55${l.raw.telefone.replace(/\D/g, '')}`}
-                                          target="_blank"
-                                          rel="noreferrer"
+                                          href={`mailto:${l.raw.email}`}
                                           className="text-sm font-medium text-primary hover:underline"
                                         >
-                                          {l.raw.telefone}
+                                          {l.raw.email}
                                         </a>
-                                      ) : (
-                                        <span className="text-sm font-medium">-</span>
-                                      )}
+                                      </div>
+                                      <div>
+                                        <span className="text-xs text-muted-foreground block mb-1">
+                                          WhatsApp / Telefone
+                                        </span>
+                                        {l.raw.telefone ? (
+                                          <a
+                                            href={`https://wa.me/55${l.raw.telefone.replace(/\D/g, '')}`}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="text-sm font-medium text-primary hover:underline"
+                                          >
+                                            {l.raw.telefone}
+                                          </a>
+                                        ) : (
+                                          <span className="text-sm font-medium">-</span>
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        </ScrollArea>
-                      </SheetContent>
-                    </Sheet>
+                          </ScrollArea>
+                        </SheetContent>
+                      </Sheet>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10 px-2"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Excluir Lead?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Esta ação não pode ser desfeita. Isso excluirá permanentemente o lead
+                              do banco de dados.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDelete(l.id, l.type, l.raw.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Excluir
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

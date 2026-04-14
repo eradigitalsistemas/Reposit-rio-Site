@@ -13,8 +13,19 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { format } from 'date-fns'
-import { Search, Filter, Eye, Download } from 'lucide-react'
+import { Search, Filter, Eye, Download, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 const ResumeView = ({ c }: { c: any }) => {
   const p = c.resume_data?.personal || {}
@@ -113,6 +124,18 @@ export default function CandidatesTab() {
       (filter ? c.status === filter : true),
   )
 
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase.from('candidates').delete().eq('id', id)
+      if (error) throw error
+      toast.success('Candidato excluído com sucesso!')
+      setCandidates(candidates.filter((c) => c.id !== id))
+    } catch (err) {
+      console.error(err)
+      toast.error('Erro ao excluir candidato')
+    }
+  }
+
   const exportToCSV = () => {
     const headers = ['Nome', 'Email', 'Profissão', 'Status', 'DISC']
     const csvData = filtered.map(
@@ -190,18 +213,49 @@ export default function CandidatesTab() {
                   </span>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <Eye className="w-4 h-4 mr-2" /> Ver Currículo
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent className="w-full sm:max-w-3xl p-0 overflow-hidden bg-slate-200">
-                      <ScrollArea className="h-full">
-                        <ResumeView c={c} />
-                      </ScrollArea>
-                    </SheetContent>
-                  </Sheet>
+                  <div className="flex items-center justify-end gap-2">
+                    <Sheet>
+                      <SheetTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <Eye className="w-4 h-4 mr-2" /> Ver Currículo
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent className="w-full sm:max-w-3xl p-0 overflow-hidden bg-slate-200">
+                        <ScrollArea className="h-full">
+                          <ResumeView c={c} />
+                        </ScrollArea>
+                      </SheetContent>
+                    </Sheet>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10 px-2"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Tem certeza absoluta?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta ação não pode ser desfeita. Isso excluirá permanentemente o
+                            currículo e removerá os dados do candidato de nossos servidores.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(c.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Excluir
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

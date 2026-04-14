@@ -10,6 +10,7 @@ import { talentosSchema, defaultTalentosValues, TalentosFormValues } from './sch
 import { StepPersonal } from './StepPersonal'
 import { StepEducation } from './StepEducation'
 import { StepExperience } from './StepExperience'
+import { StepAdditional } from './StepAdditional'
 import { StepDisc } from './StepDisc'
 import { StepReview } from './StepReview'
 
@@ -30,6 +31,7 @@ const steps = [
   },
   { id: 'education', title: 'Educação', fields: ['educations'] },
   { id: 'experience', title: 'Experiência', fields: ['experiences'] },
+  { id: 'additional', title: 'Habilidades', fields: ['additional_info'] },
   { id: 'disc', title: 'Perfil DISC', fields: ['disc'] },
   { id: 'review', title: 'Revisão', fields: [] },
 ]
@@ -91,7 +93,7 @@ export default function TalentosPage() {
 
   const handleNext = async () => {
     // Force transition if we are on DISC step
-    if (currentStep === 3) {
+    if (currentStep === 4) {
       forceNextStep()
       return
     }
@@ -168,6 +170,9 @@ export default function TalentosPage() {
       if (errors.experiences && Object.keys(errors.experiences).length > 0) return true
     }
     if (currentStep === 3) {
+      return false
+    }
+    if (currentStep === 4) {
       const d = formValues.disc || {}
       const answeredCount = Object.values(d).filter(
         (v) => typeof v === 'string' && v.trim() !== '',
@@ -210,11 +215,12 @@ export default function TalentosPage() {
                 {currentStep === 0 && <StepPersonal />}
                 {currentStep === 1 && <StepEducation />}
                 {currentStep === 2 && <StepExperience />}
-                {currentStep === 3 && <StepDisc onComplete={forceNextStep} />}
-                {currentStep === 4 && <StepReview setCurrentStep={setCurrentStep} />}
+                {currentStep === 3 && <StepAdditional />}
+                {currentStep === 4 && <StepDisc onComplete={forceNextStep} />}
+                {currentStep === 5 && <StepReview setCurrentStep={setCurrentStep} />}
               </div>
 
-              {currentStep < 4 && (
+              {currentStep < 5 && (
                 <div className="flex justify-between items-center mt-12 pt-6 border-t">
                   <Button
                     type="button"

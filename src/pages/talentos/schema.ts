@@ -85,6 +85,23 @@ export const talentosSchema = z.object({
         }
       })
     }),
+  additional_info: z
+    .object({
+      resumo_profissional: z
+        .string()
+        .max(2000, 'Máximo 2000 caracteres')
+        .optional()
+        .or(z.literal('')),
+      soft_skills: z.string().max(1000, 'Máximo 1000 caracteres').optional().or(z.literal('')),
+      hard_skills: z.string().max(1000, 'Máximo 1000 caracteres').optional().or(z.literal('')),
+      cursos_adicionais: z
+        .string()
+        .max(2000, 'Máximo 2000 caracteres')
+        .optional()
+        .or(z.literal('')),
+      idiomas: z.string().max(1000, 'Máximo 1000 caracteres').optional().or(z.literal('')),
+    })
+    .optional(),
   disc: z.object({
     q1: z.string().min(1, 'Responda a esta pergunta'),
     q2: z.string().min(1, 'Responda a esta pergunta'),
@@ -118,6 +135,13 @@ export const defaultTalentosValues: Partial<TalentosFormValues> = {
   },
   educations: [{ instituicao: '', curso: '', data_inicio: '', data_fim: '' }],
   experiences: [{ empresa: '', cargo: '', data_inicio: '', data_fim: '', descricao: '' }],
+  additional_info: {
+    resumo_profissional: '',
+    soft_skills: '',
+    hard_skills: '',
+    cursos_adicionais: '',
+    idiomas: '',
+  },
   disc: {
     q1: '',
     q2: '',

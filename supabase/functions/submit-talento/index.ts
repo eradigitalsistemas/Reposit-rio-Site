@@ -129,8 +129,44 @@ const discSchema = z.object({
   q12: z.string().min(1).transform(sanitizeHtml),
 })
 
+const additionalInfoSchema = z
+  .object({
+    resumo_profissional: z
+      .string()
+      .max(2000)
+      .optional()
+      .or(z.literal(''))
+      .transform((s) => sanitizeHtml(s || '')),
+    soft_skills: z
+      .string()
+      .max(1000)
+      .optional()
+      .or(z.literal(''))
+      .transform((s) => sanitizeHtml(s || '')),
+    hard_skills: z
+      .string()
+      .max(1000)
+      .optional()
+      .or(z.literal(''))
+      .transform((s) => sanitizeHtml(s || '')),
+    cursos_adicionais: z
+      .string()
+      .max(2000)
+      .optional()
+      .or(z.literal(''))
+      .transform((s) => sanitizeHtml(s || '')),
+    idiomas: z
+      .string()
+      .max(1000)
+      .optional()
+      .or(z.literal(''))
+      .transform((s) => sanitizeHtml(s || '')),
+  })
+  .optional()
+
 const formSchema = z.object({
   personal: personalSchema,
+  additional_info: additionalInfoSchema,
   educations: educationsSchema,
   experiences: experiencesSchema,
   disc: discSchema,
@@ -236,7 +272,10 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    let scoreD = 0, scoreI = 0, scoreS = 0, scoreC = 0
+    let scoreD = 0,
+      scoreI = 0,
+      scoreS = 0,
+      scoreC = 0
     Object.values(data.disc).forEach((answer) => {
       if (answer === 'D') scoreD++
       if (answer === 'I') scoreI++
@@ -267,24 +306,26 @@ Deno.serve(async (req: Request) => {
     })
 
     // Integração com Banco de Talentos
-    const { error: candidateError } = await supabase
-      .from('candidates')
-      .upsert({
+    const { error: candidateError } = await supabase.from('candidates').upsert(
+      {
         email: data.personal.email,
         name: data.personal.nome,
         profession: data.experiences[0]?.cargo || 'Não informado',
         resume_data: {
           personal: data.personal,
+          additional_info: data.additional_info,
           educations: data.educations,
           experiences: data.experiences,
           disc: data.disc,
         },
         disc_result: {
           type: tipoPerfil,
-          scores: scores
+          scores: scores,
         },
-        status: 'Novo'
-      }, { onConflict: 'email' })
+        status: 'Novo',
+      },
+      { onConflict: 'email' },
+    )
 
     if (candidateError) {
       console.error('Falha ao integrar com banco de talentos:', candidateError)
@@ -303,7 +344,7 @@ Deno.serve(async (req: Request) => {
           email: data.personal.email,
           nome: data.personal.nome,
         }),
-      }).catch(err => console.error('Background fetch process-resume failed:', err))
+      }).catch((err) => console.error('Background fetch process-resume failed:', err))
     } catch (err) {
       console.error('Failed to trigger process-resume:', err)
     }

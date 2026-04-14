@@ -171,13 +171,72 @@ export function StepReview({ setCurrentStep }: StepReviewProps) {
         </Card>
       </div>
 
+      {(values.additional_info?.resumo_profissional ||
+        values.additional_info?.soft_skills ||
+        values.additional_info?.hard_skills ||
+        values.additional_info?.cursos_adicionais ||
+        values.additional_info?.idiomas) && (
+        <Card className="shadow-sm">
+          <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0 border-b mb-4">
+            <CardTitle className="text-lg">Informações Adicionais</CardTitle>
+            <Button variant="ghost" size="sm" onClick={() => setCurrentStep(3)} className="h-8">
+              <Pencil className="w-4 h-4" />
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {values.additional_info?.resumo_profissional && (
+              <div>
+                <p className="font-bold text-sm">Resumo Profissional</p>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                  {values.additional_info.resumo_profissional}
+                </p>
+              </div>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {values.additional_info?.soft_skills && (
+                <div>
+                  <p className="font-bold text-sm">Soft Skills</p>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {values.additional_info.soft_skills}
+                  </p>
+                </div>
+              )}
+              {values.additional_info?.hard_skills && (
+                <div>
+                  <p className="font-bold text-sm">Hard Skills</p>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {values.additional_info.hard_skills}
+                  </p>
+                </div>
+              )}
+              {values.additional_info?.cursos_adicionais && (
+                <div>
+                  <p className="font-bold text-sm">Cursos Adicionais</p>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {values.additional_info.cursos_adicionais}
+                  </p>
+                </div>
+              )}
+              {values.additional_info?.idiomas && (
+                <div>
+                  <p className="font-bold text-sm">Idiomas</p>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {values.additional_info.idiomas}
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card className="bg-primary/5 border-primary/20 shadow-sm">
         <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
           <CardTitle className="text-lg text-primary">Resumo DISC</CardTitle>
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setCurrentStep(3)}
+            onClick={() => setCurrentStep(4)}
             className="h-8 hover:bg-primary/10"
           >
             <Pencil className="w-4 h-4" />
@@ -223,7 +282,7 @@ export function StepReview({ setCurrentStep }: StepReviewProps) {
       )}
 
       <div className="flex flex-col sm:flex-row gap-4 justify-end pt-8 border-t">
-        <Button variant="outline" size="lg" onClick={() => setCurrentStep(3)} disabled={isSending}>
+        <Button variant="outline" size="lg" onClick={() => setCurrentStep(4)} disabled={isSending}>
           Voltar para Teste DISC
         </Button>
         <Button

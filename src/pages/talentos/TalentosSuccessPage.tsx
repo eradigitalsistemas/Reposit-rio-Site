@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 const generateAbntResumeHtml = (resumeData: any, userProfile: any) => {
-  const { personal, educations = [], experiences = [] } = resumeData
+  const { personal, educations = [], experiences = [], additional_info = {} } = resumeData
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return 'Atual'
@@ -22,6 +22,11 @@ const generateAbntResumeHtml = (resumeData: any, userProfile: any) => {
       month: '2-digit',
       year: 'numeric',
     })
+  }
+
+  const formatText = (text: string) => {
+    if (!text) return ''
+    return text.replace(/\\n/g, '<br/>')
   }
 
   return `
@@ -46,7 +51,7 @@ const generateAbntResumeHtml = (resumeData: any, userProfile: any) => {
           margin: 0 auto;
         }
         h1 {
-          font-size: 14pt;
+          font-size: 12pt;
           font-weight: bold;
           text-transform: uppercase;
           text-align: center;
@@ -56,10 +61,8 @@ const generateAbntResumeHtml = (resumeData: any, userProfile: any) => {
           font-size: 12pt;
           font-weight: bold;
           text-transform: uppercase;
-          border-bottom: 1px solid #000;
-          margin-top: 24pt;
+          margin-top: 18pt;
           margin-bottom: 12pt;
-          padding-bottom: 2pt;
         }
         p {
           margin: 0 0 12pt 0;
@@ -108,13 +111,10 @@ const generateAbntResumeHtml = (resumeData: any, userProfile: any) => {
         ${personal.data_nascimento ? `<p>Data de Nascimento: ${new Date(personal.data_nascimento + 'T00:00:00').toLocaleDateString('pt-BR')}</p>` : ''}
       </div>
 
-      <h2>Resumo Profissional e Perfil Comportamental</h2>
-      <p>
-        <strong>Perfil DISC:</strong> ${userProfile.type}<br/>
-        <span class="profile-desc">${userProfile.desc}</span>
-      </p>
+      <h2>RESUMO PROFISSIONAL</h2>
+      <p>${additional_info.resumo_profissional ? formatText(additional_info.resumo_profissional) : 'Não informado.'}</p>
 
-      <h2>Formação Acadêmica</h2>
+      <h2>FORMAÇÃO ACADÊMICA</h2>
       ${
         educations.length > 0
           ? educations
@@ -133,7 +133,7 @@ const generateAbntResumeHtml = (resumeData: any, userProfile: any) => {
           : '<p>Não informada.</p>'
       }
 
-      <h2>Experiência Profissional</h2>
+      <h2>EXPERIÊNCIA PROFISSIONAL</h2>
       ${
         experiences.length > 0
           ? experiences
@@ -143,7 +143,7 @@ const generateAbntResumeHtml = (resumeData: any, userProfile: any) => {
           <p>
             <span class="item-title">${exp.cargo}</span> - ${exp.empresa}<br/>
             <span class="item-date">${formatDate(exp.data_inicio)} a ${formatDate(exp.data_fim)}</span><br/>
-            ${exp.descricao ? exp.descricao : ''}
+            ${exp.descricao ? formatText(exp.descricao) : ''}
           </p>
         </div>
       `,
@@ -152,6 +152,31 @@ const generateAbntResumeHtml = (resumeData: any, userProfile: any) => {
           : '<p>Não informada.</p>'
       }
 
+      <h2>HABILIDADES E COMPETÊNCIAS</h2>
+      <p>
+        <strong>Soft Skills (Comportamentais):</strong><br/>
+        ${additional_info.soft_skills ? formatText(additional_info.soft_skills) : 'Não informadas.'}
+      </p>
+      <p>
+        <strong>Hard Skills (Técnicas):</strong><br/>
+        ${additional_info.hard_skills ? formatText(additional_info.hard_skills) : 'Não informadas.'}
+      </p>
+
+      <h2>CURSOS ADICIONAIS E IDIOMAS</h2>
+      <p>
+        <strong>Cursos Adicionais:</strong><br/>
+        ${additional_info.cursos_adicionais ? formatText(additional_info.cursos_adicionais) : 'Não informados.'}
+      </p>
+      <p>
+        <strong>Idiomas:</strong><br/>
+        ${additional_info.idiomas ? formatText(additional_info.idiomas) : 'Não informados.'}
+      </p>
+
+      <h2>PERFIL COMPORTAMENTAL (DISC)</h2>
+      <p>
+        <strong>Resultado DISC:</strong> ${userProfile.type}<br/>
+        <span class="profile-desc">${userProfile.desc}</span>
+      </p>
     </body>
     </html>
   `

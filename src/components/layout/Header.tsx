@@ -51,6 +51,7 @@ export function Header({ currentPage: propCurrentPage, onNavigate }: HeaderProps
     { label: 'Home', href: '/' },
     { label: 'Certificados', href: '/certificados' },
     { label: 'ERP', href: '/erp' },
+    { label: 'Portal do Parceiro', href: '/parceiros' },
     { label: 'FAQ', href: '/faq' },
     { label: 'Base de Conhecimento', href: '/base-conhecimento' },
     { label: 'Área Restrita', href: '/admin/talentos' },

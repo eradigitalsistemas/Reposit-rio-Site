@@ -7,6 +7,7 @@ import { Briefcase, LogOut, LayoutDashboard } from 'lucide-react'
 import { toast } from 'sonner'
 import CandidatesTab from './components/CandidatesTab'
 import LeadsTab from './components/LeadsTab'
+import ParceirosTab from './components/ParceirosTab'
 
 export default function AdminTalentosPage() {
   const [session, setSession] = useState<any>(null)
@@ -141,15 +142,19 @@ export default function AdminTalentosPage() {
         </div>
 
         <Tabs defaultValue="talentos" className="w-full">
-          <TabsList className="mb-6 grid w-full max-w-md grid-cols-2">
+          <TabsList className="mb-6 grid w-full max-w-2xl grid-cols-3">
             <TabsTrigger value="talentos">Banco de Talentos</TabsTrigger>
             <TabsTrigger value="leads">Central de Leads</TabsTrigger>
+            <TabsTrigger value="parceiros">Portal do Parceiro</TabsTrigger>
           </TabsList>
           <TabsContent value="talentos" className="mt-0 outline-none">
             <CandidatesTab />
           </TabsContent>
           <TabsContent value="leads" className="mt-0 outline-none">
             <LeadsTab />
+          </TabsContent>
+          <TabsContent value="parceiros" className="mt-0 outline-none">
+            <ParceirosTab />
           </TabsContent>
         </Tabs>
       </div>

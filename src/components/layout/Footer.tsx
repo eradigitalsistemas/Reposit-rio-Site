@@ -256,6 +256,7 @@ export function SiteFooter() {
       <FooterColumn title="Nossas Soluções">
         <FooterLink href="/certificados">Certificados Digitais</FooterLink>
         <FooterLink href="/erp">Sistemas ERP</FooterLink>
+        <FooterLink href="/parceiros">Portal do Parceiro</FooterLink>
         <FooterLink href="/talentos">Banco de Talentos</FooterLink>
         <FooterLink href="/base-conhecimento">Base de Conhecimento</FooterLink>
         <FooterLink href="/faq">Perguntas Frequentes</FooterLink>

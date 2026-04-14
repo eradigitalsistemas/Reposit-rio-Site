@@ -8,6 +8,7 @@ import {
   Shield,
   Headphones,
   Rocket,
+  Handshake,
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -64,7 +65,7 @@ const Index = () => {
             Escolha a plataforma ideal para sua necessidade
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Link to="/certificados" className="block group">
             <Card className="h-full transition-all duration-300 hover:shadow-lg hover:border-primary/50 group-hover:-translate-y-1">
               <CardHeader>
@@ -123,6 +124,28 @@ const Index = () => {
               <CardContent>
                 <div className="flex items-center text-sm font-medium text-secondary">
                   Acessar portal <ArrowRight className="ml-2 h-4 w-4" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link to="/parceiros" className="block group">
+            <Card className="h-full transition-all duration-300 hover:shadow-lg hover:border-primary/50 group-hover:-translate-y-1">
+              <CardHeader>
+                <div className="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-4">
+                  <Handshake className="h-6 w-6" />
+                </div>
+                <CardTitle className="group-hover:text-secondary transition-colors">
+                  Portal do Parceiro
+                </CardTitle>
+                <CardDescription>
+                  Contadores e parceiros: condições especiais e suporte dedicado em certificados
+                  digitais.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center text-sm font-medium text-secondary">
+                  Seja parceiro <ArrowRight className="ml-2 h-4 w-4" />
                 </div>
               </CardContent>
             </Card>

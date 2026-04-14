@@ -174,7 +174,9 @@ export function StepPersonal() {
             name="personal.data_nascimento"
             render={({ field, fieldState }) => (
               <FormItem>
-                <FormLabel>Data de Nascimento (Opcional)</FormLabel>
+                <FormLabel>
+                  Data de Nascimento <span className="text-destructive">*</span>
+                </FormLabel>
                 <FormControl>
                   <Input
                     {...field}

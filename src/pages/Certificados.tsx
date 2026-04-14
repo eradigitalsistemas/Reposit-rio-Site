@@ -212,7 +212,9 @@ export default function Certificados() {
                       name="nome"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Nome</FormLabel>
+                          <FormLabel>
+                            Nome <span className="text-destructive">*</span>
+                          </FormLabel>
                           <FormControl>
                             <Input placeholder="Seu nome" {...field} />
                           </FormControl>
@@ -225,7 +227,9 @@ export default function Certificados() {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>E-mail</FormLabel>
+                          <FormLabel>
+                            E-mail <span className="text-destructive">*</span>
+                          </FormLabel>
                           <FormControl>
                             <Input placeholder="seu@email.com" {...field} />
                           </FormControl>
@@ -238,8 +242,11 @@ export default function Certificados() {
                       name="telefone"
                       render={({ field: { onChange, value, ...rest } }) => (
                         <FormItem>
-                          <FormLabel>Telefone / WhatsApp</FormLabel>
+                          <FormLabel>
+                            Telefone / WhatsApp <span className="text-destructive">*</span>
+                          </FormLabel>
                           <FormControl>
+                            {' '}
                             <Input
                               placeholder="(00) 00000-0000"
                               value={value}
@@ -256,7 +263,9 @@ export default function Certificados() {
                       name="tipo_certificado"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Tipo de Certificado</FormLabel>
+                          <FormLabel>
+                            Tipo de Certificado <span className="text-destructive">*</span>
+                          </FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
@@ -282,7 +291,10 @@ export default function Certificados() {
                             <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                           </FormControl>
                           <div className="space-y-1 leading-none">
-                            <FormLabel>Termos de Privacidade (LGPD)</FormLabel>
+                            <FormLabel>
+                              Termos de Privacidade (LGPD){' '}
+                              <span className="text-destructive">*</span>
+                            </FormLabel>
                             <FormDescription className="text-xs">
                               Concordo com o processamento dos meus dados para contato.
                             </FormDescription>

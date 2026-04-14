@@ -6,12 +6,10 @@ import {
   Loader2,
   CheckCircle2,
   MessageCircle,
-  BarChart4,
-  Cpu,
-  Layers,
-  Lock,
-  TrendingUp,
-  Users,
+  Handshake,
+  Gift,
+  Percent,
+  Headphones,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { HeroSection } from '@/components/blocks/HeroSection'
@@ -36,39 +34,38 @@ import { trackAndOpenWhatsApp, WHATSAPP_COMERCIAL } from '@/lib/whatsapp'
 
 const formSchema = z.object({
   nome: z.string().min(2, 'Nome é obrigatório'),
-  empresa: z.string().min(2, 'Nome da empresa é obrigatório'),
+  profissao: z.string().min(2, 'Profissão/Ocupação é obrigatória'),
   email: z.string().email('Email inválido'),
   telefone: z.string().min(14, 'Telefone incompleto'),
   lgpd: z.boolean().refine((val) => val === true, 'Você deve aceitar os termos de privacidade'),
 })
 
-export default function ERP() {
+export default function PortalParceiro() {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { nome: '', empresa: '', email: '', telefone: '', lgpd: false },
+    defaultValues: { nome: '', profissao: '', email: '', telefone: '', lgpd: false },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
     try {
-      const { error } = await supabase.from('leads_erp').insert({
+      const { error } = await supabase.from('leads_parceiros').insert({
         nome: values.nome,
-        empresa: values.empresa,
+        profissao: values.profissao,
         email: values.email,
         telefone: values.telefone,
-        data_contato: new Date().toISOString(),
-      })
+      } as any) // Type override until schema update is regenerated
       if (error) throw error
       setIsSuccess(true)
     } catch (err: any) {
       toast({
         variant: 'destructive',
         title: 'Erro',
-        description: err.message || 'Ocorreu um erro.',
+        description: err.message || 'Ocorreu um erro ao enviar solicitação.',
       })
     } finally {
       setIsSubmitting(false)
@@ -78,50 +75,41 @@ export default function ERP() {
   const handleWhatsAppHero = () => {
     trackAndOpenWhatsApp(
       WHATSAPP_COMERCIAL,
-      'Olá, gostaria de solicitar uma análise de ERP para minha empresa',
-      'erp_hero',
+      'Olá, gostaria de saber mais sobre como me tornar um parceiro da Era Digital',
+      'parceiro_hero',
     )
   }
 
   const benefits = [
     {
-      title: 'Otimização',
-      desc: 'Automatize tarefas manuais e reduza erros operacionais.',
-      icon: Cpu,
+      title: 'Certificado PF Grátis',
+      desc: 'Como parceiro ativo, você ganha seu certificado digital Pessoa Física gratuitamente.',
+      icon: Gift,
     },
     {
-      title: 'Redução de Custos',
-      desc: 'Identifique gargalos financeiros e maximize seus lucros.',
-      icon: TrendingUp,
+      title: 'PJ a Preço de Custo',
+      desc: 'Condições exclusivas e margens diferenciadas para certificados de Pessoa Jurídica.',
+      icon: Percent,
     },
     {
-      title: 'Integração',
-      desc: 'Vendas, estoque e financeiro em uma única plataforma.',
-      icon: Layers,
+      title: 'Suporte Dedicado',
+      desc: 'Atendimento humanizado e prioritário para você e seus clientes.',
+      icon: Headphones,
     },
-    {
-      title: 'Dados em Tempo Real',
-      desc: 'Relatórios precisos para tomadas de decisão ágeis.',
-      icon: BarChart4,
-    },
-    { title: 'Segurança', desc: 'Acesso controlado e backup automático em nuvem.', icon: Lock },
-    { title: 'Escalabilidade', desc: 'O sistema cresce junto com a sua empresa.', icon: Users },
   ]
 
   return (
     <div className="space-y-16 pb-10 animate-fade-in">
-      {/* Header */}
       <HeroSection
-        title="Sistemas ERP"
-        subtitle="Assuma o controle total do seu negócio. Nossas soluções ERP oferecem gestão inteligente, integrações robustas e a flexibilidade que sua empresa precisa para crescer."
-        cta="Solicitar Análise no WhatsApp"
+        title="Portal do Parceiro"
+        subtitle="Junte-se à Era Digital! Contadores e escritórios de contabilidade contam com benefícios exclusivos, como e-CPF grátis e e-CNPJ a preço de custo."
+        cta="Fale com um Consultor"
         onCTA={handleWhatsAppHero}
-        ctaIcon={<MessageCircle className="h-5 w-5" />}
-        ctaClassName="bg-[#25D366] hover:bg-[#20bd5a] text-white"
+        ctaIcon={<Handshake className="h-5 w-5" />}
+        ctaClassName="bg-primary hover:bg-primary/90 text-primary-foreground"
       />
 
-      {/* Benefits */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {benefits.map((b, i) => (
           <FeatureCard
             key={i}
@@ -133,14 +121,14 @@ export default function ERP() {
       </section>
 
       <div className="grid md:grid-cols-2 gap-12 items-start">
-        {/* Lead Form */}
         <section>
           {isSuccess ? (
             <div className="text-center space-y-6 p-8 bg-slate-50 rounded-xl border">
               <CheckCircle2 className="h-16 w-16 text-emerald-500 mx-auto" />
-              <h2 className="text-2xl font-bold">Obrigado pelo interesse!</h2>
+              <h2 className="text-2xl font-bold">Solicitação Recebida!</h2>
               <p className="text-muted-foreground">
-                Um consultor entrará em contato para apresentar a melhor solução.
+                Nossa equipe de parcerias entrará em contato em breve para apresentar todas as
+                vantagens.
               </p>
               <Button onClick={() => setIsSuccess(false)} variant="outline">
                 Voltar
@@ -149,9 +137,9 @@ export default function ERP() {
           ) : (
             <Card>
               <CardHeader>
-                <CardTitle>Solicite uma Demonstração</CardTitle>
+                <CardTitle>Seja nosso Parceiro</CardTitle>
                 <CardDescription>
-                  Deixe seus dados para que possamos apresentar como o ERP pode ajudar sua empresa.
+                  Preencha os dados abaixo e descubra como podemos crescer juntos.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -163,10 +151,10 @@ export default function ERP() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            Seu Nome <span className="text-destructive">*</span>
+                            Nome Completo <span className="text-destructive">*</span>
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="Ex: João da Silva" {...field} />
+                            <Input placeholder="Seu nome" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -174,14 +162,14 @@ export default function ERP() {
                     />
                     <FormField
                       control={form.control}
-                      name="empresa"
+                      name="profissao"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            Nome da Empresa <span className="text-destructive">*</span>
+                            Profissão ou Ocupação <span className="text-destructive">*</span>
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="Sua Empresa LTDA" {...field} />
+                            <Input placeholder="Ex: Contador, Advogado, Escritório..." {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -194,10 +182,10 @@ export default function ERP() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>
-                              E-mail Corporativo <span className="text-destructive">*</span>
+                              E-mail <span className="text-destructive">*</span>
                             </FormLabel>
                             <FormControl>
-                              <Input placeholder="contato@empresa.com" {...field} />
+                              <Input placeholder="contato@exemplo.com" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -238,7 +226,8 @@ export default function ERP() {
                               <span className="text-destructive">*</span>
                             </FormLabel>
                             <FormDescription className="text-xs">
-                              Permito que a Era Digital utilize meus dados para contato.
+                              Permito que a Era Digital utilize meus dados para apresentar propostas
+                              de parceria.
                             </FormDescription>
                           </div>
                         </FormItem>
@@ -250,7 +239,7 @@ export default function ERP() {
                       disabled={isSubmitting}
                     >
                       {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Quero conhecer o ERP
+                      Quero ser Parceiro
                     </Button>
                   </form>
                 </Form>
@@ -259,30 +248,29 @@ export default function ERP() {
           )}
         </section>
 
-        {/* FAQ Section */}
         <section className="space-y-6">
           <FAQAccordion
-            category="Dúvidas Frequentes sobre ERP"
+            category="Dúvidas Frequentes - Parceiros"
             items={[
               {
-                question: 'O sistema é em nuvem ou local?',
+                question: 'Quem pode ser parceiro da Era Digital?',
                 answer:
-                  'Nosso ERP é 100% em nuvem (Cloud), permitindo que você acesse as informações da sua empresa de qualquer lugar, a qualquer momento e com total segurança.',
+                  'Contadores, escritórios de contabilidade, advogados, consultores e outros profissionais que lidam com clientes que necessitam de emissão ou renovação de Certificados Digitais.',
               },
               {
-                question: 'Como funciona o processo de implantação?',
+                question: 'Como funciona o e-CPF grátis?',
                 answer:
-                  'Realizamos um mapeamento dos seus processos, configuramos os módulos necessários, migramos seus dados atuais e realizamos o treinamento com sua equipe. O tempo médio varia de 15 a 45 dias.',
+                  'Ao se tornar um parceiro ativo e realizar indicações mensais, seu escritório tem direito a emissões ou renovações gratuitas de e-CPF A1 para os sócios.',
               },
               {
-                question: 'Posso integrar com minha loja virtual?',
+                question: 'Qual o custo para me tornar parceiro?',
                 answer:
-                  'Sim! Nosso sistema possui APIs robustas que permitem integração com as principais plataformas de e-commerce e marketplaces do mercado.',
+                  'Nenhum! A parceria com a Era Digital é totalmente gratuita. Nosso objetivo é somar forças para entregar o melhor serviço ao seu cliente.',
               },
               {
-                question: 'O suporte é cobrado à parte?',
+                question: 'A comissão é paga em dinheiro?',
                 answer:
-                  'Não. Todo o suporte técnico via chat e ticket está incluso na sua mensalidade, garantindo que sua operação nunca pare.',
+                  'Oferecemos um modelo altamente flexível, onde você pode optar por repassar o desconto (preço de custo) direto ao seu cliente ou manter margem financeira na revenda. Nossos consultores explicarão todos os detalhes.',
               },
             ]}
           />

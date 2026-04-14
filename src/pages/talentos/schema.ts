@@ -9,7 +9,7 @@ export const talentosSchema = z.object({
       .regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/, 'Nome deve conter apenas letras e espaços'),
     email: z.string().email('Email inválido. Formato esperado: usuario@dominio.com').max(255),
     telefone: z.string().min(1, 'Telefone é obrigatório'),
-    data_nascimento: z.string().optional().or(z.literal('')),
+    data_nascimento: z.string().min(1, 'Data de nascimento é obrigatória'),
     endereco: z.string().max(200, 'Máximo 200 caracteres').optional().or(z.literal('')),
     foto_url: z.string().optional().or(z.literal('')),
   }),

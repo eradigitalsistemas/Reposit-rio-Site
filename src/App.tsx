@@ -17,6 +17,7 @@ import AdminTalentosPage from './pages/admin/AdminTalentosPage'
 import NotFound from './pages/NotFound'
 import Politicas from './pages/Politicas'
 import Termos from './pages/Termos'
+import PortalParceiro from './pages/PortalParceiro'
 
 const App = () => (
   <BrowserRouter future={{ v7_startTransition: false, v7_relativeSplatPath: false }}>
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/certificados" element={<Certificados />} />
           <Route path="/erp" element={<ERP />} />
+          <Route path="/parceiros" element={<PortalParceiro />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/base-conhecimento" element={<BaseConhecimento />} />
           <Route path="/tecnologia" element={<Tecnologia />} />

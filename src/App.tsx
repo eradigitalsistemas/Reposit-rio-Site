@@ -13,6 +13,7 @@ import TalentosPage from './pages/talentos/TalentosPage'
 import TalentosSuccessPage from './pages/talentos/TalentosSuccessPage'
 import DesignSystem from './pages/DesignSystem'
 import IntegrationsDashboard from './pages/admin/IntegrationsDashboard'
+import AdminTalentosPage from './pages/admin/AdminTalentosPage'
 import NotFound from './pages/NotFound'
 import Politicas from './pages/Politicas'
 import Termos from './pages/Termos'
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/talentos/sucesso" element={<TalentosSuccessPage />} />
           <Route path="/design-system" element={<DesignSystem />} />
           <Route path="/admin/integracoes" element={<IntegrationsDashboard />} />
+          <Route path="/admin/talentos" element={<AdminTalentosPage />} />
           <Route path="/politicas" element={<Politicas />} />
           <Route path="/termos" element={<Termos />} />
         </Route>

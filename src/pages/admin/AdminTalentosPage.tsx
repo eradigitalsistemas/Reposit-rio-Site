@@ -26,17 +26,38 @@ export default function AdminTalentosPage() {
   const [statusFilter, setStatusFilter] = useState('')
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setLoading(false)
-      if (session) fetchCandidates()
-    })
+    const checkSession = async () => {
+      const isAdminSessionActive = sessionStorage.getItem('admin_session_active')
+
+      if (!isAdminSessionActive) {
+        await supabase.auth.signOut()
+        setSession(null)
+        setLoading(false)
+      } else {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
+        setSession(session)
+        setLoading(false)
+        if (session) fetchCandidates()
+      }
+    }
+
+    checkSession()
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      if (session) fetchCandidates()
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      const isAdminSessionActive = sessionStorage.getItem('admin_session_active')
+      if (event === 'SIGNED_IN' && !isAdminSessionActive) {
+        sessionStorage.setItem('admin_session_active', 'true')
+      }
+      if (sessionStorage.getItem('admin_session_active')) {
+        setSession(session)
+        if (session) fetchCandidates()
+      } else {
+        setSession(null)
+      }
     })
 
     return () => subscription.unsubscribe()
@@ -67,13 +88,16 @@ export default function AdminTalentosPage() {
     if (error) {
       toast.error('Credenciais inválidas. Verifique o login e senha informados.')
     } else {
+      sessionStorage.setItem('admin_session_active', 'true')
       toast.success('Login administrativo realizado com sucesso!')
     }
     setAuthLoading(false)
   }
 
   const handleLogout = async () => {
+    sessionStorage.removeItem('admin_session_active')
     await supabase.auth.signOut()
+    setSession(null)
     toast.success('Você saiu do sistema.')
   }
 

@@ -21,20 +21,20 @@ Deno.serve(async (req: Request) => {
 
   try {
     const body = await req.json()
-    
+
     const emailsToSend: Array<{
-      from: string;
-      to: string[];
-      subject: string;
-      html: string;
-      reply_to?: string;
-      attachments?: any[];
+      from: string
+      to: string[]
+      subject: string
+      html: string
+      reply_to?: string
+      attachments?: any[]
     }> = []
 
     // Processamento de gatilho do banco de dados (Webhook)
     if (isWebhook && body.type === 'INSERT' && body.table) {
       const { table, record } = body
-      
+
       let internalSubject = ''
       let internalHtml = ''
       let userSubject = ''
@@ -64,18 +64,19 @@ Deno.serve(async (req: Request) => {
         `
       } else if (table === 'leads_erp') {
         const empresaName = record.empresa || record.email
-        internalSubject = `[Novo Lead ERP] Solicitação de Demonstração - ${empresaName}`
+        internalSubject = `[Novo Lead ERP] Solicitação de Demonstração - ${record.nome || empresaName}`
         internalHtml = `
           <h2>Nova Solicitação de Demonstração (Sistemas ERP)</h2>
+          <p><strong>Nome:</strong> ${record.nome || 'Não informado'}</p>
+          <p><strong>Empresa:</strong> ${record.empresa || 'Não informado'}</p>
           <p><strong>E-mail:</strong> ${record.email}</p>
           <p><strong>WhatsApp:</strong> ${record.telefone || 'Não informado'}</p>
-          <p><strong>Empresa:</strong> ${record.empresa || 'Não informado'}</p>
           <p>Acesse o painel para mais detalhes ou entre em contato com o lead.</p>
         `
         userSubject = `Sua solicitação de demonstração ERP foi recebida`
         userHtml = `
           <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
-            <h2>Olá! Recebemos sua solicitação.</h2>
+            <h2>Olá, ${record.nome ? record.nome.split(' ')[0] : 'tudo bem'}! Recebemos sua solicitação.</h2>
             <p>Agradecemos o seu interesse nas soluções ERP da <strong>Super Era Digital</strong>.</p>
             <p>Sua solicitação de demonstração já foi encaminhada ao nosso setor comercial. Um de nossos consultores especialistas entrará em contato em breve através do WhatsApp ou e-mail informado para agendar o melhor horário para apresentar nossa tecnologia.</p>
             <p>Enquanto isso, fique à vontade para explorar mais sobre nossas soluções em nosso site.</p>
@@ -86,9 +87,10 @@ Deno.serve(async (req: Request) => {
           </div>
         `
       } else if (table === 'leads_certificados') {
-        internalSubject = `[Novo Lead] Interesse em Certificados Digitais`
+        internalSubject = `[Novo Lead] Interesse em Certificados Digitais - ${record.nome || record.email}`
         internalHtml = `
           <h2>Novo Interesse em Certificado Digital</h2>
+          <p><strong>Nome:</strong> ${record.nome || 'Não informado'}</p>
           <p><strong>E-mail:</strong> ${record.email}</p>
           <p><strong>WhatsApp:</strong> ${record.telefone || 'Não informado'}</p>
           <p><strong>Tipo de Certificado:</strong> ${record.tipo_certificado || 'Não informado'}</p>
@@ -96,7 +98,7 @@ Deno.serve(async (req: Request) => {
         userSubject = `Recebemos seu interesse em Certificados Digitais`
         userHtml = `
           <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
-            <h2>Olá! Recebemos seu contato.</h2>
+            <h2>Olá, ${record.nome ? record.nome.split(' ')[0] : 'tudo bem'}! Recebemos seu contato.</h2>
             <p>Obrigado por buscar a <strong>Super Era Digital</strong> para a emissão do seu Certificado Digital.</p>
             <p>Nossa equipe já recebeu seus dados e entrará em contato rapidamente para orientar sobre os próximos passos e documentos necessários para a emissão ágil e segura do seu certificado.</p>
             <br>
@@ -136,7 +138,7 @@ Deno.serve(async (req: Request) => {
         to: [COMERCIAL_EMAIL],
         subject: internalSubject,
         html: internalHtml,
-        reply_to: record.email
+        reply_to: record.email,
       })
 
       // Adiciona o e-mail para o usuário (confirmação comercial e direta)
@@ -145,10 +147,9 @@ Deno.serve(async (req: Request) => {
           from: 'Super Era Digital <onboarding@resend.dev>',
           to: [record.email],
           subject: userSubject,
-          html: userHtml
+          html: userHtml,
         })
       }
-
     } else {
       // Envio direto via API (ex: para outras Edge Functions que chamam send-notification)
       if (body.to && body.subject && body.html) {
@@ -158,7 +159,7 @@ Deno.serve(async (req: Request) => {
           subject: body.subject,
           html: body.html,
           reply_to: body.reply_to,
-          attachments: body.attachments
+          attachments: body.attachments,
         })
       } else {
         throw new Error('Payload inválido ou webhook não autorizado')
@@ -183,7 +184,7 @@ Deno.serve(async (req: Request) => {
     })
 
     const results = await Promise.all(emailPromises)
-    const hasError = results.some(r => !r.success)
+    const hasError = results.some((r) => !r.success)
 
     if (hasError) {
       throw new Error('Falha no envio de um ou mais emails')

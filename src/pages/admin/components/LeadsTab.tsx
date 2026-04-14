@@ -31,10 +31,10 @@ export default function LeadsTab() {
         arr.push({
           id: `erp-${l.id}`,
           type: 'ERP',
-          name: l.empresa || 'Não informado',
+          name: l.nome || l.empresa || 'Não informado',
           email: l.email,
           phone: l.telefone,
-          date: l.created_at,
+          date: l.created_at || l.data_contato,
           raw: l,
         }),
       )
@@ -42,10 +42,10 @@ export default function LeadsTab() {
         arr.push({
           id: `cert-${l.id}`,
           type: 'Certificados',
-          name: l.email?.split('@')[0] || 'Lead',
+          name: l.nome || l.email?.split('@')[0] || 'Lead',
           email: l.email,
           phone: l.telefone,
-          date: l.created_at,
+          date: l.created_at || l.data_contato,
           raw: l,
         }),
       )
@@ -141,6 +141,12 @@ export default function LeadsTab() {
                             <>
                               <div>
                                 <span className="font-semibold text-sm text-muted-foreground block">
+                                  Nome
+                                </span>{' '}
+                                {l.raw.nome || l.name}
+                              </div>
+                              <div>
+                                <span className="font-semibold text-sm text-muted-foreground block">
                                   Empresa
                                 </span>{' '}
                                 {l.raw.empresa}
@@ -161,6 +167,12 @@ export default function LeadsTab() {
                           )}
                           {l.type === 'Certificados' && (
                             <>
+                              <div>
+                                <span className="font-semibold text-sm text-muted-foreground block">
+                                  Nome
+                                </span>{' '}
+                                {l.raw.nome || l.name}
+                              </div>
                               <div>
                                 <span className="font-semibold text-sm text-muted-foreground block">
                                   Tipo Solicitado

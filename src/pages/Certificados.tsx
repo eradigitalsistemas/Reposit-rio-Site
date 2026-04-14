@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Loader2, CheckCircle2, MessageCircle } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase/client'
 import { HeroSection } from '@/components/blocks/HeroSection'
 import { CertificateCard } from '@/components/blocks/CertificateCard'
 import { FAQAccordion } from '@/components/blocks/FAQAccordion'
@@ -32,6 +32,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { trackAndOpenWhatsApp, WHATSAPP_SUPORTE } from '@/lib/whatsapp'
 
 const formSchema = z.object({
+  nome: z.string().min(2, 'Nome é obrigatório'),
   email: z.string().email('Email inválido'),
   tipo_certificado: z.string().min(1, 'Selecione o tipo de certificado'),
   telefone: z.string().min(14, 'Telefone incompleto'),
@@ -45,18 +46,19 @@ export default function Certificados() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { email: '', tipo_certificado: '', telefone: '', lgpd: false },
+    defaultValues: { nome: '', email: '', tipo_certificado: '', telefone: '', lgpd: false },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
     try {
       const { error } = await supabase.from('leads_certificados').insert({
+        nome: values.nome,
         email: values.email,
         tipo_certificado: values.tipo_certificado,
         telefone: values.telefone,
         data_contato: new Date().toISOString(),
-      })
+      } as any)
       if (error) throw error
       setIsSuccess(true)
       toast({
@@ -205,6 +207,19 @@ export default function Certificados() {
               <CardContent>
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="nome"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nome</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Seu nome" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     <FormField
                       control={form.control}
                       name="email"

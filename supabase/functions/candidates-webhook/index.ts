@@ -174,9 +174,9 @@ async function handleRequest(
         <p><strong>Perfil DISC:</strong> ${data.disc_result}</p>
         <p>Acesse o painel administrativo para ver os detalhes completos.</p>
       `,
-      reply_to: data.email
+      reply_to: data.email,
     }),
-  }).catch(err => console.error('Background fetch send-notification failed:', err))
+  }).catch((err) => console.error('Background fetch send-notification failed:', err))
 
   // Notificação para o candidato
   fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-notification`, {
@@ -199,9 +199,9 @@ async function handleRequest(
           <p>Atenciosamente,</p>
           <p><strong>Equipe de Talentos - Super Era Digital</strong></p>
         </div>
-      `
+      `,
     }),
-  }).catch(err => console.error('Background fetch send-notification to candidate failed:', err))
+  }).catch((err) => console.error('Background fetch send-notification to candidate failed:', err))
 
   return new Response(
     JSON.stringify({

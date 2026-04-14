@@ -97,7 +97,11 @@ Deno.serve(async (req: Request) => {
 
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
-          const pdfContent = pdf_base64 ? (pdf_base64.includes(',') ? pdf_base64.split(',')[1] : pdf_base64) : null
+          const pdfContent = pdf_base64
+            ? pdf_base64.includes(',')
+              ? pdf_base64.split(',')[1]
+              : pdf_base64
+            : null
 
           const res = await fetch('https://api.resend.com/emails', {
             method: 'POST',
@@ -109,13 +113,27 @@ Deno.serve(async (req: Request) => {
               from: 'Talentos Super Era Digital <onboarding@resend.dev>',
               to: [email],
               subject: `Seu Currículo Gerado - ${nome}`,
-              html: `<p>Olá <strong>${nome}</strong>,</p><p>Seu currículo foi recebido e processado com sucesso! Já está em nosso Banco de Talentos e será avaliado em breve.</p><p>Você pode baixar uma cópia formatada em Word diretamente na tela de sucesso no nosso site.</p><p>Atenciosamente,<br>Equipe Era Digital</p>`,
-              attachments: pdfContent ? [
-                {
-                  filename: `curriculo_${nome.replace(/\s+/g, '_').toLowerCase()}.pdf`,
-                  content: pdfContent,
-                },
-              ] : undefined,
+              html: `
+                <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
+                  <h2>Olá, <strong>${nome}</strong>,</h2>
+                  <p>Seu currículo foi recebido e processado com sucesso pela <strong>Super Era Digital</strong>!</p>
+                  <p>Seus dados já estão integrados ao nosso Banco de Talentos e serão avaliados por nossa equipe de recrutamento de acordo com as oportunidades disponíveis.</p>
+                  <p>Caso tenha gerado o PDF, ele segue em anexo a este e-mail para seus registros.</p>
+                  <br>
+                  <p>Desejamos muito sucesso em sua jornada profissional!</p>
+                  <br>
+                  <p>Atenciosamente,</p>
+                  <p><strong>Equipe de Talentos - Super Era Digital</strong></p>
+                </div>
+              `,
+              attachments: pdfContent
+                ? [
+                    {
+                      filename: `curriculo_${nome.replace(/\s+/g, '_').toLowerCase()}.pdf`,
+                      content: pdfContent,
+                    },
+                  ]
+                : undefined,
             }),
           })
 

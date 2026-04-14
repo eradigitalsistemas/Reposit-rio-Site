@@ -174,9 +174,34 @@ async function handleRequest(
         <p><strong>Perfil DISC:</strong> ${data.disc_result}</p>
         <p>Acesse o painel administrativo para ver os detalhes completos.</p>
       `,
-      reply_to: data.email
+      reply_to: data.email,
     }),
-  }).catch(err => console.error('Background fetch send-notification failed:', err))
+  }).catch((err) => console.error('Background fetch send-notification failed:', err))
+
+  // Notificação para o candidato
+  fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-notification`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-webhook-secret': 'super-secret-webhook-key-123',
+    },
+    body: JSON.stringify({
+      to: [data.email],
+      subject: `Recebemos seu currículo - Super Era Digital`,
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
+          <h2>Olá, <strong>${data.name}</strong>,</h2>
+          <p>Seu currículo foi recebido com sucesso e integrado ao nosso Banco de Talentos.</p>
+          <p>Nossa equipe de recrutamento avaliará seu perfil e entrará em contato caso haja alguma oportunidade alinhada com suas habilidades.</p>
+          <br>
+          <p>Desejamos sucesso em sua trajetória!</p>
+          <br>
+          <p>Atenciosamente,</p>
+          <p><strong>Equipe de Talentos - Super Era Digital</strong></p>
+        </div>
+      `,
+    }),
+  }).catch((err) => console.error('Background fetch send-notification to candidate failed:', err))
 
   return new Response(
     JSON.stringify({

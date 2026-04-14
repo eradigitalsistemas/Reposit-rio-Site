@@ -149,11 +149,6 @@ const generateAbntResumeHtml = (resumeData: any, userProfile: any) => {
           : '<p>Não informada.</p>'
       }
 
-      <script>
-        window.onload = function() {
-          window.print();
-        }
-      </script>
     </body>
     </html>
   `
@@ -235,18 +230,14 @@ export default function TalentosSuccessPage() {
 
   const handleDownload = () => {
     const htmlContent = generateAbntResumeHtml(data, profile)
-    const printWindow = window.open('', '_blank')
-    if (printWindow) {
-      printWindow.document.write(htmlContent)
-      printWindow.document.close()
-    } else {
-      // Fallback if popup blocked
-      const blob = new Blob([htmlContent], { type: 'text/html' })
-      const link = document.createElement('a')
-      link.href = URL.createObjectURL(blob)
-      link.download = `Curriculo_${data?.personal?.nome?.replace(/\s+/g, '_')}.html`
-      link.click()
-    }
+    // Exportação simples utilizando MIME type MS Word para que o usuário baixe um .doc facilmente editável
+    const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `Curriculo_${data?.personal?.nome?.replace(/\s+/g, '_')}.doc`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   const handleCreateNew = () => {
@@ -290,8 +281,8 @@ export default function TalentosSuccessPage() {
       <SuccessAnimation type="checkmark" />
 
       <ConfirmationMessage
-        message="Seu Currículo foi Criado com Sucesso!"
-        subMessage="Enviamos seu currículo para comercial@areradigital.com.br. Em breve, entraremos em contato."
+        message="Seu Currículo foi Adicionado ao Banco de Talentos!"
+        subMessage="Seu perfil já está disponível para nossa equipe de recrutamento. Você também pode baixar o arquivo no formato Word abaixo."
       />
 
       <div className="grid md:grid-cols-2 gap-6 mb-8">

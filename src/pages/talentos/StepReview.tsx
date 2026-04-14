@@ -20,7 +20,7 @@ export function StepReview({ setCurrentStep }: StepReviewProps) {
     setValue,
     formState: { errors },
   } = useFormContext<TalentosFormValues>()
-  const [isGenerating, setIsGenerating] = useState(false)
+
   const [isSending, setIsSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -139,23 +139,10 @@ export function StepReview({ setCurrentStep }: StepReviewProps) {
 
   const handleSubmit = async () => {
     setError(null)
-    setIsGenerating(true)
-
-    let pdfBase64 = ''
-    try {
-      pdfBase64 = await generatePDF()
-    } catch (e) {
-      setError('Erro ao gerar PDF. Tente novamente.')
-      setIsGenerating(false)
-      return
-    }
-
-    setIsGenerating(false)
     setIsSending(true)
 
     const payload = {
       ...values,
-      pdf_base64: pdfBase64.split(',')[1],
     }
 
     let attempt = 0
@@ -186,7 +173,8 @@ export function StepReview({ setCurrentStep }: StepReviewProps) {
 
     setIsSending(false)
     setSuccess(true)
-    localStorage.removeItem('talentos_form_data')
+    localStorage.setItem('talentos_form_data', JSON.stringify(values))
+    localStorage.setItem('talentos_generated_at', new Date().toISOString())
   }
 
   if (success) {
@@ -345,14 +333,10 @@ export function StepReview({ setCurrentStep }: StepReviewProps) {
         <Button
           size="lg"
           onClick={handleSubmit}
-          disabled={!lgpd || isGenerating || isSending}
+          disabled={!lgpd || isSending}
           className="min-w-[240px]"
         >
-          {isGenerating ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Gerando PDF...
-            </>
-          ) : isSending ? (
+          {isSending ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Enviando currículo...
             </>

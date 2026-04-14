@@ -18,15 +18,27 @@ export function ActionButtons({ onNewCurriculum, onExplore }: ActionButtonsProps
           <MailCheck className="w-6 h-6 text-primary" />
         </div>
         <p className="text-sm sm:text-base font-medium text-foreground">
-          Seu currículo formatado em PDF (ABNT) foi enviado para o seu e-mail com sucesso!
+          Seu currículo foi adicionado ao nosso Banco de Talentos com sucesso!
         </p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        {onDownload && (
+          <Button
+            size="lg"
+            onClick={onDownload}
+            className="w-full sm:w-auto text-base h-12 px-8 shadow-md hover:shadow-lg transition-all bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <Award className="w-5 h-5 mr-2" />
+            Baixar Currículo (.doc)
+          </Button>
+        )}
+
         <Button
           size="lg"
+          variant="outline"
           onClick={onNewCurriculum}
-          className="w-full sm:w-auto text-base h-12 px-8 shadow-md hover:shadow-lg transition-all"
+          className="w-full sm:w-auto text-base h-12 px-8"
         >
           <RefreshCcw className="w-5 h-5 mr-2" />
           Criar Novo

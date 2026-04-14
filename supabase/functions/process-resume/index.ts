@@ -103,7 +103,11 @@ Deno.serve(async (req: Request) => {
 
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
-          const pdfContent = pdf_base64 ? (pdf_base64.includes(',') ? pdf_base64.split(',')[1] : pdf_base64) : null
+          const pdfContent = pdf_base64
+            ? pdf_base64.includes(',')
+              ? pdf_base64.split(',')[1]
+              : pdf_base64
+            : null
 
           const res = await fetch('https://api.resend.com/emails', {
             method: 'POST',
@@ -128,12 +132,14 @@ Deno.serve(async (req: Request) => {
                   <p><strong>Equipe de Talentos - Super Era Digital</strong></p>
                 </div>
               `,
-              attachments: pdfContent ? [
-                {
-                  filename: `curriculo_${nome.replace(/\s+/g, '_').toLowerCase()}.pdf`,
-                  content: pdfContent,
-                },
-              ] : undefined,
+              attachments: pdfContent
+                ? [
+                    {
+                      filename: `curriculo_${nome.replace(/\s+/g, '_').toLowerCase()}.pdf`,
+                      content: pdfContent,
+                    },
+                  ]
+                : undefined,
             }),
           })
 

@@ -52,10 +52,10 @@ const generateDocument = (values: TalentosFormValues) => {
           mso-paper-source: 0;
         }
         div.WordSection1 { page: WordSection1; }
-        body { font-family: 'Arial', sans-serif; font-size: 12pt; line-height: 1.5; color: #000; }
+        body { font-family: 'Arial', sans-serif; font-size: 12pt; line-height: 1.5; color: #000; text-align: justify; }
         h1 { font-size: 14pt; font-weight: bold; text-align: center; text-transform: uppercase; margin-bottom: 24pt; }
         h2 { font-size: 12pt; font-weight: bold; text-transform: uppercase; margin-top: 24pt; margin-bottom: 12pt; border-bottom: 1pt solid #000; padding-bottom: 2pt; }
-        p { margin: 0 0 12pt 0; }
+        p { margin: 0 0 12pt 0; text-align: justify; }
         .contact-info { text-align: center; margin-bottom: 24pt; }
         .section { margin-bottom: 24pt; }
         .item-title { font-weight: bold; }
@@ -133,10 +133,10 @@ const generateDocument = (values: TalentosFormValues) => {
           values.additional_info?.hard_skills || values.additional_info?.soft_skills
             ? `
         <div class="section">
-          <h2>Habilidades</h2>
+          <h2>Habilidades e Competências</h2>
           <ul>
-            ${values.additional_info?.hard_skills ? `<li><strong>Hard Skills:</strong> ${values.additional_info.hard_skills}</li>` : ''}
-            ${values.additional_info?.soft_skills ? `<li><strong>Soft Skills:</strong> ${values.additional_info.soft_skills}</li>` : ''}
+            ${values.additional_info?.soft_skills ? `<li><strong>Soft Skills (Comportamentais):</strong> ${values.additional_info.soft_skills}</li>` : ''}
+            ${values.additional_info?.hard_skills ? `<li><strong>Hard Skills (Técnicas):</strong> ${values.additional_info.hard_skills}</li>` : ''}
           </ul>
         </div>
         `
@@ -403,12 +403,11 @@ export default function TalentosPage() {
               .filter(Boolean)
           : []
 
-      await pb.collection('candidatos').create({
+      const payload: any = {
         nome: values.personal?.nome,
         email: values.personal?.email,
         telefone: values.personal?.telefone,
         endereco: values.personal?.endereco,
-        data_nascimento: dataNascimento,
         foto_url: values.personal?.foto_url || '',
         curriculo_url: '',
         formacoes: values.educations || [],
@@ -432,8 +431,13 @@ export default function TalentosPage() {
             : null,
         status: 'Novo',
         origem: 'Site',
-        empresa_id: '',
-      })
+      }
+
+      if (dataNascimento) {
+        payload.data_nascimento = dataNascimento
+      }
+
+      await pb.collection('candidatos').create(payload)
 
       try {
         generateDocument(values)
@@ -442,11 +446,11 @@ export default function TalentosPage() {
       }
 
       toast({
-        title: 'Currículo enviado e baixado com sucesso!',
-        description: 'Sua candidatura foi registrada e o download do currículo foi iniciado.',
+        title: 'Currículo enviado com sucesso!',
+        description: 'Sua candidatura foi registrada e o download foi iniciado.',
       })
 
-      localStorage.removeItem(STORAGE_KEY)
+      localStorage.setItem('talentos_generated_at', new Date().toISOString())
       navigate('/talentos/sucesso')
     } catch (err: any) {
       console.error(err)
@@ -491,8 +495,8 @@ export default function TalentosPage() {
       }
 
       toast({
-        title: 'Erro ao enviar candidatura',
-        description: errorMsg,
+        title: 'Erro ao salvar dados no banco de talentos',
+        description: errorMsg || 'Verifique os dados preenchidos e tente novamente.',
         variant: 'destructive',
       })
     } finally {

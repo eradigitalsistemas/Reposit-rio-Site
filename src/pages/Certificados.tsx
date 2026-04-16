@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -84,6 +84,24 @@ export default function Certificados() {
     )
   }
 
+  const [certificates, setCertificates] = useState<any[]>([])
+  const [isLoadingCerts, setIsLoadingCerts] = useState(true)
+
+  useEffect(() => {
+    async function fetchCertificates() {
+      try {
+        const { data, error } = await supabase.from('certificates').select('*').order('id')
+        if (error) throw error
+        setCertificates(data || [])
+      } catch (err) {
+        console.error('Error fetching certificates:', err)
+      } finally {
+        setIsLoadingCerts(false)
+      }
+    }
+    fetchCertificates()
+  }, [])
+
   const handleWhatsAppCard = (title: string) => {
     trackAndOpenWhatsApp(
       WHATSAPP_SUPORTE,
@@ -105,57 +123,28 @@ export default function Certificados() {
       />
 
       {/* Types of Certificates */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          {
-            title: 'e-CPF A1',
-            desc: 'Instalado no computador, validade de 1 ano. Ideal para pessoas físicas.',
-            benefits: [
-              'Instalado no computador',
-              'Validade de 1 ano',
-              'Emissão online',
-              'Acesso rápido',
-            ],
-          },
-          {
-            title: 'e-CPF A3',
-            desc: 'Armazenado em token ou cartão, validade de 1 a 3 anos. Maior segurança física.',
-            benefits: [
-              'Armazenado em token/cartão',
-              'Validade de 1 a 3 anos',
-              'Alta segurança',
-              'Portabilidade',
-            ],
-          },
-          {
-            title: 'e-CNPJ A1',
-            desc: 'Identidade digital da sua empresa no computador, validade de 1 ano.',
-            benefits: [
-              'Emissão de NF-e rápida',
-              'Instalação em múltiplos PCs',
-              'Validade de 1 ano',
-              'Automação fácil',
-            ],
-          },
-          {
-            title: 'e-CNPJ A3',
-            desc: 'Identidade PJ em mídia física, validade de 1 a 3 anos.',
-            benefits: [
-              'Mídia física (Token)',
-              'Validade de até 3 anos',
-              'Máxima segurança',
-              'Uso restrito',
-            ],
-          },
-        ].map((cert, i) => (
-          <CertificateCard
-            key={i}
-            type={cert.title}
-            description={cert.desc}
-            benefits={cert.benefits}
-            onAction={() => handleWhatsAppCard(cert.title)}
-          />
-        ))}
+      <section className="min-h-[200px]">
+        {isLoadingCerts ? (
+          <div className="flex justify-center items-center h-48">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : certificates.length === 0 ? (
+          <div className="text-center text-muted-foreground h-48 flex items-center justify-center bg-slate-50 rounded-xl border border-dashed">
+            Nenhum certificado encontrado no momento.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {certificates.map((cert) => (
+              <CertificateCard
+                key={cert.id}
+                type={cert.title}
+                description={cert.description}
+                benefits={cert.benefits}
+                onAction={() => handleWhatsAppCard(cert.title)}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       <div className="grid md:grid-cols-2 gap-12 items-start">

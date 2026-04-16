@@ -14,6 +14,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/button'
 import { BenefitsSection } from '@/components/blocks/BenefitsSection'
 import { CTASection } from '@/components/blocks/CTASection'
+import { RegistrationFormSection } from '@/components/blocks/RegistrationFormSection'
 
 const Index = () => {
   const navigate = useNavigate()
@@ -183,6 +184,17 @@ const Index = () => {
             },
           ]}
         />
+      </section>
+
+      {/* Lead Capture Form */}
+      <section className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-bold tracking-tight">Comece sua transformação</h2>
+          <p className="text-muted-foreground mt-2">
+            Deixe seus dados e nossa equipe de especialistas entrará em contato.
+          </p>
+        </div>
+        <RegistrationFormSection />
       </section>
 
       {/* Final CTA */}

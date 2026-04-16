@@ -22,12 +22,56 @@ export function StepReview({ setCurrentStep }: StepReviewProps) {
   const handleSubmit = async () => {
     setIsSubmitting(true)
     try {
-      await pb.send('/backend/v1/resume/generate', {
-        method: 'POST',
-        body: JSON.stringify(values),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      let scoreD = 0,
+        scoreI = 0,
+        scoreS = 0,
+        scoreC = 0
+      if (values.disc) {
+        Object.values(values.disc).forEach((ans) => {
+          if (ans === 'D') scoreD++
+          if (ans === 'I') scoreI++
+          if (ans === 'S') scoreS++
+          if (ans === 'C') scoreC++
+        })
+      }
+
+      const scores = [
+        { type: 'Dominância (D)', value: scoreD },
+        { type: 'Influência (I)', value: scoreI },
+        { type: 'Estabilidade (S)', value: scoreS },
+        { type: 'Conformidade (C)', value: scoreC },
+      ].sort((a, b) => b.value - a.value)
+
+      let tipoPerfil = scores[0].type
+      if (scores[0].value === scores[1].value && scores[0].value > 0) {
+        tipoPerfil = `${scores[0].type.split(' ')[0]} / ${scores[1].type.split(' ')[0]}`
+      }
+
+      let dataNascimento = null
+      if (values.personal?.data_nascimento) {
+        dataNascimento = new Date(values.personal.data_nascimento).toISOString()
+      }
+
+      await pb.collection('candidatos').create({
+        nome: values.personal?.nome,
+        email: values.personal?.email,
+        telefone: values.personal?.telefone,
+        endereco: values.personal?.endereco,
+        data_nascimento: dataNascimento,
+        formacoes: values.educations || [],
+        experiencias: values.experiences || [],
+        disc_respondido: !!values.disc,
+        disc_resultado: values.disc
+          ? {
+              pontuacao_d: scoreD,
+              pontuacao_i: scoreI,
+              pontuacao_s: scoreS,
+              pontuacao_c: scoreC,
+              tipo_perfil: tipoPerfil,
+            }
+          : null,
+        status: 'Novo',
+        origem: 'Site',
       })
 
       toast({
@@ -35,7 +79,9 @@ export function StepReview({ setCurrentStep }: StepReviewProps) {
         description: 'Seu currículo foi gerado e enviado com sucesso.',
       })
 
-      localStorage.removeItem('talentos_form_data')
+      localStorage.setItem('talentos_form_data', JSON.stringify(values))
+      localStorage.setItem('talentos_generated_at', new Date().toISOString())
+
       navigate('/talentos/sucesso')
     } catch (error: any) {
       console.error('Error submitting resume:', error)
@@ -43,8 +89,7 @@ export function StepReview({ setCurrentStep }: StepReviewProps) {
         variant: 'destructive',
         title: 'Erro ao enviar currículo',
         description:
-          error?.message ||
-          'Ocorreu um erro inesperado ao conectar com o servidor. Tente novamente mais tarde.',
+          error?.message || 'Ocorreu um erro inesperado. Verifique os dados e tente novamente.',
       })
     } finally {
       setIsSubmitting(false)

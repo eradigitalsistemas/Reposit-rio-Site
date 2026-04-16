@@ -53,11 +53,14 @@ export default function PortalParceiro() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
     try {
-      await pb.collection('leads_parceiros').create({
-        nome_empresa: values.nome_empresa,
+      await pb.collection('leads').create({
+        nome: values.nome_empresa,
+        empresa: values.nome_empresa,
         email: values.email,
         telefone: values.telefone,
         mensagem: values.mensagem,
+        tipo: 'Lead de Parceria',
+        estagio: 'Novo',
       })
       setIsSuccess(true)
     } catch (err: any) {

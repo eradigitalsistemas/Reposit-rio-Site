@@ -55,12 +55,14 @@ export default function ERP() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
     try {
-      await pb.collection('leads_erp').create({
+      await pb.collection('leads').create({
         nome: values.nome,
         empresa: values.empresa,
         email: values.email,
         telefone: values.telefone,
         data_contato: new Date().toISOString(),
+        tipo: 'Lead de Sistemas ERP',
+        estagio: 'Novo',
       })
       setIsSuccess(true)
     } catch (err: any) {

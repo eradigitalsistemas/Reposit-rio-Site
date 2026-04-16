@@ -3,7 +3,6 @@ import pb from '@/lib/pocketbase/client'
 import { useRealtime } from '@/hooks/use-realtime'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Table,
   TableBody,
@@ -27,122 +26,26 @@ import {
 import { format } from 'date-fns'
 import { Search, Eye, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
-
-const GenericLeadTable = ({ items, search, collectionName, columns, renderDetails }: any) => {
-  const filtered = items.filter((i: any) =>
-    Object.values(i).some((val) => String(val).toLowerCase().includes(search.toLowerCase())),
-  )
-
-  const handleDelete = async (id: string) => {
-    try {
-      await pb.collection(collectionName).delete(id)
-      toast.success('Lead excluído com sucesso!')
-    } catch (err) {
-      toast.error('Erro ao excluir lead.')
-    }
-  }
-
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          {columns.map((c: any, idx: number) => (
-            <TableHead key={idx}>{c.label}</TableHead>
-          ))}
-          <TableHead className="text-right">Ações</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {filtered.map((l: any) => (
-          <TableRow key={l.id}>
-            {columns.map((c: any, idx: number) => (
-              <TableCell key={idx}>{c.render(l)}</TableCell>
-            ))}
-            <TableCell className="text-right">
-              <div className="flex justify-end gap-2">
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <Eye className="w-4 h-4 mr-2" /> Ver
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent className="sm:max-w-md">
-                    <SheetHeader className="mb-6">
-                      <SheetTitle>Detalhes do Lead</SheetTitle>
-                    </SheetHeader>
-                    {renderDetails(l)}
-                  </SheetContent>
-                </Sheet>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-destructive hover:bg-destructive/10"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        O lead será permanentemente excluído do sistema.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleDelete(l.id)}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      >
-                        Excluir
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  )
-}
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 export default function LeadsTab() {
-  const [leadsGeral, setLeadsGeral] = useState<any[]>([])
-  const [leadsErp, setLeadsErp] = useState<any[]>([])
-  const [leadsCert, setLeadsCert] = useState<any[]>([])
-  const [leadsParceiros, setLeadsParceiros] = useState<any[]>([])
+  const [leads, setLeads] = useState<any[]>([])
   const [search, setSearch] = useState('')
 
   const loadAll = async () => {
-    pb.collection('leads')
-      .getFullList({ sort: '-created' })
-      .then(setLeadsGeral)
-      .catch(console.error)
-    pb.collection('leads_erp')
-      .getFullList({ sort: '-created' })
-      .then(setLeadsErp)
-      .catch(console.error)
-    pb.collection('leads_certificados')
-      .getFullList({ sort: '-created' })
-      .then(setLeadsCert)
-      .catch(console.error)
-    pb.collection('leads_parceiros')
-      .getFullList({ sort: '-created' })
-      .then(setLeadsParceiros)
-      .catch(console.error)
+    try {
+      const records = await pb.collection('leads').getFullList({ sort: '-created' })
+      setLeads(records)
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   useEffect(() => {
     loadAll()
   }, [])
+
   useRealtime('leads', () => loadAll())
-  useRealtime('leads_erp', () => loadAll())
-  useRealtime('leads_certificados', () => loadAll())
-  useRealtime('leads_parceiros', () => loadAll())
 
   const formatDate = (dateString: string) =>
     dateString ? format(new Date(dateString), 'dd/MM/yyyy HH:mm') : '-'
@@ -154,125 +57,127 @@ export default function LeadsTab() {
     </div>
   )
 
+  const filtered = leads.filter((i: any) =>
+    Object.values(i).some((val) => String(val).toLowerCase().includes(search.toLowerCase())),
+  )
+
+  const handleDelete = async (id: string) => {
+    try {
+      await pb.collection('leads').delete(id)
+      toast.success('Lead excluído com sucesso!')
+    } catch (err) {
+      toast.error('Erro ao excluir lead.')
+    }
+  }
+
+  const renderDetails = (l: any) => (
+    <ScrollArea className="h-[calc(100vh-100px)] pr-4">
+      {detailRow('Data', formatDate(l.created))}
+      {detailRow('Tipo', l.tipo || 'Geral')}
+      {detailRow('Nome', l.nome)}
+      {detailRow('Email', l.email)}
+      {detailRow('Telefone', l.telefone)}
+      {l.empresa && detailRow('Empresa', l.empresa)}
+      {l.certificate_interest && detailRow('Tipo de Certificado', l.certificate_interest)}
+      {l.mensagem && detailRow('Mensagem', l.mensagem)}
+      {l.estagio && detailRow('Estágio', l.estagio)}
+      {l.status_interesse && detailRow('Status', l.status_interesse)}
+    </ScrollArea>
+  )
+
   return (
     <div className="bg-card rounded-xl shadow-sm border overflow-hidden">
-      <Tabs defaultValue="geral" className="w-full">
-        <div className="p-4 border-b bg-muted/10 flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <TabsList>
-            <TabsTrigger value="geral">Geral</TabsTrigger>
-            <TabsTrigger value="erp">ERP</TabsTrigger>
-            <TabsTrigger value="certificados">Certificados</TabsTrigger>
-            <TabsTrigger value="parceiros">Parceiros</TabsTrigger>
-          </TabsList>
-          <div className="relative w-full max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar leads..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-9"
-            />
-          </div>
+      <div className="p-4 border-b bg-muted/10 flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <h2 className="text-lg font-semibold">Todos os Leads</h2>
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar leads..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 h-9"
+          />
         </div>
+      </div>
 
-        <TabsContent value="geral" className="m-0">
-          <GenericLeadTable
-            items={leadsGeral}
-            search={search}
-            collectionName="leads"
-            columns={[
-              { label: 'Data', render: (l: any) => formatDate(l.created) },
-              { label: 'Nome', render: (l: any) => l.nome },
-              { label: 'Email', render: (l: any) => l.email },
-              { label: 'Estágio', render: (l: any) => l.estagio || '-' },
-            ]}
-            renderDetails={(l: any) => (
-              <div>
-                {detailRow('Data', formatDate(l.created))}
-                {detailRow('Nome', l.nome)}
-                {detailRow('Email', l.email)}
-                {detailRow('Telefone', l.telefone)}
-                {detailRow('Interesse', l.certificate_interest)}
-                {detailRow('Estágio', l.estagio)}
-                {detailRow('Status', l.status_interesse)}
-              </div>
-            )}
-          />
-        </TabsContent>
-
-        <TabsContent value="erp" className="m-0">
-          <GenericLeadTable
-            items={leadsErp}
-            search={search}
-            collectionName="leads_erp"
-            columns={[
-              {
-                label: 'Data Contato',
-                render: (l: any) => formatDate(l.data_contato || l.created),
-              },
-              { label: 'Empresa', render: (l: any) => l.empresa },
-              { label: 'Email', render: (l: any) => l.email },
-            ]}
-            renderDetails={(l: any) => (
-              <div>
-                {detailRow('Data Contato', formatDate(l.data_contato || l.created))}
-                {detailRow('Empresa', l.empresa)}
-                {detailRow('Email', l.email)}
-                {detailRow('Telefone', l.telefone)}
-              </div>
-            )}
-          />
-        </TabsContent>
-
-        <TabsContent value="certificados" className="m-0">
-          <GenericLeadTable
-            items={leadsCert}
-            search={search}
-            collectionName="leads_certificados"
-            columns={[
-              {
-                label: 'Data Contato',
-                render: (l: any) => formatDate(l.data_contato || l.created),
-              },
-              { label: 'Email', render: (l: any) => l.email },
-              { label: 'Tipo Certificado', render: (l: any) => l.tipo_certificado },
-            ]}
-            renderDetails={(l: any) => (
-              <div>
-                {detailRow('Data Contato', formatDate(l.data_contato || l.created))}
-                {detailRow('Email', l.email)}
-                {detailRow('Telefone', l.telefone)}
-                {detailRow('Tipo Certificado', l.tipo_certificado)}
-              </div>
-            )}
-          />
-        </TabsContent>
-
-        <TabsContent value="parceiros" className="m-0">
-          <GenericLeadTable
-            items={leadsParceiros}
-            search={search}
-            collectionName="leads_parceiros"
-            columns={[
-              {
-                label: 'Data',
-                render: (l: any) => formatDate(l.created),
-              },
-              { label: 'Empresa', render: (l: any) => l.nome_empresa },
-              { label: 'Email', render: (l: any) => l.email },
-            ]}
-            renderDetails={(l: any) => (
-              <div>
-                {detailRow('Data', formatDate(l.created))}
-                {detailRow('Empresa / Profissional', l.nome_empresa)}
-                {detailRow('Email', l.email)}
-                {detailRow('Telefone', l.telefone)}
-                {detailRow('Mensagem', l.mensagem)}
-              </div>
-            )}
-          />
-        </TabsContent>
-      </Tabs>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Data</TableHead>
+            <TableHead>Nome</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Tipo</TableHead>
+            <TableHead className="text-right">Ações</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filtered.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                Nenhum lead encontrado.
+              </TableCell>
+            </TableRow>
+          ) : (
+            filtered.map((l: any) => (
+              <TableRow key={l.id}>
+                <TableCell className="text-muted-foreground">{formatDate(l.created)}</TableCell>
+                <TableCell className="font-medium">{l.nome}</TableCell>
+                <TableCell>{l.email}</TableCell>
+                <TableCell>
+                  <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                    {l.tipo || 'Geral'}
+                  </span>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Sheet>
+                      <SheetTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <Eye className="w-4 h-4 mr-2" /> Ver
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent className="sm:max-w-md">
+                        <SheetHeader className="mb-6">
+                          <SheetTitle>Detalhes do Lead</SheetTitle>
+                        </SheetHeader>
+                        {renderDetails(l)}
+                      </SheetContent>
+                    </Sheet>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            O lead será permanentemente excluído do sistema.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(l.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Excluir
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
     </div>
   )
 }

@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-const generateAbntResumeHtml = (resumeData: any, userProfile: any) => {
+const generateAbntResumeHtml = (resumeData: any) => {
   const { personal, educations = [], experiences = [], additional_info = {} } = resumeData
 
   const formatDate = (dateStr: string) => {
@@ -30,77 +30,55 @@ const generateAbntResumeHtml = (resumeData: any, userProfile: any) => {
   }
 
   return `
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-    <head>
-      <meta charset="UTF-8">
-      <title>Currículo - ${personal.nome}</title>
-      <style>
-        @page {
-          size: A4;
-          margin: 3cm 2cm 2cm 3cm;
-        }
-        body {
-          font-family: "Arial", "Times New Roman", sans-serif;
-          font-size: 12pt;
-          line-height: 1.5;
-          color: #000;
-          margin: 0;
-          padding: 0;
-          max-width: 800px;
-          margin: 0 auto;
-        }
-        h1 {
-          font-size: 14pt;
-          font-weight: bold;
-          text-transform: uppercase;
-          text-align: center;
-          margin-bottom: 24pt;
-        }
-        h2 {
-          font-size: 14pt;
-          font-weight: bold;
-          text-transform: uppercase;
-          margin-top: 18pt;
-          margin-bottom: 12pt;
-        }
-        p {
-          margin: 0 0 12pt 0;
-          text-align: justify;
-        }
-        .header-info {
-          text-align: center;
-          margin-bottom: 24pt;
-        }
-        .header-info p {
-          margin: 0;
-          text-align: center;
-        }
-        .section-item {
-          margin-bottom: 12pt;
-        }
-        .item-title {
-          font-weight: bold;
-        }
-        .item-date {
-          font-style: italic;
-        }
-        .profile-desc {
-          margin-top: 6pt;
-          display: block;
-        }
-        ul {
-          margin: 0 0 12pt 0;
-          padding-left: 24pt;
-        }
-        li {
-          margin-bottom: 6pt;
-          text-align: justify;
-        }
-        @media print {
-          body { max-width: none; margin: 0; }
-        }
-      </style>
+    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    <head><meta charset='utf-8'><title>Currículo</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 3cm 2cm 2cm 3cm;
+      }
+      body {
+        font-family: "Arial", sans-serif;
+        font-size: 12pt;
+        line-height: 1.5;
+        color: #000;
+      }
+      h1 {
+        font-size: 14pt;
+        font-weight: bold;
+        text-transform: uppercase;
+        text-align: center;
+        margin-bottom: 24pt;
+      }
+      h2 {
+        font-size: 12pt;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-top: 18pt;
+        margin-bottom: 12pt;
+      }
+      p {
+        margin: 0 0 12pt 0;
+        text-align: justify;
+      }
+      .header-info {
+        text-align: center;
+        margin-bottom: 24pt;
+      }
+      .header-info p {
+        margin: 0;
+        text-align: center;
+      }
+      .section-item {
+        margin-bottom: 12pt;
+      }
+      .item-title {
+        font-weight: bold;
+      }
+      .item-date {
+        font-style: italic;
+      }
+    </style>
     </head>
     <body>
       <h1>${personal.nome}</h1>
@@ -180,9 +158,6 @@ export default function TalentosSuccessPage() {
   const navigate = useNavigate()
   const [data, setData] = useState<any>(null)
   const [expired, setExpired] = useState(false)
-  const [profile, setProfile] = useState<{ type: string; desc: string; scores?: any[] } | null>(
-    null,
-  )
 
   useEffect(() => {
     const saved = localStorage.getItem('talentos_form_data')
@@ -204,55 +179,14 @@ export default function TalentosSuccessPage() {
           setExpired(true)
         }
       }
-
-      const disc = parsed.disc || {}
-      let scoreD = 0,
-        scoreI = 0,
-        scoreS = 0,
-        scoreC = 0
-      Object.values(disc).forEach((ans) => {
-        if (ans === 'D') scoreD++
-        if (ans === 'I') scoreI++
-        if (ans === 'S') scoreS++
-        if (ans === 'C') scoreC++
-      })
-      const scores = [
-        {
-          type: 'Dominância (D)',
-          desc: 'Focado em resultados, direto e competitivo.',
-          value: scoreD,
-        },
-        {
-          type: 'Influência (I)',
-          desc: 'Comunicativo, persuasivo e focado em pessoas.',
-          value: scoreI,
-        },
-        {
-          type: 'Estabilidade (S)',
-          desc: 'Paciente, confiável e focado em equipe.',
-          value: scoreS,
-        },
-        { type: 'Conformidade (C)', desc: 'Analítico, preciso e focado em regras.', value: scoreC },
-      ]
-      scores.sort((a, b) => b.value - a.value)
-
-      if (scores[0].value === scores[1].value && scores[0].value > 0) {
-        setProfile({
-          type: `${scores[0].type.split(' ')[0]} / ${scores[1].type.split(' ')[0]}`,
-          desc: 'Perfil equilibrado com múltiplas forças complementares.',
-          scores: scores,
-        })
-      } else {
-        setProfile({ ...scores[0], scores })
-      }
     } catch (e) {
       navigate('/talentos', { replace: true })
     }
   }, [navigate])
 
   const handleDownload = () => {
-    if (!data || !profile) return
-    const htmlContent = generateAbntResumeHtml(data, profile)
+    if (!data) return
+    const htmlContent = generateAbntResumeHtml(data)
     const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' })
     const link = document.createElement('a')
     link.href = URL.createObjectURL(blob)
@@ -288,7 +222,7 @@ export default function TalentosSuccessPage() {
     )
   }
 
-  if (!data || !profile) return null
+  if (!data) return null
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-4 animate-fade-in-up">
@@ -303,55 +237,35 @@ export default function TalentosSuccessPage() {
         </h1>
         <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
           Seu perfil já está disponível para nossa equipe de recrutamento. Você também pode baixar o
-          arquivo no formato Word abaixo.
+          arquivo formatado no padrão ABNT.
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
-        <Card>
+      <div className="flex justify-center mb-8">
+        <Card className="w-full max-w-md">
           <CardHeader className="pb-3 border-b mb-4">
-            <CardTitle className="text-lg flex items-center">
-              <User className="w-5 h-5 mr-2 text-primary" /> Dados Pessoais
+            <CardTitle className="text-lg flex items-center justify-center">
+              <User className="w-5 h-5 mr-2 text-primary" /> Seus Dados
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-4 mb-4">
+            <div className="flex flex-col items-center gap-4 mb-4 text-center">
               {data.personal.foto_url ? (
                 <img
                   src={data.personal.foto_url}
                   alt="Foto de perfil"
-                  className="w-16 h-16 rounded-full object-cover border-2 border-primary/20"
+                  className="w-20 h-20 rounded-full object-cover border-2 border-primary/20"
                 />
               ) : (
-                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-                  <User className="w-8 h-8 text-muted-foreground" />
+                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
+                  <User className="w-10 h-10 text-muted-foreground" />
                 </div>
               )}
               <div>
-                <p className="font-bold text-lg">{data.personal.nome}</p>
+                <p className="font-bold text-xl">{data.personal.nome}</p>
                 <p className="text-sm text-muted-foreground">{data.personal.email}</p>
                 <p className="text-sm text-muted-foreground">{data.personal.telefone}</p>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-primary/5 border-primary/20">
-          <CardHeader className="pb-3 border-b border-primary/10 mb-4">
-            <CardTitle className="text-lg flex items-center text-primary">
-              <FileText className="w-5 h-5 mr-2" /> Seu Perfil DISC
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="font-bold text-xl mb-2">{profile.type}</p>
-            <p className="text-muted-foreground">{profile.desc}</p>
-            <div className="mt-4 space-y-2">
-              {profile.scores?.map((s, i) => (
-                <div key={i} className="flex justify-between text-sm">
-                  <span className="font-medium">{s.type}</span>
-                  <span className="text-primary font-bold">{s.value} pts</span>
-                </div>
-              ))}
             </div>
           </CardContent>
         </Card>

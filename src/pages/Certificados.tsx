@@ -76,6 +76,7 @@ export default function Certificados() {
         certificate_interest: values.tipo_certificado,
         estagio: 'Novo',
         status_interesse: 'Interessado',
+        tipo: 'Lead de Certificados',
       })
       setIsSuccess(true)
       toast({

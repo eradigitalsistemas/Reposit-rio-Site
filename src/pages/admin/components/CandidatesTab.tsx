@@ -37,10 +37,24 @@ const ResumeView = ({ c }: { c: any }) => {
     <div className="space-y-6 p-6 bg-background rounded-lg">
       <div className="border-b pb-4">
         <h2 className="text-2xl font-bold">{c.nome}</h2>
-        <p className="text-muted-foreground">
-          {c.email} | {c.telefone}
-        </p>
-        <div className="flex gap-2 mt-2">
+        <div className="text-muted-foreground space-y-1 mt-2 text-sm">
+          <p>
+            <strong>E-mail:</strong> {c.email}
+          </p>
+          <p>
+            <strong>Telefone:</strong> {c.telefone}
+          </p>
+          <p>
+            <strong>Nascimento:</strong>{' '}
+            {c.data_nascimento
+              ? format(new Date(c.data_nascimento), 'dd/MM/yyyy')
+              : 'Não informado'}
+          </p>
+          <p>
+            <strong>Endereço:</strong> {c.endereco || 'Não informado'}
+          </p>
+        </div>
+        <div className="flex gap-2 mt-4">
           <span className="text-xs px-2 py-1 bg-secondary rounded-md">
             Origem: {c.origem || 'N/A'}
           </span>
@@ -54,18 +68,18 @@ const ResumeView = ({ c }: { c: any }) => {
         <h3 className="font-semibold text-lg border-b mb-3">Experiência Profissional</h3>
         {experiencias.length > 0 ? (
           experiencias.map((e: any, i: number) => (
-            <div key={i} className="mb-3">
-              <p className="font-medium">
+            <div key={i} className="mb-4">
+              <p className="font-medium text-base">
                 {e.cargo} na {e.empresa}
               </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground mb-1">
                 {e.data_inicio} - {e.data_fim || 'Atual'}
               </p>
-              <p className="text-sm mt-1">{e.descricao}</p>
+              <p className="text-sm">{e.descricao}</p>
             </div>
           ))
         ) : (
-          <p className="text-sm text-muted-foreground">Não informado</p>
+          <p className="text-sm text-muted-foreground">Não informada</p>
         )}
       </div>
 
@@ -73,8 +87,8 @@ const ResumeView = ({ c }: { c: any }) => {
         <h3 className="font-semibold text-lg border-b mb-3">Formação Acadêmica</h3>
         {formacoes.length > 0 ? (
           formacoes.map((f: any, i: number) => (
-            <div key={i} className="mb-2">
-              <p className="font-medium">
+            <div key={i} className="mb-3">
+              <p className="font-medium text-base">
                 {f.curso} - {f.instituicao}
               </p>
               <p className="text-sm text-muted-foreground">
@@ -83,19 +97,37 @@ const ResumeView = ({ c }: { c: any }) => {
             </div>
           ))
         ) : (
-          <p className="text-sm text-muted-foreground">Não informado</p>
+          <p className="text-sm text-muted-foreground">Não informada</p>
         )}
       </div>
 
       <div>
         <h3 className="font-semibold text-lg border-b mb-3">Perfil DISC</h3>
-        <p className="text-sm">
+        <p className="text-sm mb-2">
           Respondido: <strong>{c.disc_respondido ? 'Sim' : 'Não'}</strong>
         </p>
         {c.disc_respondido && disc.tipo_perfil && (
-          <p className="text-sm">
-            Resultado: <strong>{disc.tipo_perfil}</strong>
-          </p>
+          <div className="bg-muted/30 p-4 rounded-md text-sm space-y-2">
+            <p className="font-medium text-base text-primary mb-2">Resultado: {disc.tipo_perfil}</p>
+            <div className="grid grid-cols-2 gap-2 max-w-sm">
+              <div className="flex justify-between">
+                <span>Dominância (D):</span>{' '}
+                <span className="font-bold">{disc.pontuacao_d || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Influência (I):</span>{' '}
+                <span className="font-bold">{disc.pontuacao_i || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Estabilidade (S):</span>{' '}
+                <span className="font-bold">{disc.pontuacao_s || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Conformidade (C):</span>{' '}
+                <span className="font-bold">{disc.pontuacao_c || 0}</span>
+              </div>
+            </div>
+          </div>
         )}
       </div>
 

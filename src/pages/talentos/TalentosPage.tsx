@@ -171,6 +171,19 @@ export default function TalentosPage() {
         }
       }
 
+      if (userId && values.experiences) {
+        for (const exp of values.experiences) {
+          await pb.collection('experiences').create({
+            user_id: userId,
+            empresa: exp.empresa,
+            cargo: exp.cargo,
+            data_inicio: exp.data_inicio,
+            data_fim: exp.data_fim || '',
+            descricao: exp.descricao || '',
+          })
+        }
+      }
+
       await pb.collection('candidatos').create({
         nome: values.personal?.nome,
         email: values.personal?.email,

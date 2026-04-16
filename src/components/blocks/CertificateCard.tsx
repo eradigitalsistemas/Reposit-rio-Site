@@ -16,7 +16,7 @@ export function CertificateCard({ type, description, benefits, onAction }: Certi
         <CardTitle className="text-2xl font-bold text-primary">{type}</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col space-y-6">
-        <p className="text-sm text-muted-foreground text-center">{description}</p>
+        {description && <p className="text-sm text-muted-foreground text-center">{description}</p>}
         <ul className="space-y-2 flex-1">
           {benefits.map((benefit, i) => (
             <li key={i} className="flex items-start gap-2 text-sm">

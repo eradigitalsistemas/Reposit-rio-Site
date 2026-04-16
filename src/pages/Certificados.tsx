@@ -49,6 +49,13 @@ const formSchema = z.object({
   lgpd: z.boolean().refine((val) => val === true, 'Você deve aceitar os termos de privacidade'),
 })
 
+const cleanText = (text: any) => {
+  if (!text) return ''
+  return String(text)
+    .replace(/[[\]"]/g, '')
+    .trim()
+}
+
 export default function Certificados() {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -200,12 +207,13 @@ export default function Certificados() {
               <CertificateCard
                 key={cert.id}
                 type={cert.title}
-                description={cert.description}
+                description={cleanText(cert.description)}
                 benefits={
                   cert.benefits
                     ? String(cert.benefits)
                         .split(',')
-                        .map((b) => b.trim())
+                        .map((b) => cleanText(b))
+                        .filter(Boolean)
                     : []
                 }
                 onAction={() => handleWhatsAppCard(cert.title)}

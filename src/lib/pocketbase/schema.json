@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-16T22:36:12.553Z",
+  "generatedAt": "2026-04-16T22:48:13.157Z",
   "collections": [
     {
       "name": "users",
@@ -139,6 +139,12 @@
         {
           "name": "mensagem",
           "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "email_sent",
+          "type": "bool",
           "required": false,
           "system": false
         }
@@ -636,6 +642,12 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "email_sent",
+          "type": "bool",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": []

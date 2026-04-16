@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Loader2, CheckCircle2 } from 'lucide-react'
-import { supabase } from '@/lib/supabase/client'
+import pb from '@/lib/pocketbase/client'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,7 +17,6 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
-import { sendEmailWithRetry } from '@/lib/email'
 import { formatPhone } from '@/lib/utils'
 
 const leadSchema = z.object({
@@ -41,56 +40,23 @@ export function RegistrationFormSection() {
   async function onSubmit(values: z.infer<typeof leadSchema>) {
     setIsSubmitting(true)
     try {
-      // 1. Database insertion
-      const { error: dbError } = await supabase.from('leads').insert({
+      // 1. Database insertion via PocketBase
+      await pb.collection('leads').create({
         nome: values.name,
         email: values.email,
         telefone: values.phone,
         empresa: values.company,
-        observacoes: values.details,
+        mensagem: values.details,
         estagio: 'Novo',
         status_interesse: 'Interessado',
-      } as any)
-
-      if (dbError) throw dbError
-
-      // 2. Email payload preparation
-      const clientPayload = {
-        type: 'client_confirmation',
-        clientEmail: values.email,
-        clientName: values.name,
-        subject: 'Bem-vindo ao Planejador Financeiro',
-        from: 'suporte@seudominio',
-        registrationSummary: {
-          name: values.name,
-          email: values.email,
-          phone: values.phone,
-          company: values.company,
-        },
-        accessLink: window.location.origin,
-      }
-
-      const internalPayload = {
-        type: 'internal_notification',
-        teamEmail: 'comercial@aeradigital.com.br',
-        subject: `Nova Solicitação de Cadastro - ${values.name}`,
-        from: 'noreply@seudominio',
-        clientData: {
-          name: values.name,
-          email: values.email,
-          phone: values.phone,
-          company: values.company,
-          registrationDetails: values.details,
-        },
-      }
-
-      // 3. Trigger edge function with retries
-      await Promise.all([sendEmailWithRetry(clientPayload), sendEmailWithRetry(internalPayload)])
+        tipo: 'Certificado',
+        certificate_interest: 'Certificado Digital',
+      })
 
       setIsSuccess(true)
       toast({
         title: 'Sucesso!',
-        description: 'Cadastro realizado com sucesso! Confira seu e-mail para mais detalhes',
+        description: 'Cadastro recebido! A confirmação foi enviada para o seu e-mail.',
       })
       form.reset()
     } catch (err: any) {
@@ -109,7 +75,9 @@ export function RegistrationFormSection() {
       <div className="text-center space-y-6 p-8 bg-slate-50 rounded-xl border max-w-2xl mx-auto animate-fade-in">
         <CheckCircle2 className="h-16 w-16 text-emerald-500 mx-auto" />
         <h2 className="text-2xl font-bold">Cadastro realizado com sucesso!</h2>
-        <p className="text-muted-foreground">Confira seu e-mail para mais detalhes.</p>
+        <p className="text-muted-foreground">
+          Sua solicitação foi recebida e um e-mail de confirmação está a caminho.
+        </p>
         <Button onClick={() => setIsSuccess(false)} variant="outline">
           Fazer novo cadastro
         </Button>

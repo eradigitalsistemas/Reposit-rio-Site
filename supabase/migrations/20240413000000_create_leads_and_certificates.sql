@@ -9,6 +9,16 @@ CREATE TABLE IF NOT EXISTS public.leads (
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- Create leads_certificados table for specialized certificate form submissions
+CREATE TABLE IF NOT EXISTS public.leads_certificados (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  nome text NOT NULL,
+  email text NOT NULL,
+  telefone text NOT NULL,
+  tipo_certificado text NOT NULL,
+  data_contato timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- Create certificates table
 CREATE TABLE IF NOT EXISTS public.certificates (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -20,15 +30,17 @@ CREATE TABLE IF NOT EXISTS public.certificates (
 
 -- Set up Row Level Security (RLS)
 ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.leads_certificados ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.certificates ENABLE ROW LEVEL SECURITY;
 
--- Allow public insert into leads
+-- Allow public insert to leads tables
 CREATE POLICY "Allow public insert to leads" ON public.leads FOR INSERT TO public WITH CHECK (true);
+CREATE POLICY "Allow public insert to leads_certificados" ON public.leads_certificados FOR INSERT TO public WITH CHECK (true);
 
 -- Allow public read access to certificates
 CREATE POLICY "Allow public select from certificates" ON public.certificates FOR SELECT TO public USING (true);
 
--- Populate certificates with mock data if empty
+-- Populate certificates with initial data if empty
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM public.certificates) THEN

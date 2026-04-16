@@ -86,21 +86,30 @@ export default function Certificados() {
 
   const [certificates, setCertificates] = useState<any[]>([])
   const [isLoadingCerts, setIsLoadingCerts] = useState(true)
+  const [fetchError, setFetchError] = useState(false)
 
   useEffect(() => {
     async function fetchCertificates() {
       try {
+        setFetchError(false)
         const { data, error } = await supabase.from('certificates').select('*').order('id')
         if (error) throw error
         setCertificates(data || [])
       } catch (err) {
         console.error('Error fetching certificates:', err)
+        setFetchError(true)
+        toast({
+          variant: 'destructive',
+          title: 'Erro ao carregar certificados',
+          description:
+            'Não foi possível carregar as opções do banco de dados. Tente novamente mais tarde.',
+        })
       } finally {
         setIsLoadingCerts(false)
       }
     }
     fetchCertificates()
-  }, [])
+  }, [toast])
 
   const handleWhatsAppCard = (title: string) => {
     trackAndOpenWhatsApp(
@@ -127,6 +136,13 @@ export default function Certificados() {
         {isLoadingCerts ? (
           <div className="flex justify-center items-center h-48">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : fetchError ? (
+          <div className="text-center text-destructive h-48 flex flex-col items-center justify-center bg-red-50 rounded-xl border border-dashed border-red-200 p-4">
+            <p className="font-medium mb-4">Não foi possível carregar os certificados.</p>
+            <Button variant="outline" onClick={() => window.location.reload()}>
+              Tentar Novamente
+            </Button>
           </div>
         ) : certificates.length === 0 ? (
           <div className="text-center text-muted-foreground h-48 flex items-center justify-center bg-slate-50 rounded-xl border border-dashed">

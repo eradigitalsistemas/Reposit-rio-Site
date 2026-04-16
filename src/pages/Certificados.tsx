@@ -374,11 +374,4 @@ export default function Certificados() {
                     </Button>
                   </form>
                 </Form>
-              </CardContent>
-            </Card>
-          )}
-        </section>
-      </div>
-    </div>
-  )
-}
+              </C

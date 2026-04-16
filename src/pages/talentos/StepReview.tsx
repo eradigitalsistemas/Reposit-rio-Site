@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { supabase } from '@/lib/supabase/client'
 import { TalentosFormValues } from './schema'
 import { Loader2, Pencil, AlertCircle } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 interface StepReviewProps {
   setCurrentStep: (step: number) => void
@@ -22,6 +23,7 @@ export function StepReview({ setCurrentStep }: StepReviewProps) {
   } = useFormContext<TalentosFormValues>()
 
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [isSending, setIsSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -62,40 +64,100 @@ export function StepReview({ setCurrentStep }: StepReviewProps) {
     setError(null)
     setIsSending(true)
 
-    const payload = {
-      ...values,
+    const clientPayload = {
+      type: 'client_confirmation',
+      clientEmail: values.personal.email,
+      clientName: values.personal.nome,
+      subject: 'Bem-vindo ao Planejador Financeiro',
+      from: 'suporte@seudominio',
+      registrationSummary: {
+        name: values.personal.nome,
+        email: values.personal.email,
+        phone: values.personal.telefone,
+        company: values.experiences?.[0]?.empresa || 'Não informada',
+      },
+      accessLink: window.location.origin,
     }
 
-    let attempt = 0
-    let successReq = false
+    const internalPayload = {
+      type: 'internal_notification',
+      teamEmail: 'comercial@aeradigital.com.br',
+      subject: `Nova Solicitação de Cadastro - ${values.personal.nome}`,
+      from: 'noreply@seudominio',
+      clientData: {
+        name: values.personal.nome,
+        email: values.personal.email,
+        phone: values.personal.telefone,
+        company: values.experiences?.[0]?.empresa || 'Não informada',
+        registrationDetails: `Perfil DISC: ${discResult.tipoPerfil}`,
+      },
+    }
 
-    while (attempt < 3 && !successReq) {
-      try {
-        const { data, error: invokeError } = await supabase.functions.invoke('submit-talento', {
-          body: payload,
-        })
-
-        if (invokeError) throw new Error(invokeError.message)
-        if (data?.error) throw new Error(data.error)
-
-        successReq = true
-      } catch (e: any) {
-        attempt++
-        if (attempt >= 3) {
-          setError(
-            `Erro ao enviar currículo: ${e.message || 'Falha de comunicação'}. Tente novamente.`,
+    const sendEmail = async (payload: any) => {
+      let attempt = 0
+      while (attempt < 3) {
+        try {
+          const { data, error: invokeError } = await supabase.functions.invoke('RESEND_API_KEY', {
+            body: payload,
+          })
+          if (invokeError) throw new Error(invokeError.message)
+          if (data?.error) throw new Error(data.error)
+          console.log(
+            `[${new Date().toISOString()}] Email type ${payload.type} disparado com sucesso para ${payload.clientEmail || payload.teamEmail}`,
           )
-          setIsSending(false)
-          return
+          return data
+        } catch (e: any) {
+          attempt++
+          if (attempt >= 3) {
+            console.error(
+              `[${new Date().toISOString()}] Falha ao enviar e-mail ${payload.type}:`,
+              e,
+            )
+            throw new Error(e.message || 'Falha na comunicação de e-mail')
+          }
+          await new Promise((r) => setTimeout(r, 5000))
         }
-        await new Promise((r) => setTimeout(r, 1000 * Math.pow(2, attempt)))
       }
     }
 
-    setIsSending(false)
-    localStorage.setItem('talentos_form_data', JSON.stringify(values))
-    localStorage.setItem('talentos_generated_at', new Date().toISOString())
-    navigate('/talentos/sucesso')
+    const submitData = async () => {
+      let attempt = 0
+      while (attempt < 3) {
+        try {
+          const { data, error: invokeError } = await supabase.functions.invoke('submit-talento', {
+            body: values,
+          })
+          if (invokeError) throw new Error(invokeError.message)
+          if (data?.error) throw new Error(data.error)
+          return data
+        } catch (e: any) {
+          attempt++
+          if (attempt >= 3) {
+            throw new Error(e.message || 'Falha ao salvar currículo')
+          }
+          await new Promise((r) => setTimeout(r, 5000))
+        }
+      }
+    }
+
+    try {
+      await Promise.all([submitData(), sendEmail(clientPayload), sendEmail(internalPayload)])
+
+      toast({
+        title: 'Sucesso',
+        description: 'Cadastro realizado com sucesso! Confira seu e-mail para mais detalhes',
+      })
+
+      localStorage.setItem('talentos_form_data', JSON.stringify(values))
+      localStorage.setItem('talentos_generated_at', new Date().toISOString())
+      navigate('/talentos/sucesso')
+    } catch (err: any) {
+      setError(
+        `Erro ao enviar solicitação: ${err.message || 'Falha de comunicação'}. Tente novamente.`,
+      )
+    } finally {
+      setIsSending(false)
+    }
   }
 
   return (

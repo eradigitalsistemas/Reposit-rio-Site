@@ -18,7 +18,6 @@ import { FAQAccordion } from '@/components/blocks/FAQAccordion'
 import { formatPhone } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
-import { sendEmailWithRetry } from '@/lib/email'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -88,41 +87,10 @@ export default function Certificados() {
         data_contato: new Date().toISOString(),
       })
 
-      const clientPayload = {
-        type: 'client_confirmation',
-        clientEmail: values.email,
-        clientName: values.nome,
-        subject: 'Bem-vindo ao Planejador Financeiro',
-        from: 'suporte@seudominio.com',
-        registrationSummary: {
-          name: values.nome,
-          email: values.email,
-          phone: values.telefone || 'Não informado',
-          company: values.empresa || 'Não informada',
-        },
-        accessLink: window.location.origin,
-      }
-
-      const internalPayload = {
-        type: 'internal_notification',
-        teamEmail: 'comercial@areradigital.com.br',
-        subject: `Nova Solicitação de Cadastro - ${values.nome}`,
-        from: 'sistema@seudominio.com',
-        clientData: {
-          name: values.nome,
-          email: values.email,
-          phone: values.telefone || 'Não informado',
-          company: values.empresa || 'Não informada',
-          registrationDetails: `Tipo de Certificado: ${values.tipo_certificado}`,
-        },
-      }
-
-      await Promise.all([sendEmailWithRetry(clientPayload), sendEmailWithRetry(internalPayload)])
-
       setIsSuccess(true)
       toast({
         title: 'Sucesso!',
-        description: 'Cadastro realizado com sucesso! Confira seu e-mail para mais detalhes.',
+        description: 'Cadastro realizado com sucesso!',
       })
       form.reset()
     } catch (err: any) {

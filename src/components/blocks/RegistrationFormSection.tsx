@@ -56,7 +56,7 @@ export function RegistrationFormSection() {
       setIsSuccess(true)
       toast({
         title: 'Sucesso!',
-        description: 'Cadastro recebido! A confirmação foi enviada para o seu e-mail.',
+        description: 'Cadastro realizado com sucesso!',
       })
       form.reset()
     } catch (err: any) {
@@ -76,7 +76,7 @@ export function RegistrationFormSection() {
         <CheckCircle2 className="h-16 w-16 text-emerald-500 mx-auto" />
         <h2 className="text-2xl font-bold">Cadastro realizado com sucesso!</h2>
         <p className="text-muted-foreground">
-          Sua solicitação foi recebida e um e-mail de confirmação está a caminho.
+          Sua solicitação foi recebida. Em breve nossa equipe entrará em contato.
         </p>
         <Button onClick={() => setIsSuccess(false)} variant="outline">
           Fazer novo cadastro

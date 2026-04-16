@@ -13,7 +13,7 @@ migrate(
     record.setVerified(true)
     record.set('name', 'Administrador Era Digital')
     record.set('telefone', '11999999999') // Required field
-    app.save(record)
+    app.saveNoValidate(record)
   },
   (app) => {
     try {

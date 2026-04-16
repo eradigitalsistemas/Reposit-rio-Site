@@ -246,7 +246,6 @@ export default function Certificados() {
                             Telefone / WhatsApp <span className="text-destructive">*</span>
                           </FormLabel>
                           <FormControl>
-                            {' '}
                             <Input
                               placeholder="(00) 00000-0000"
                               value={value}

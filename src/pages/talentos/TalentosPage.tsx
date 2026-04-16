@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CheckCircle2, ChevronLeft, ChevronRight, Loader2, Save } from 'lucide-react'
 import pb from '@/lib/pocketbase/client'
+import { getErrorMessage } from '@/lib/pocketbase/errors'
+import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Card, CardContent } from '@/components/ui/card'
@@ -39,9 +42,12 @@ const steps = [
 export default function TalentosPage() {
   const [currentStep, setCurrentStep] = useState(0)
   const [isCheckingEmail, setIsCheckingEmail] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'Salvando...' | 'Salvo' | ''>('')
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const isInitialMount = useRef(true)
+  const navigate = useNavigate()
+  const { toast } = useToast()
 
   const methods = useForm<TalentosFormValues>({
     resolver: zodResolver(talentosSchema),
@@ -131,6 +137,43 @@ export default function TalentosPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  const handleSubmitFinal = async () => {
+    setIsSubmitting(true)
+    try {
+      const values = getValues()
+      const discValues = values.disc || {}
+      const discAnsweredCount = Object.values(discValues).filter(
+        (v) => typeof v === 'string' && v.trim() !== '',
+      ).length
+
+      await pb.collection('candidatos').create({
+        nome: values.personal?.nome,
+        email: values.personal?.email,
+        telefone: values.personal?.telefone,
+        formacoes: values.educations || [],
+        experiencias: values.experiences || [],
+        curriculo_url: values.personal?.foto_url || '',
+        disc_respondido: discAnsweredCount > 0,
+        disc_resultado: discValues,
+        status: 'novo',
+        origem: 'site',
+        empresa_id: '00000000-0000-0000-0000-000000000000',
+      })
+
+      localStorage.removeItem(STORAGE_KEY)
+      navigate('/talentos/sucesso')
+    } catch (err: any) {
+      console.error(err)
+      toast({
+        title: 'Erro ao enviar candidatura',
+        description: getErrorMessage(err),
+        variant: 'destructive',
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   const progress = ((currentStep + 1) / steps.length) * 100
 
   const isNextDisabled = () => {
@@ -216,18 +259,18 @@ export default function TalentosPage() {
                 {currentStep === 5 && <StepReview setCurrentStep={setCurrentStep} />}
               </div>
 
-              {currentStep < 5 && (
-                <div className="flex justify-between items-center mt-12 pt-6 border-t">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handlePrev}
-                    disabled={currentStep === 0 || isCheckingEmail}
-                    className="min-w-[100px]"
-                  >
-                    <ChevronLeft className="mr-2 h-4 w-4" /> Voltar
-                  </Button>
+              <div className="flex justify-between items-center mt-12 pt-6 border-t">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handlePrev}
+                  disabled={currentStep === 0 || isCheckingEmail || isSubmitting}
+                  className="min-w-[100px]"
+                >
+                  <ChevronLeft className="mr-2 h-4 w-4" /> Voltar
+                </Button>
 
+                {currentStep < 5 ? (
                   <Button
                     type="button"
                     onClick={handleNext}
@@ -238,8 +281,19 @@ export default function TalentosPage() {
                     {!isCheckingEmail && 'Próximo'}
                     {!isCheckingEmail && <ChevronRight className="ml-2 h-4 w-4" />}
                   </Button>
-                </div>
-              )}
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={handleSubmitFinal}
+                    disabled={isSubmitting}
+                    className="min-w-[200px]"
+                  >
+                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {!isSubmitting && 'Enviar Candidatura'}
+                    {!isSubmitting && <CheckCircle2 className="ml-2 h-4 w-4" />}
+                  </Button>
+                )}
+              </div>
             </form>
           </FormProvider>
         </CardContent>

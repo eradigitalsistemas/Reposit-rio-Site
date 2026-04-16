@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-16T20:33:50.954Z",
+  "generatedAt": "2026-04-16T20:39:21.011Z",
   "collections": [
     {
       "name": "users",
@@ -245,6 +245,104 @@
         }
       ],
       "indexes": ["CREATE UNIQUE INDEX idx_site_content_key ON site_content (section_key)"]
+    },
+    {
+      "name": "candidatos",
+      "type": "base",
+      "apiRules": {
+        "list": null,
+        "view": null,
+        "create": "",
+        "update": null,
+        "delete": null
+      },
+      "fields": [
+        {
+          "name": "nome",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "email",
+          "type": "email",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "telefone",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "formacoes",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "experiencias",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "curriculo_url",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "disc_respondido",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "disc_resultado",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "origem",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "empresa_id",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX idx_candidatos_email ON candidatos (email)",
+        "CREATE INDEX idx_candidatos_status ON candidatos (status)",
+        "CREATE INDEX idx_candidatos_empresa ON candidatos (empresa_id)"
+      ]
     }
   ]
 }

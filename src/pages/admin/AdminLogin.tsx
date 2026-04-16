@@ -31,7 +31,7 @@ export default function AdminLogin() {
       toast({
         variant: 'destructive',
         title: 'Erro de autenticação',
-        description: 'Credenciais inválidas. Verifique seu e-mail e senha.',
+        description: 'Credenciais inválidas. Por favor, tente novamente.',
       })
       setIsLoading(false)
       return
@@ -57,7 +57,7 @@ export default function AdminLogin() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">E-mail</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
@@ -78,7 +78,7 @@ export default function AdminLogin() {
             />
           </div>
           <Button type="submit" disabled={isLoading} className="w-full mt-4">
-            {isLoading ? 'Verificando...' : 'Entrar'}
+            {isLoading ? 'Verificando...' : 'Login'}
           </Button>
         </form>
       </div>

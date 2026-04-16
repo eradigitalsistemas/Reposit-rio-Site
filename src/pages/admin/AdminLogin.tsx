@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, Navigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
 import { useToast } from '@/hooks/use-toast'
 import { Label } from '@/components/ui/label'
@@ -10,12 +10,16 @@ export default function AdminLogin() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const { signIn } = useAuth()
+  const { signIn, user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const { toast } = useToast()
 
   const from = location.state?.from?.pathname || '/admin/talentos'
+
+  if (user) {
+    return <Navigate to={from} replace />
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

@@ -76,7 +76,7 @@ export default function Certificados() {
         certificate_interest: values.tipo_certificado,
         estagio: 'Novo',
         status_interesse: 'Interessado',
-        tipo: 'Lead de Certificados',
+        tipo: 'Certificado',
       })
       setIsSuccess(true)
       toast({
@@ -338,9 +338,10 @@ export default function Certificados() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="e-cpf">e-CPF</SelectItem>
-                              <SelectItem value="e-cnpj">e-CNPJ</SelectItem>
-                              <SelectItem value="nf-e">NF-e</SelectItem>
+                              <SelectItem value="e-CNPJ A3">e-CNPJ A3</SelectItem>
+                              <SelectItem value="e-CNPJ A1">e-CNPJ A1</SelectItem>
+                              <SelectItem value="e-CPF A3">e-CPF A3</SelectItem>
+                              <SelectItem value="e-CPF A1">e-CPF A1</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />

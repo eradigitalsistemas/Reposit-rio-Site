@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-16T22:51:53.582Z",
+  "generatedAt": "2026-04-16T22:57:18.786Z",
   "collections": [
     {
       "name": "users",
@@ -646,6 +646,18 @@
         {
           "name": "email_sent",
           "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "nome",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "empresa",
+          "type": "text",
           "required": false,
           "system": false
         }

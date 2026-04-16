@@ -1,12 +1,12 @@
-import { supabase } from '@/lib/supabase/client'
+import pb from '@/lib/pocketbase/client'
 
 export async function sendEmailWithRetry(payload: any, retries = 3): Promise<void> {
   for (let i = 0; i < retries; i++) {
     try {
-      const { data, error } = await supabase.functions.invoke('RESEND_API_KEY', {
+      await pb.send('/backend/v1/email-dispatcher', {
+        method: 'POST',
         body: payload,
       })
-      if (error) throw error
       return
     } catch (err) {
       if (i === retries - 1) throw err

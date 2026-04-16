@@ -18,6 +18,7 @@ import { FAQAccordion } from '@/components/blocks/FAQAccordion'
 import { formatPhone } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
+import { sendEmailWithRetry } from '@/lib/email'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -43,6 +44,8 @@ import { trackAndOpenWhatsApp, WHATSAPP_SUPORTE } from '@/lib/whatsapp'
 import { extractFieldErrors, getErrorMessage } from '@/lib/pocketbase/errors'
 
 const formSchema = z.object({
+  nome: z.string().min(2, 'Nome é obrigatório'),
+  empresa: z.string().optional().or(z.literal('')),
   email: z.string().min(1, 'E-mail é obrigatório').email('Email inválido'),
   tipo_certificado: z.string().min(1, 'Selecione o tipo de certificado'),
   telefone: z.string().optional().or(z.literal('')),
@@ -63,22 +66,63 @@ export default function Certificados() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { email: '', tipo_certificado: '', telefone: '', lgpd: false },
+    defaultValues: {
+      nome: '',
+      empresa: '',
+      email: '',
+      tipo_certificado: '',
+      telefone: '',
+      lgpd: false,
+    },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
     try {
       await pb.collection('leads_certificados').create({
+        nome: values.nome,
+        empresa: values.empresa,
         email: values.email,
         telefone: values.telefone,
         tipo_certificado: values.tipo_certificado,
         data_contato: new Date().toISOString(),
       })
+
+      const clientPayload = {
+        type: 'client_confirmation',
+        clientEmail: values.email,
+        clientName: values.nome,
+        subject: 'Bem-vindo ao Planejador Financeiro',
+        from: 'suporte@seudominio.com',
+        registrationSummary: {
+          name: values.nome,
+          email: values.email,
+          phone: values.telefone || 'Não informado',
+          company: values.empresa || 'Não informada',
+        },
+        accessLink: window.location.origin,
+      }
+
+      const internalPayload = {
+        type: 'internal_notification',
+        teamEmail: 'comercial@areradigital.com.br',
+        subject: `Nova Solicitação de Cadastro - ${values.nome}`,
+        from: 'sistema@seudominio.com',
+        clientData: {
+          name: values.nome,
+          email: values.email,
+          phone: values.telefone || 'Não informado',
+          company: values.empresa || 'Não informada',
+          registrationDetails: `Tipo de Certificado: ${values.tipo_certificado}`,
+        },
+      }
+
+      await Promise.all([sendEmailWithRetry(clientPayload), sendEmailWithRetry(internalPayload)])
+
       setIsSuccess(true)
       toast({
         title: 'Sucesso!',
-        description: 'Sua solicitação foi enviada com sucesso! Em breve entraremos em contato.',
+        description: 'Cadastro realizado com sucesso! Confira seu e-mail para mais detalhes.',
       })
       form.reset()
     } catch (err: any) {
@@ -281,6 +325,34 @@ export default function Certificados() {
               <CardContent>
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="nome"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Nome <span className="text-destructive">*</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder="Seu nome completo" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="empresa"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Empresa</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Nome da sua empresa" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     <FormField
                       control={form.control}
                       name="email"

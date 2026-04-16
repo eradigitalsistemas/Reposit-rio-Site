@@ -9,6 +9,16 @@ import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Card, CardContent } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { talentosSchema, defaultTalentosValues, TalentosFormValues } from './schema'
 import { StepPersonal } from './StepPersonal'
 import { StepEducation } from './StepEducation'
@@ -42,6 +52,13 @@ const steps = [
 export default function TalentosPage() {
   const [currentStep, setCurrentStep] = useState(0)
   const [isCheckingEmail, setIsCheckingEmail] = useState(false)
+  const [isCertLeadOpen, setIsCertLeadOpen] = useState(false)
+  const [certLeadData, setCertLeadData] = useState({
+    email: '',
+    telefone: '',
+    tipo_certificado: '',
+  })
+  const [certLeadLoading, setCertLeadLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'Salvando...' | 'Salvo' | ''>('')
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -89,6 +106,39 @@ export default function TalentosPage() {
       setSaveStatus('Salvo')
       setTimeout(() => setSaveStatus(''), 2000)
     }, 500)
+  }
+
+  const handleCertLeadSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!certLeadData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(certLeadData.email)) {
+      toast({
+        title: 'Email inválido',
+        description: 'Por favor, insira um email válido.',
+        variant: 'destructive',
+      })
+      return
+    }
+    setCertLeadLoading(true)
+    try {
+      await pb.collection('leads_certificados').create({
+        ...certLeadData,
+        data_contato: new Date().toISOString(),
+      })
+      toast({
+        title: 'Interesse registrado com sucesso!',
+        description: 'Em breve entraremos em contato com as melhores oportunidades.',
+      })
+      setIsCertLeadOpen(false)
+      setCertLeadData({ email: '', telefone: '', tipo_certificado: '' })
+    } catch (err) {
+      toast({
+        title: 'Erro ao registrar',
+        description: getErrorMessage(err),
+        variant: 'destructive',
+      })
+    } finally {
+      setCertLeadLoading(false)
+    }
   }
 
   const forceNextStep = () => {
@@ -263,6 +313,65 @@ export default function TalentosPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-6 px-4 animate-fade-in">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Cadastro de Talentos</h1>
+          <p className="text-muted-foreground mt-1">Preencha seu currículo e perfil DISC.</p>
+        </div>
+        <Dialog open={isCertLeadOpen} onOpenChange={setIsCertLeadOpen}>
+          <DialogTrigger asChild>
+            <Button variant="secondary" className="whitespace-nowrap">
+              Interesse em Certificados?
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Registrar Interesse</DialogTitle>
+              <DialogDescription>
+                Deixe seu contato e o tipo de certificado que busca para recebermos novidades.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleCertLeadSubmit} className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="cert-email">E-mail *</Label>
+                <Input
+                  id="cert-email"
+                  type="email"
+                  required
+                  placeholder="seu@email.com"
+                  value={certLeadData.email}
+                  onChange={(e) => setCertLeadData({ ...certLeadData, email: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cert-telefone">Telefone</Label>
+                <Input
+                  id="cert-telefone"
+                  placeholder="(00) 00000-0000"
+                  value={certLeadData.telefone}
+                  onChange={(e) => setCertLeadData({ ...certLeadData, telefone: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cert-tipo">Tipo de Certificado</Label>
+                <Input
+                  id="cert-tipo"
+                  placeholder="Ex: Scrum, PMP, AWS..."
+                  value={certLeadData.tipo_certificado}
+                  onChange={(e) =>
+                    setCertLeadData({ ...certLeadData, tipo_certificado: e.target.value })
+                  }
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={certLeadLoading}>
+                {certLeadLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Enviar Interesse
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
       <div className="mb-8 sticky top-[80px] bg-background/95 pb-4 z-10 pt-4 -mt-4 border-b">
         <div className="flex justify-between items-center text-sm font-medium mb-3">
           <div className="text-muted-foreground flex items-center gap-2">

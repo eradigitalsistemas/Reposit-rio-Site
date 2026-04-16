@@ -10,8 +10,8 @@ import {
   AlertCircle,
   Database as DatabaseIcon,
 } from 'lucide-react'
-import { supabase } from '@/lib/supabase/client'
-import type { Database } from '@/lib/supabase/types'
+import pb from '@/lib/pocketbase/client'
+import { useRealtime } from '@/hooks/use-realtime'
 import { HeroSection } from '@/components/blocks/HeroSection'
 import { CertificateCard } from '@/components/blocks/CertificateCard'
 import { FAQAccordion } from '@/components/blocks/FAQAccordion'
@@ -62,15 +62,14 @@ export default function Certificados() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
     try {
-      const { error } = await supabase.from('leads').insert({
+      await pb.collection('leads').create({
         nome: values.nome,
         email: values.email,
         telefone: values.telefone,
         certificate_interest: values.tipo_certificado,
         estagio: 'Novo',
         status_interesse: 'Interessado',
-      } as any)
-      if (error) throw error
+      })
       setIsSuccess(true)
       toast({
         title: 'Sucesso!',
@@ -99,33 +98,27 @@ export default function Certificados() {
   const [isLoadingCerts, setIsLoadingCerts] = useState(true)
   const [fetchError, setFetchError] = useState(false)
 
-  const hasSupabase = !!(
-    import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-  )
-
-  async function fetchCertificates() {
-    if (!hasSupabase) {
-      setIsLoadingCerts(false)
-      return
-    }
-
-    setIsLoadingCerts(true)
+  async function fetchCertificates(isInitial = false) {
+    if (isInitial) setIsLoadingCerts(true)
     try {
       setFetchError(false)
-      const { data, error } = await supabase.from('certificados').select('*').order('id')
-      if (error) throw error
+      const data = await pb.collection('certificados').getFullList({ sort: 'created' })
       setCertificates(data || [])
     } catch (err: any) {
       console.error('Error fetching certificates:', err)
-      setFetchError(true)
+      if (isInitial) setFetchError(true)
     } finally {
-      setIsLoadingCerts(false)
+      if (isInitial) setIsLoadingCerts(false)
     }
   }
 
   useEffect(() => {
-    fetchCertificates()
-  }, [hasSupabase])
+    fetchCertificates(true)
+  }, [])
+
+  useRealtime('certificados', () => {
+    fetchCertificates(false)
+  })
 
   const handleWhatsAppCard = (title: string) => {
     trackAndOpenWhatsApp(
@@ -149,18 +142,7 @@ export default function Certificados() {
 
       {/* Types of Certificates */}
       <section className="min-h-[200px]">
-        {!hasSupabase ? (
-          <div className="flex flex-col items-center justify-center p-8 text-center bg-slate-50 rounded-xl border border-dashed">
-            <DatabaseIcon className="h-10 w-10 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Banco de dados não conectado</h3>
-            <p className="text-muted-foreground max-w-md mb-4">
-              Para visualizar os certificados, é necessário conectar o projeto ao Supabase.
-            </p>
-            <Button asChild variant="default">
-              <Link to="/admin/integracoes">Ir para Integrações</Link>
-            </Button>
-          </div>
-        ) : isLoadingCerts ? (
+        {isLoadingCerts ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
               <Card key={i} className="flex flex-col h-full overflow-hidden border">
@@ -219,7 +201,13 @@ export default function Certificados() {
                 key={cert.id}
                 type={cert.title}
                 description={cert.description}
-                benefits={cert.benefits as string[]}
+                benefits={
+                  cert.benefits
+                    ? String(cert.benefits)
+                        .split(',')
+                        .map((b) => b.trim())
+                    : []
+                }
                 onAction={() => handleWhatsAppCard(cert.title)}
               />
             ))}

@@ -12,7 +12,7 @@ migrate(
     record.setPassword('Raimundo1087')
     record.setVerified(true)
     record.set('name', 'Administrador Era Digital')
-    record.set('telefone', '11999999999')
+    record.set('telefone', '11999999999') // Required field
     app.save(record)
   },
   (app) => {

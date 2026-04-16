@@ -4,7 +4,7 @@ import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CheckCircle2, ChevronLeft, ChevronRight, Loader2, Save } from 'lucide-react'
 import pb from '@/lib/pocketbase/client'
-import { getErrorMessage } from '@/lib/pocketbase/errors'
+import { getErrorMessage, extractFieldErrors } from '@/lib/pocketbase/errors'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -237,6 +237,10 @@ export default function TalentosPage() {
       ).length
 
       let userId = pb.authStore.record?.id
+      const dataNascimento = values.personal?.data_nascimento
+        ? `${values.personal.data_nascimento} 12:00:00.000Z`
+        : undefined
+
       if (!userId && values.personal?.email) {
         const password = Math.random().toString(36).slice(-8) + 'Aa1@'
         const user = await pb.collection('users').create({
@@ -244,9 +248,19 @@ export default function TalentosPage() {
           password: password,
           passwordConfirm: password,
           name: values.personal.nome,
+          telefone: values.personal.telefone,
+          data_nascimento: dataNascimento,
+          endereco: values.personal.endereco || '',
         })
         await pb.collection('users').authWithPassword(values.personal.email, password)
         userId = user.id
+      } else if (userId) {
+        await pb.collection('users').update(userId, {
+          name: values.personal?.nome,
+          telefone: values.personal?.telefone,
+          data_nascimento: dataNascimento,
+          endereco: values.personal?.endereco || '',
+        })
       }
 
       if (userId && values.educations) {
@@ -292,6 +306,39 @@ export default function TalentosPage() {
       navigate('/talentos/sucesso')
     } catch (err: any) {
       console.error(err)
+      const fieldErrors = extractFieldErrors(err)
+
+      if (Object.keys(fieldErrors).length > 0) {
+        let hasPersonalError = false
+        if (fieldErrors.telefone) {
+          setError('personal.telefone', { type: 'manual', message: fieldErrors.telefone })
+          hasPersonalError = true
+        }
+        if (fieldErrors.data_nascimento) {
+          setError('personal.data_nascimento', {
+            type: 'manual',
+            message: fieldErrors.data_nascimento,
+          })
+          hasPersonalError = true
+        }
+        if (fieldErrors.endereco) {
+          setError('personal.endereco', { type: 'manual', message: fieldErrors.endereco })
+          hasPersonalError = true
+        }
+        if (fieldErrors.name) {
+          setError('personal.nome', { type: 'manual', message: fieldErrors.name })
+          hasPersonalError = true
+        }
+        if (fieldErrors.email) {
+          setError('personal.email', { type: 'manual', message: fieldErrors.email })
+          hasPersonalError = true
+        }
+
+        if (hasPersonalError) {
+          setCurrentStep(0)
+        }
+      }
+
       toast({
         title: 'Erro ao enviar candidatura',
         description: getErrorMessage(err),

@@ -19,7 +19,7 @@ export function StepReview({ setCurrentStep }: StepReviewProps) {
         </div>
         <h3 className="text-2xl font-semibold mb-2">Quase lá, {values.personal?.nome}!</h3>
         <p className="text-muted-foreground">
-          Revise seus dados abaixo. Se estiver tudo certo, clique em enviar candidatura.
+          Revise seus dados abaixo. Se estiver tudo certo, clique em gerar e enviar currículo.
         </p>
       </div>
 

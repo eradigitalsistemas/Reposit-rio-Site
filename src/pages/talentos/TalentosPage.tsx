@@ -29,6 +29,158 @@ import { StepReview } from './StepReview'
 
 const STORAGE_KEY = 'talentos_form_data'
 
+const generateDocument = (values: TalentosFormValues) => {
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return ''
+    const parts = dateStr.split('-')
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`
+    }
+    return dateStr
+  }
+
+  const content = `
+    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    <head>
+      <meta charset='utf-8'>
+      <style>
+        @page WordSection1 {
+          size: 21cm 29.7cm;
+          margin: 3cm 2cm 2cm 3cm;
+          mso-header-margin: 35.4pt;
+          mso-footer-margin: 35.4pt;
+          mso-paper-source: 0;
+        }
+        div.WordSection1 { page: WordSection1; }
+        body { font-family: 'Arial', sans-serif; font-size: 12pt; line-height: 1.5; color: #000; }
+        h1 { font-size: 14pt; font-weight: bold; text-align: center; text-transform: uppercase; margin-bottom: 24pt; }
+        h2 { font-size: 12pt; font-weight: bold; text-transform: uppercase; margin-top: 24pt; margin-bottom: 12pt; border-bottom: 1pt solid #000; padding-bottom: 2pt; }
+        p { margin: 0 0 12pt 0; }
+        .contact-info { text-align: center; margin-bottom: 24pt; }
+        .section { margin-bottom: 24pt; }
+        .item-title { font-weight: bold; }
+        ul { margin-top: 0; margin-bottom: 12pt; }
+        li { margin-bottom: 6pt; }
+      </style>
+    </head>
+    <body>
+      <div class="WordSection1">
+        <h1>${values.personal?.nome || 'Currículo'}</h1>
+        
+        <div class="contact-info">
+          <p>
+            ${values.personal?.endereco ? values.personal.endereco + '<br>' : ''}
+            Telefone: ${values.personal?.telefone || ''} | E-mail: ${values.personal?.email || ''}<br>
+            ${values.personal?.data_nascimento ? 'Data de Nascimento: ' + formatDate(values.personal.data_nascimento) : ''}
+          </p>
+        </div>
+
+        ${
+          values.additional_info?.resumo_profissional
+            ? `
+        <div class="section">
+          <h2>Resumo Profissional</h2>
+          <p>${values.additional_info.resumo_profissional.replace(/\n/g, '<br>')}</p>
+        </div>
+        `
+            : ''
+        }
+
+        ${
+          values.experiences && values.experiences.length > 0
+            ? `
+        <div class="section">
+          <h2>Experiência Profissional</h2>
+          ${values.experiences
+            .map(
+              (exp: any) => `
+            <p>
+              <span class="item-title">${exp.empresa}</span><br>
+              Cargo: ${exp.cargo}<br>
+              Período: ${formatDate(exp.data_inicio)} até ${exp.data_fim ? formatDate(exp.data_fim) : 'Atual'}
+              ${exp.descricao ? '<br>' + exp.descricao.replace(/\n/g, '<br>') : ''}
+            </p>
+          `,
+            )
+            .join('')}
+        </div>
+        `
+            : ''
+        }
+
+        ${
+          values.educations && values.educations.length > 0
+            ? `
+        <div class="section">
+          <h2>Formação Acadêmica</h2>
+          ${values.educations
+            .map(
+              (edu: any) => `
+            <p>
+              <span class="item-title">${edu.instituicao}</span><br>
+              Curso: ${edu.curso}<br>
+              Período: ${formatDate(edu.data_inicio)} até ${edu.data_fim ? formatDate(edu.data_fim) : 'Atual'}
+            </p>
+          `,
+            )
+            .join('')}
+        </div>
+        `
+            : ''
+        }
+
+        ${
+          values.additional_info?.hard_skills || values.additional_info?.soft_skills
+            ? `
+        <div class="section">
+          <h2>Habilidades</h2>
+          <ul>
+            ${values.additional_info?.hard_skills ? `<li><strong>Hard Skills:</strong> ${values.additional_info.hard_skills}</li>` : ''}
+            ${values.additional_info?.soft_skills ? `<li><strong>Soft Skills:</strong> ${values.additional_info.soft_skills}</li>` : ''}
+          </ul>
+        </div>
+        `
+            : ''
+        }
+
+        ${
+          values.additional_info?.idiomas
+            ? `
+        <div class="section">
+          <h2>Idiomas</h2>
+          <p>${values.additional_info.idiomas.replace(/\n/g, '<br>')}</p>
+        </div>
+        `
+            : ''
+        }
+
+        ${
+          values.additional_info?.cursos_adicionais
+            ? `
+        <div class="section">
+          <h2>Cursos Adicionais</h2>
+          <p>${values.additional_info.cursos_adicionais.replace(/\n/g, '<br>')}</p>
+        </div>
+        `
+            : ''
+        }
+
+      </div>
+    </body>
+    </html>
+  `
+
+  const blob = new Blob(['\uFEFF', content], { type: 'application/msword' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `Curriculo_${values.personal?.nome?.replace(/\s+/g, '_') || 'Candidato'}.doc`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
 const steps = [
   {
     id: 'personal',
@@ -241,7 +393,7 @@ export default function TalentosPage() {
 
       const dataNascimento = values.personal?.data_nascimento
         ? `${values.personal.data_nascimento} 12:00:00.000Z`
-        : undefined
+        : ''
 
       const splitByComma = (str?: string) =>
         str
@@ -258,7 +410,7 @@ export default function TalentosPage() {
         endereco: values.personal?.endereco,
         data_nascimento: dataNascimento,
         foto_url: values.personal?.foto_url || '',
-        curriculo_url: values.personal?.foto_url || '',
+        curriculo_url: '',
         formacoes: values.educations || [],
         experiencias: values.experiences || [],
         resumo_profissional: values.additional_info?.resumo_profissional || '',
@@ -283,9 +435,15 @@ export default function TalentosPage() {
         empresa_id: '',
       })
 
+      try {
+        generateDocument(values)
+      } catch (docErr) {
+        console.error('Error generating document:', docErr)
+      }
+
       toast({
-        title: 'Currículo enviado com sucesso! Boa sorte!',
-        description: 'Sua candidatura foi registrada em nosso banco de talentos.',
+        title: 'Currículo enviado e baixado com sucesso!',
+        description: 'Sua candidatura foi registrada e o download do currículo foi iniciado.',
       })
 
       localStorage.removeItem(STORAGE_KEY)
@@ -385,7 +543,6 @@ export default function TalentosPage() {
         (v) => typeof v === 'string' && v.trim() !== '',
       ).length
       if (answeredCount < 12) return true
-      // Remove strict validation dependency to avoid locking UI
       return false
     }
     return false
@@ -568,7 +725,7 @@ export default function TalentosPage() {
                     className="min-w-[200px]"
                   >
                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {!isSubmitting && 'Enviar Candidatura'}
+                    {!isSubmitting && 'Gerar e Enviar Currículo'}
                     {!isSubmitting && <CheckCircle2 className="ml-2 h-4 w-4" />}
                   </Button>
                 )}

@@ -43,12 +43,14 @@ export function RegistrationFormSection() {
     try {
       // 1. Database insertion
       const { error: dbError } = await supabase.from('leads').insert({
-        name: values.name,
+        nome: values.name,
         email: values.email,
-        phone: values.phone,
-        company: values.company,
-        details: values.details,
-      })
+        telefone: values.phone,
+        empresa: values.company,
+        observacoes: values.details,
+        estagio: 'Novo',
+        status_interesse: 'Interessado',
+      } as any)
 
       if (dbError) throw dbError
 

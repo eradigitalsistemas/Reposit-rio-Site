@@ -53,12 +53,13 @@ export default function Certificados() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
     try {
-      const { error } = await supabase.from('leads_certificados').insert({
+      const { error } = await supabase.from('leads').insert({
         nome: values.nome,
         email: values.email,
-        tipo_certificado: values.tipo_certificado,
         telefone: values.telefone,
-        data_contato: new Date().toISOString(),
+        certificate_interest: values.tipo_certificado,
+        estagio: 'Novo',
+        status_interesse: 'Interessado',
       } as any)
       if (error) throw error
       setIsSuccess(true)
@@ -85,9 +86,7 @@ export default function Certificados() {
     )
   }
 
-  const [certificates, setCertificates] = useState<
-    Database['public']['Tables']['certificates']['Row'][]
-  >([])
+  const [certificates, setCertificates] = useState<any[]>([])
   const [isLoadingCerts, setIsLoadingCerts] = useState(true)
   const [fetchError, setFetchError] = useState(false)
 
@@ -95,7 +94,7 @@ export default function Certificados() {
     async function fetchCertificates() {
       try {
         setFetchError(false)
-        const { data, error } = await supabase.from('certificates').select('*').order('id')
+        const { data, error } = await supabase.from('certificados').select('*').order('id')
         if (error) throw error
         setCertificates(data || [])
       } catch (err) {

@@ -41,7 +41,7 @@ const generateAbntResumeHtml = (resumeData: any, userProfile: any) => {
           margin: 3cm 2cm 2cm 3cm;
         }
         body {
-          font-family: "Arial", sans-serif;
+          font-family: "Arial", "Times New Roman", sans-serif;
           font-size: 12pt;
           line-height: 1.5;
           color: #000;
@@ -51,14 +51,14 @@ const generateAbntResumeHtml = (resumeData: any, userProfile: any) => {
           margin: 0 auto;
         }
         h1 {
-          font-size: 12pt;
+          font-size: 14pt;
           font-weight: bold;
           text-transform: uppercase;
           text-align: center;
           margin-bottom: 24pt;
         }
         h2 {
-          font-size: 12pt;
+          font-size: 14pt;
           font-weight: bold;
           text-transform: uppercase;
           margin-top: 18pt;
@@ -170,12 +170,6 @@ const generateAbntResumeHtml = (resumeData: any, userProfile: any) => {
       <p>
         <strong>Idiomas:</strong><br/>
         ${additional_info.idiomas ? formatText(additional_info.idiomas) : 'Não informados.'}
-      </p>
-
-      <h2>PERFIL COMPORTAMENTAL (DISC)</h2>
-      <p>
-        <strong>Resultado DISC:</strong> ${userProfile.type}<br/>
-        <span class="profile-desc">${userProfile.desc}</span>
       </p>
     </body>
     </html>

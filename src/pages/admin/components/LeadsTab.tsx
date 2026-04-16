@@ -114,6 +114,7 @@ export default function LeadsTab() {
   const [leadsGeral, setLeadsGeral] = useState<any[]>([])
   const [leadsErp, setLeadsErp] = useState<any[]>([])
   const [leadsCert, setLeadsCert] = useState<any[]>([])
+  const [leadsParceiros, setLeadsParceiros] = useState<any[]>([])
   const [search, setSearch] = useState('')
 
   const loadAll = async () => {
@@ -129,6 +130,10 @@ export default function LeadsTab() {
       .getFullList({ sort: '-created' })
       .then(setLeadsCert)
       .catch(console.error)
+    pb.collection('leads_parceiros')
+      .getFullList({ sort: '-created' })
+      .then(setLeadsParceiros)
+      .catch(console.error)
   }
 
   useEffect(() => {
@@ -137,6 +142,7 @@ export default function LeadsTab() {
   useRealtime('leads', () => loadAll())
   useRealtime('leads_erp', () => loadAll())
   useRealtime('leads_certificados', () => loadAll())
+  useRealtime('leads_parceiros', () => loadAll())
 
   const formatDate = (dateString: string) =>
     dateString ? format(new Date(dateString), 'dd/MM/yyyy HH:mm') : '-'
@@ -153,9 +159,10 @@ export default function LeadsTab() {
       <Tabs defaultValue="geral" className="w-full">
         <div className="p-4 border-b bg-muted/10 flex flex-col sm:flex-row gap-4 items-center justify-between">
           <TabsList>
-            <TabsTrigger value="geral">Geral / Parceiros</TabsTrigger>
+            <TabsTrigger value="geral">Geral</TabsTrigger>
             <TabsTrigger value="erp">ERP</TabsTrigger>
             <TabsTrigger value="certificados">Certificados</TabsTrigger>
+            <TabsTrigger value="parceiros">Parceiros</TabsTrigger>
           </TabsList>
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -236,6 +243,31 @@ export default function LeadsTab() {
                 {detailRow('Email', l.email)}
                 {detailRow('Telefone', l.telefone)}
                 {detailRow('Tipo Certificado', l.tipo_certificado)}
+              </div>
+            )}
+          />
+        </TabsContent>
+
+        <TabsContent value="parceiros" className="m-0">
+          <GenericLeadTable
+            items={leadsParceiros}
+            search={search}
+            collectionName="leads_parceiros"
+            columns={[
+              {
+                label: 'Data',
+                render: (l: any) => formatDate(l.created),
+              },
+              { label: 'Empresa', render: (l: any) => l.nome_empresa },
+              { label: 'Email', render: (l: any) => l.email },
+            ]}
+            renderDetails={(l: any) => (
+              <div>
+                {detailRow('Data', formatDate(l.created))}
+                {detailRow('Empresa / Profissional', l.nome_empresa)}
+                {detailRow('Email', l.email)}
+                {detailRow('Telefone', l.telefone)}
+                {detailRow('Mensagem', l.mensagem)}
               </div>
             )}
           />

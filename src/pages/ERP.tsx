@@ -13,7 +13,7 @@ import {
   Receipt,
   MonitorSmartphone,
 } from 'lucide-react'
-import { supabase } from '@/lib/supabase/client'
+import pb from '@/lib/pocketbase/client'
 import { HeroSection } from '@/components/blocks/HeroSection'
 import { FeatureCard } from '@/components/blocks/FeatureCard'
 import { FAQAccordion } from '@/components/blocks/FAQAccordion'
@@ -55,14 +55,13 @@ export default function ERP() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
     try {
-      const { error } = await supabase.from('leads_erp').insert({
+      await pb.collection('leads_erp').create({
         nome: values.nome,
         empresa: values.empresa,
         email: values.email,
         telefone: values.telefone,
         data_contato: new Date().toISOString(),
       })
-      if (error) throw error
       setIsSuccess(true)
     } catch (err: any) {
       toast({

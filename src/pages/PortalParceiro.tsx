@@ -11,7 +11,7 @@ import {
   Percent,
   Headphones,
 } from 'lucide-react'
-import { supabase } from '@/lib/supabase/client'
+import pb from '@/lib/pocketbase/client'
 import { HeroSection } from '@/components/blocks/HeroSection'
 import { FeatureCard } from '@/components/blocks/FeatureCard'
 import { FAQAccordion } from '@/components/blocks/FAQAccordion'
@@ -33,10 +33,10 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { trackAndOpenWhatsApp, WHATSAPP_COMERCIAL } from '@/lib/whatsapp'
 
 const formSchema = z.object({
-  nome: z.string().min(2, 'Nome é obrigatório'),
-  profissao: z.string().min(2, 'Profissão/Ocupação é obrigatória'),
+  nome_empresa: z.string().min(2, 'Nome da Empresa é obrigatório'),
   email: z.string().email('Email inválido'),
   telefone: z.string().min(14, 'Telefone incompleto'),
+  mensagem: z.string().min(2, 'Mensagem é obrigatória'),
   lgpd: z.boolean().refine((val) => val === true, 'Você deve aceitar os termos de privacidade'),
 })
 
@@ -47,19 +47,18 @@ export default function PortalParceiro() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { nome: '', profissao: '', email: '', telefone: '', lgpd: false },
+    defaultValues: { nome_empresa: '', email: '', telefone: '', mensagem: '', lgpd: false },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
     try {
-      const { error } = await supabase.from('leads_parceiros').insert({
-        nome: values.nome,
-        profissao: values.profissao,
+      await pb.collection('leads_parceiros').create({
+        nome_empresa: values.nome_empresa,
         email: values.email,
         telefone: values.telefone,
-      } as any) // Type override until schema update is regenerated
-      if (error) throw error
+        mensagem: values.mensagem,
+      })
       setIsSuccess(true)
     } catch (err: any) {
       toast({
@@ -147,29 +146,15 @@ export default function PortalParceiro() {
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     <FormField
                       control={form.control}
-                      name="nome"
+                      name="nome_empresa"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            Nome Completo <span className="text-destructive">*</span>
+                            Nome da Empresa ou Profissional{' '}
+                            <span className="text-destructive">*</span>
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="Seu nome" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="profissao"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            Profissão ou Ocupação <span className="text-destructive">*</span>
-                          </FormLabel>
-                          <FormControl>
-                            <Input placeholder="Ex: Contador, Advogado, Escritório..." {...field} />
+                            <Input placeholder="Sua empresa" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -212,6 +197,21 @@ export default function PortalParceiro() {
                         )}
                       />
                     </div>
+                    <FormField
+                      control={form.control}
+                      name="mensagem"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Mensagem <span className="text-destructive">*</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder="Como podemos ajudar?" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     <FormField
                       control={form.control}
                       name="lgpd"

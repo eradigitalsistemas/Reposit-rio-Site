@@ -2,7 +2,14 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { Loader2, CheckCircle2, MessageCircle } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import {
+  Loader2,
+  CheckCircle2,
+  MessageCircle,
+  AlertCircle,
+  Database as DatabaseIcon,
+} from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import type { Database } from '@/lib/supabase/types'
 import { HeroSection } from '@/components/blocks/HeroSection'
@@ -13,6 +20,7 @@ import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   Select,
   SelectContent,
@@ -90,28 +98,31 @@ export default function Certificados() {
   const [isLoadingCerts, setIsLoadingCerts] = useState(true)
   const [fetchError, setFetchError] = useState(false)
 
+  const hasSupabase = !!(
+    import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+  )
+
   useEffect(() => {
     async function fetchCertificates() {
+      if (!hasSupabase) {
+        setIsLoadingCerts(false)
+        return
+      }
+
       try {
         setFetchError(false)
         const { data, error } = await supabase.from('certificados').select('*').order('id')
         if (error) throw error
         setCertificates(data || [])
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching certificates:', err)
         setFetchError(true)
-        toast({
-          variant: 'destructive',
-          title: 'Erro ao carregar certificados',
-          description:
-            'Não foi possível carregar as opções do banco de dados. Tente novamente mais tarde.',
-        })
       } finally {
         setIsLoadingCerts(false)
       }
     }
     fetchCertificates()
-  }, [toast])
+  }, [hasSupabase])
 
   const handleWhatsAppCard = (title: string) => {
     trackAndOpenWhatsApp(
@@ -135,14 +146,51 @@ export default function Certificados() {
 
       {/* Types of Certificates */}
       <section className="min-h-[200px]">
-        {isLoadingCerts ? (
-          <div className="flex justify-center items-center h-48">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        {!hasSupabase ? (
+          <div className="flex flex-col items-center justify-center p-8 text-center bg-slate-50 rounded-xl border border-dashed">
+            <DatabaseIcon className="h-10 w-10 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Banco de dados não conectado</h3>
+            <p className="text-muted-foreground max-w-md mb-4">
+              Para visualizar os certificados, é necessário conectar o projeto ao Supabase.
+            </p>
+            <Button asChild variant="default">
+              <Link to="/admin/integracoes">Ir para Integrações</Link>
+            </Button>
+          </div>
+        ) : isLoadingCerts ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i} className="flex flex-col h-full overflow-hidden border">
+                <CardHeader className="bg-slate-50 border-b pb-4">
+                  <Skeleton className="h-6 w-24 mb-2" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-4/5 mt-1" />
+                </CardHeader>
+                <CardContent className="flex-1 pt-6 flex flex-col">
+                  <div className="space-y-3 mb-6 flex-1">
+                    {[1, 2, 3].map((j) => (
+                      <div key={j} className="flex items-start gap-2">
+                        <Skeleton className="h-4 w-4 rounded-full mt-0.5" />
+                        <Skeleton className="h-4 w-full" />
+                      </div>
+                    ))}
+                  </div>
+                  <Skeleton className="h-10 w-full rounded-md" />
+                </CardContent>
+              </Card>
+            ))}
           </div>
         ) : fetchError ? (
-          <div className="text-center text-destructive h-48 flex flex-col items-center justify-center bg-red-50 rounded-xl border border-dashed border-red-200 p-4">
-            <p className="font-medium mb-4">Não foi possível carregar os certificados.</p>
-            <Button variant="outline" onClick={() => window.location.reload()}>
+          <div className="text-center h-48 flex flex-col items-center justify-center bg-red-50/50 rounded-xl border border-dashed border-red-200 p-4">
+            <AlertCircle className="h-8 w-8 text-red-500 mb-3" />
+            <p className="font-medium text-red-800 mb-4">
+              Não foi possível carregar os certificados no momento.
+            </p>
+            <Button
+              variant="outline"
+              className="border-red-200 text-red-700 hover:bg-red-50"
+              onClick={() => window.location.reload()}
+            >
               Tentar Novamente
             </Button>
           </div>

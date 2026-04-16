@@ -38,6 +38,7 @@ import {
   FormDescription,
 } from '@/components/ui/form'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { trackAndOpenWhatsApp, WHATSAPP_SUPORTE } from '@/lib/whatsapp'
 
 const formSchema = z.object({
@@ -102,25 +103,27 @@ export default function Certificados() {
     import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
   )
 
-  useEffect(() => {
-    async function fetchCertificates() {
-      if (!hasSupabase) {
-        setIsLoadingCerts(false)
-        return
-      }
-
-      try {
-        setFetchError(false)
-        const { data, error } = await supabase.from('certificados').select('*').order('id')
-        if (error) throw error
-        setCertificates(data || [])
-      } catch (err: any) {
-        console.error('Error fetching certificates:', err)
-        setFetchError(true)
-      } finally {
-        setIsLoadingCerts(false)
-      }
+  async function fetchCertificates() {
+    if (!hasSupabase) {
+      setIsLoadingCerts(false)
+      return
     }
+
+    setIsLoadingCerts(true)
+    try {
+      setFetchError(false)
+      const { data, error } = await supabase.from('certificados').select('*').order('id')
+      if (error) throw error
+      setCertificates(data || [])
+    } catch (err: any) {
+      console.error('Error fetching certificates:', err)
+      setFetchError(true)
+    } finally {
+      setIsLoadingCerts(false)
+    }
+  }
+
+  useEffect(() => {
     fetchCertificates()
   }, [hasSupabase])
 
@@ -181,22 +184,33 @@ export default function Certificados() {
             ))}
           </div>
         ) : fetchError ? (
-          <div className="text-center h-48 flex flex-col items-center justify-center bg-red-50/50 rounded-xl border border-dashed border-red-200 p-4">
-            <AlertCircle className="h-8 w-8 text-red-500 mb-3" />
-            <p className="font-medium text-red-800 mb-4">
-              Não foi possível carregar os certificados no momento.
-            </p>
-            <Button
-              variant="outline"
-              className="border-red-200 text-red-700 hover:bg-red-50"
-              onClick={() => window.location.reload()}
-            >
-              Tentar Novamente
-            </Button>
+          <div className="flex justify-center p-4">
+            <Alert variant="destructive" className="max-w-2xl">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Erro ao carregar</AlertTitle>
+              <AlertDescription className="mt-2 flex flex-col gap-4">
+                <p>
+                  Não foi possível carregar os certificados no momento. Verifique sua conexão com a
+                  internet ou se as credenciais do banco de dados estão corretas.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-fit border-destructive text-destructive hover:bg-destructive/10"
+                  onClick={() => fetchCertificates()}
+                >
+                  Tentar Novamente
+                </Button>
+              </AlertDescription>
+            </Alert>
           </div>
         ) : certificates.length === 0 ? (
-          <div className="text-center text-muted-foreground h-48 flex items-center justify-center bg-slate-50 rounded-xl border border-dashed">
-            Nenhum certificado encontrado no momento.
+          <div className="text-center h-48 flex flex-col items-center justify-center bg-slate-50 rounded-xl border border-dashed p-6">
+            <DatabaseIcon className="h-10 w-10 text-muted-foreground mb-4 opacity-50" />
+            <h3 className="text-lg font-semibold mb-2">Nenhum certificado encontrado</h3>
+            <p className="text-muted-foreground max-w-md">
+              Não há certificados cadastrados no momento. Por favor, volte mais tarde.
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

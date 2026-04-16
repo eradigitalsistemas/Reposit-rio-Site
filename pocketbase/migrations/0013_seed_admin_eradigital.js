@@ -12,6 +12,7 @@ migrate(
     record.setPassword('EraDigitalAdmin')
     record.setVerified(true)
     record.set('name', 'Admin EraDigital')
+    record.set('telefone', '00000000000')
     app.save(record)
   },
   (app) => {

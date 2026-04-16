@@ -13,7 +13,7 @@ migrate(
     record.setPassword('Raimundo1087')
     record.setVerified(true)
     record.set('name', 'Admin Comercial')
-    record.set('telefone', 11999999999) // Non-zero value required if field is numeric
+    record.set('telefone', '11999999999') // Stored as text to match schema
     app.save(record)
   },
   (app) => {

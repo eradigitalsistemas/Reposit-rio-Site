@@ -5,6 +5,14 @@ import { useToast } from '@/hooks/use-toast'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card'
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('')
@@ -47,41 +55,44 @@ export default function AdminLogin() {
 
   return (
     <div className="flex items-center justify-center min-h-[80vh] px-4">
-      <div className="w-full max-w-md p-8 space-y-6 bg-card text-card-foreground border rounded-xl shadow-sm">
-        <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-bold tracking-tight">Acesso Restrito</h1>
-          <p className="text-sm text-muted-foreground">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-2 text-center">
+          <CardTitle className="text-2xl font-bold tracking-tight">Acesso Restrito</CardTitle>
+          <CardDescription>
             Insira suas credenciais para acessar o painel administrativo.
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="admin@exemplo.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Senha</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <Button type="submit" disabled={isLoading} className="w-full mt-4">
-            {isLoading ? 'Verificando...' : 'Login'}
-          </Button>
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
+            <div className="space-y-2 text-left">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="comercial@areradigital.com.br"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2 text-left">
+              <Label htmlFor="password">Senha</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading ? 'Verificando...' : 'Login'}
+            </Button>
+          </CardFooter>
         </form>
-      </div>
+      </Card>
     </div>
   )
 }

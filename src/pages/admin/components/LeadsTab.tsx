@@ -34,8 +34,22 @@ export default function LeadsTab() {
 
   const loadAll = async () => {
     try {
-      const records = await pb.collection('leads').getFullList({ sort: '-created' })
-      setLeads(records)
+      const [leadsRes, parceirosRes] = await Promise.all([
+        pb.collection('leads').getFullList({ sort: '-created' }),
+        pb.collection('leads_parceiros').getFullList({ sort: '-created' }),
+      ])
+
+      const combined = [
+        ...leadsRes.map((l: any) => ({ ...l, _collection: 'leads' })),
+        ...parceirosRes.map((p: any) => ({
+          ...p,
+          _collection: 'leads_parceiros',
+          tipo: 'Parceria',
+          nome: p.nome_empresa,
+        })),
+      ].sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime())
+
+      setLeads(combined)
     } catch (err) {
       console.error(err)
     }
@@ -46,6 +60,7 @@ export default function LeadsTab() {
   }, [])
 
   useRealtime('leads', () => loadAll())
+  useRealtime('leads_parceiros', () => loadAll())
 
   const formatDate = (dateString: string) =>
     dateString ? format(new Date(dateString), 'dd/MM/yyyy HH:mm') : '-'
@@ -61,9 +76,9 @@ export default function LeadsTab() {
     Object.values(i).some((val) => String(val).toLowerCase().includes(search.toLowerCase())),
   )
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (l: any) => {
     try {
-      await pb.collection('leads').delete(id)
+      await pb.collection(l._collection).delete(l.id)
       toast.success('Lead excluído com sucesso!')
     } catch (err) {
       toast.error('Erro ao excluir lead.')
@@ -79,6 +94,9 @@ export default function LeadsTab() {
       {detailRow('Telefone', l.telefone)}
       {l.empresa && detailRow('Empresa', l.empresa)}
       {l.certificate_interest && detailRow('Tipo de Certificado', l.certificate_interest)}
+      {l._collection === 'leads_parceiros' &&
+        l.profissao_ocupacao &&
+        detailRow('Profissão/Ocupação', l.profissao_ocupacao)}
       {l.mensagem && detailRow('Mensagem', l.mensagem)}
       {l.estagio && detailRow('Estágio', l.estagio)}
       {l.status_interesse && detailRow('Status', l.status_interesse)}
@@ -163,7 +181,7 @@ export default function LeadsTab() {
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancelar</AlertDialogCancel>
                           <AlertDialogAction
-                            onClick={() => handleDelete(l.id)}
+                            onClick={() => handleDelete(l)}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           >
                             Excluir

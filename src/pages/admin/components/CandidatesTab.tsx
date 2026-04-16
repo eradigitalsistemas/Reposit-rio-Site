@@ -16,6 +16,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { format } from 'date-fns'
 import { Search, Eye, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { discQuestions } from '@/pages/talentos/StepDisc'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -127,6 +128,23 @@ const ResumeView = ({ c }: { c: any }) => {
                 <span className="font-bold">{disc.pontuacao_c || 0}</span>
               </div>
             </div>
+          </div>
+        )}
+
+        {c.disc_respondido && disc && Object.keys(disc).some((k) => k.startsWith('q')) && (
+          <div className="mt-4 space-y-3">
+            <h4 className="font-medium text-base mb-2 border-b pb-2">Respostas Detalhadas:</h4>
+            {discQuestions.map((q) => {
+              const answerVal = disc[q.id]
+              if (!answerVal) return null
+              const answerLabel = q.options.find((o) => o.value === answerVal)?.label || answerVal
+              return (
+                <div key={q.id} className="text-sm bg-muted/20 p-3 rounded-md border">
+                  <p className="font-medium mb-1">{q.text}</p>
+                  <p className="text-muted-foreground">{answerLabel}</p>
+                </div>
+              )
+            })}
           </div>
         )}
       </div>

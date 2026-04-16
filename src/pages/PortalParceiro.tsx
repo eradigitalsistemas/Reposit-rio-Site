@@ -36,7 +36,7 @@ const formSchema = z.object({
   nome_empresa: z.string().min(2, 'Nome da Empresa é obrigatório'),
   email: z.string().email('Email inválido'),
   telefone: z.string().min(14, 'Telefone incompleto'),
-  mensagem: z.string().min(2, 'Mensagem é obrigatória'),
+  profissao_ocupacao: z.string().min(2, 'Selecione sua profissão/ocupação'),
   lgpd: z.boolean().refine((val) => val === true, 'Você deve aceitar os termos de privacidade'),
 })
 
@@ -47,20 +47,23 @@ export default function PortalParceiro() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { nome_empresa: '', email: '', telefone: '', mensagem: '', lgpd: false },
+    defaultValues: {
+      nome_empresa: '',
+      email: '',
+      telefone: '',
+      profissao_ocupacao: '',
+      lgpd: false,
+    },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
     try {
-      await pb.collection('leads').create({
-        nome: values.nome_empresa,
-        empresa: values.nome_empresa,
+      await pb.collection('leads_parceiros').create({
+        nome_empresa: values.nome_empresa,
         email: values.email,
         telefone: values.telefone,
-        mensagem: values.mensagem,
-        tipo: 'Lead de Parceria',
-        estagio: 'Novo',
+        profissao_ocupacao: values.profissao_ocupacao,
       })
       setIsSuccess(true)
     } catch (err: any) {
@@ -202,14 +205,27 @@ export default function PortalParceiro() {
                     </div>
                     <FormField
                       control={form.control}
-                      name="mensagem"
+                      name="profissao_ocupacao"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            Mensagem <span className="text-destructive">*</span>
+                            Profissão/Ocupação <span className="text-destructive">*</span>
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="Como podemos ajudar?" {...field} />
+                            <select
+                              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                              {...field}
+                            >
+                              <option value="" disabled>
+                                Selecione uma opção
+                              </option>
+                              <option value="Contador">Contador</option>
+                              <option value="Escritório de Contabilidade">
+                                Escritório de Contabilidade
+                              </option>
+                              <option value="Advogado">Advogado</option>
+                              <option value="Outro">Outro</option>
+                            </select>
                           </FormControl>
                           <FormMessage />
                         </FormItem>

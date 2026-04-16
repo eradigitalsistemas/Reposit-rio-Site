@@ -59,6 +59,13 @@ export default function TalentosPage() {
     tipo_certificado: '',
   })
   const [certLeadLoading, setCertLeadLoading] = useState(false)
+  const [isErpLeadOpen, setIsErpLeadOpen] = useState(false)
+  const [erpLeadData, setErpLeadData] = useState({
+    email: '',
+    telefone: '',
+    empresa: '',
+  })
+  const [erpLeadLoading, setErpLeadLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'Salvando...' | 'Salvo' | ''>('')
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -106,6 +113,39 @@ export default function TalentosPage() {
       setSaveStatus('Salvo')
       setTimeout(() => setSaveStatus(''), 2000)
     }, 500)
+  }
+
+  const handleErpLeadSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!erpLeadData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(erpLeadData.email)) {
+      toast({
+        title: 'Email inválido',
+        description: 'Por favor, insira um email válido.',
+        variant: 'destructive',
+      })
+      return
+    }
+    setErpLeadLoading(true)
+    try {
+      await pb.collection('leads_erp').create({
+        ...erpLeadData,
+        data_contato: new Date().toISOString(),
+      })
+      toast({
+        title: 'Interesse registrado com sucesso!',
+        description: 'Nossa equipe entrará em contato.',
+      })
+      setIsErpLeadOpen(false)
+      setErpLeadData({ email: '', telefone: '', empresa: '' })
+    } catch (err) {
+      toast({
+        title: 'Erro ao registrar',
+        description: getErrorMessage(err),
+        variant: 'destructive',
+      })
+    } finally {
+      setErpLeadLoading(false)
+    }
   }
 
   const handleCertLeadSubmit = async (e: React.FormEvent) => {
@@ -318,58 +358,111 @@ export default function TalentosPage() {
           <h1 className="text-3xl font-bold tracking-tight">Cadastro de Talentos</h1>
           <p className="text-muted-foreground mt-1">Preencha seu currículo e perfil DISC.</p>
         </div>
-        <Dialog open={isCertLeadOpen} onOpenChange={setIsCertLeadOpen}>
-          <DialogTrigger asChild>
-            <Button variant="secondary" className="whitespace-nowrap">
-              Interesse em Certificados?
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Registrar Interesse</DialogTitle>
-              <DialogDescription>
-                Deixe seu contato e o tipo de certificado que busca para recebermos novidades.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleCertLeadSubmit} className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label htmlFor="cert-email">E-mail *</Label>
-                <Input
-                  id="cert-email"
-                  type="email"
-                  required
-                  placeholder="seu@email.com"
-                  value={certLeadData.email}
-                  onChange={(e) => setCertLeadData({ ...certLeadData, email: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cert-telefone">Telefone</Label>
-                <Input
-                  id="cert-telefone"
-                  placeholder="(00) 00000-0000"
-                  value={certLeadData.telefone}
-                  onChange={(e) => setCertLeadData({ ...certLeadData, telefone: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cert-tipo">Tipo de Certificado</Label>
-                <Input
-                  id="cert-tipo"
-                  placeholder="Ex: Scrum, PMP, AWS..."
-                  value={certLeadData.tipo_certificado}
-                  onChange={(e) =>
-                    setCertLeadData({ ...certLeadData, tipo_certificado: e.target.value })
-                  }
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={certLeadLoading}>
-                {certLeadLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Enviar Interesse
+        <div className="flex gap-2 flex-wrap">
+          <Dialog open={isErpLeadOpen} onOpenChange={setIsErpLeadOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="whitespace-nowrap">
+                Interesse em ERP?
               </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Interesse em ERP</DialogTitle>
+                <DialogDescription>
+                  Deixe seu contato para sabermos mais sobre as necessidades de ERP da sua empresa.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleErpLeadSubmit} className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="erp-email">E-mail *</Label>
+                  <Input
+                    id="erp-email"
+                    type="email"
+                    required
+                    placeholder="seu@email.com"
+                    value={erpLeadData.email}
+                    onChange={(e) => setErpLeadData({ ...erpLeadData, email: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="erp-empresa">Empresa</Label>
+                  <Input
+                    id="erp-empresa"
+                    placeholder="Nome da sua empresa"
+                    value={erpLeadData.empresa}
+                    onChange={(e) => setErpLeadData({ ...erpLeadData, empresa: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="erp-telefone">Telefone</Label>
+                  <Input
+                    id="erp-telefone"
+                    placeholder="(00) 00000-0000"
+                    value={erpLeadData.telefone}
+                    onChange={(e) => setErpLeadData({ ...erpLeadData, telefone: e.target.value })}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={erpLeadLoading}>
+                  {erpLeadLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Enviar
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={isCertLeadOpen} onOpenChange={setIsCertLeadOpen}>
+            <DialogTrigger asChild>
+              <Button variant="secondary" className="whitespace-nowrap">
+                Interesse em Certificados?
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Registrar Interesse</DialogTitle>
+                <DialogDescription>
+                  Deixe seu contato e o tipo de certificado que busca para recebermos novidades.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleCertLeadSubmit} className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="cert-email">E-mail *</Label>
+                  <Input
+                    id="cert-email"
+                    type="email"
+                    required
+                    placeholder="seu@email.com"
+                    value={certLeadData.email}
+                    onChange={(e) => setCertLeadData({ ...certLeadData, email: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cert-telefone">Telefone</Label>
+                  <Input
+                    id="cert-telefone"
+                    placeholder="(00) 00000-0000"
+                    value={certLeadData.telefone}
+                    onChange={(e) => setCertLeadData({ ...certLeadData, telefone: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cert-tipo">Tipo de Certificado</Label>
+                  <Input
+                    id="cert-tipo"
+                    placeholder="Ex: Scrum, PMP, AWS..."
+                    value={certLeadData.tipo_certificado}
+                    onChange={(e) =>
+                      setCertLeadData({ ...certLeadData, tipo_certificado: e.target.value })
+                    }
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={certLeadLoading}>
+                  {certLeadLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Enviar Interesse
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <div className="mb-8 sticky top-[80px] bg-background/95 pb-4 z-10 pt-4 -mt-4 border-b">

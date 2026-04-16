@@ -34,9 +34,10 @@ export default function LeadsTab() {
 
   const loadAll = async () => {
     try {
-      const [leadsRes, parceirosRes] = await Promise.all([
+      const [leadsRes, parceirosRes, certificadosRes] = await Promise.all([
         pb.collection('leads').getFullList({ sort: '-created' }),
         pb.collection('leads_parceiros').getFullList({ sort: '-created' }),
+        pb.collection('leads_certificados').getFullList({ sort: '-created' }),
       ])
 
       const combined = [
@@ -46,6 +47,11 @@ export default function LeadsTab() {
           _collection: 'leads_parceiros',
           tipo: 'Parceria',
           nome: p.nome_empresa,
+        })),
+        ...certificadosRes.map((c: any) => ({
+          ...c,
+          _collection: 'leads_certificados',
+          tipo: 'Certificado',
         })),
       ].sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime())
 
@@ -61,6 +67,7 @@ export default function LeadsTab() {
 
   useRealtime('leads', () => loadAll())
   useRealtime('leads_parceiros', () => loadAll())
+  useRealtime('leads_certificados', () => loadAll())
 
   const formatDate = (dateString: string) =>
     dateString ? format(new Date(dateString), 'dd/MM/yyyy HH:mm') : '-'
@@ -88,12 +95,14 @@ export default function LeadsTab() {
   const renderDetails = (l: any) => (
     <ScrollArea className="h-[calc(100vh-100px)] pr-4">
       {detailRow('Data', formatDate(l.created))}
+      {l.data_contato && detailRow('Data do Contato', formatDate(l.data_contato))}
       {detailRow('Tipo', l.tipo || 'Geral')}
       {detailRow('Nome', l.nome)}
       {detailRow('Email', l.email)}
       {detailRow('Telefone', l.telefone)}
       {l.empresa && detailRow('Empresa', l.empresa)}
-      {l.certificate_interest && detailRow('Tipo de Certificado', l.certificate_interest)}
+      {l.certificate_interest && detailRow('Interesse em Certificado', l.certificate_interest)}
+      {l.tipo_certificado && detailRow('Tipo de Certificado', l.tipo_certificado)}
       {l._collection === 'leads_parceiros' &&
         l.profissao_ocupacao &&
         detailRow('Profissão/Ocupação', l.profissao_ocupacao)}

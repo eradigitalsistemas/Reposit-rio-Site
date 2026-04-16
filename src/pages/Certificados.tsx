@@ -40,12 +40,12 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { trackAndOpenWhatsApp, WHATSAPP_SUPORTE } from '@/lib/whatsapp'
+import { extractFieldErrors, getErrorMessage } from '@/lib/pocketbase/errors'
 
 const formSchema = z.object({
-  nome: z.string().min(2, 'Nome é obrigatório'),
-  email: z.string().email('Email inválido'),
+  email: z.string().min(1, 'E-mail é obrigatório').email('Email inválido'),
   tipo_certificado: z.string().min(1, 'Selecione o tipo de certificado'),
-  telefone: z.string().min(14, 'Telefone incompleto'),
+  telefone: z.string().optional().or(z.literal('')),
   lgpd: z.boolean().refine((val) => val === true, 'Você deve aceitar os termos de privacidade'),
 })
 
@@ -63,31 +63,39 @@ export default function Certificados() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { nome: '', email: '', tipo_certificado: '', telefone: '', lgpd: false },
+    defaultValues: { email: '', tipo_certificado: '', telefone: '', lgpd: false },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
     try {
-      await pb.collection('leads').create({
-        nome: values.nome,
+      await pb.collection('leads_certificados').create({
         email: values.email,
         telefone: values.telefone,
-        certificate_interest: values.tipo_certificado,
-        estagio: 'Novo',
-        status_interesse: 'Interessado',
-        tipo: 'Certificado',
+        tipo_certificado: values.tipo_certificado,
+        data_contato: new Date().toISOString(),
       })
       setIsSuccess(true)
       toast({
         title: 'Sucesso!',
-        description: 'Sua solicitação foi recebida. Entraremos em contato.',
+        description: 'Sua solicitação foi enviada com sucesso! Em breve entraremos em contato.',
       })
+      form.reset()
     } catch (err: any) {
+      const fieldErrors = extractFieldErrors(err)
+
+      if (Object.keys(fieldErrors).length > 0) {
+        Object.entries(fieldErrors).forEach(([field, msg]) => {
+          form.setError(field as any, { type: 'server', message: msg })
+        })
+      }
+
       toast({
         variant: 'destructive',
         title: 'Erro ao enviar',
-        description: err.message || 'Ocorreu um erro inesperado.',
+        description:
+          getErrorMessage(err) ||
+          'Não foi possível enviar sua solicitação. Verifique os dados e tente novamente.',
       })
     } finally {
       setIsSubmitting(false)
@@ -256,7 +264,7 @@ export default function Certificados() {
               <CheckCircle2 className="h-16 w-16 text-emerald-500 mx-auto" />
               <h2 className="text-2xl font-bold">Tudo Certo!</h2>
               <p className="text-muted-foreground">
-                Sua solicitação foi registrada. Entraremos em contato em breve.
+                Sua solicitação foi enviada com sucesso! Em breve entraremos em contato.
               </p>
               <Button onClick={() => setIsSuccess(false)} variant="outline">
                 Enviar nova solicitação
@@ -273,21 +281,6 @@ export default function Certificados() {
               <CardContent>
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="nome"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            Nome <span className="text-destructive">*</span>
-                          </FormLabel>
-                          <FormControl>
-                            <Input placeholder="Seu nome" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
                     <FormField
                       control={form.control}
                       name="email"
@@ -308,9 +301,7 @@ export default function Certificados() {
                       name="telefone"
                       render={({ field: { onChange, value, ...rest } }) => (
                         <FormItem>
-                          <FormLabel>
-                            Telefone / WhatsApp <span className="text-destructive">*</span>
-                          </FormLabel>
+                          <FormLabel>Telefone / WhatsApp</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="(00) 00000-0000"

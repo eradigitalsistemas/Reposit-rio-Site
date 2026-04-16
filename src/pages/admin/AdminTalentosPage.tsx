@@ -18,54 +18,83 @@ export default function AdminTalentosPage() {
 
   useEffect(() => {
     const checkSession = async () => {
-      const isAdminSessionActive = sessionStorage.getItem('admin_session_active')
-      if (!isAdminSessionActive) {
-        await supabase.auth.signOut()
-        setSession(null)
-      } else {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession()
-        setSession(session)
+      if (!supabase?.auth) {
+        setLoading(false)
+        return
       }
-      setLoading(false)
+      try {
+        const isAdminSessionActive = sessionStorage.getItem('admin_session_active')
+        if (!isAdminSessionActive) {
+          await supabase.auth.signOut()
+          setSession(null)
+        } else {
+          const {
+            data: { session },
+          } = await supabase.auth.getSession()
+          setSession(session)
+        }
+      } catch (error) {
+        console.error('Session check error:', error)
+      } finally {
+        setLoading(false)
+      }
     }
     checkSession()
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      const isAdminSessionActive = sessionStorage.getItem('admin_session_active')
-      if (event === 'SIGNED_IN' && !isAdminSessionActive) {
-        sessionStorage.setItem('admin_session_active', 'true')
-      }
-      if (sessionStorage.getItem('admin_session_active')) {
-        setSession(session)
-      } else {
-        setSession(null)
-      }
-    })
-    return () => subscription.unsubscribe()
+    let subscription: any = null
+    if (supabase?.auth?.onAuthStateChange) {
+      const { data } = supabase.auth.onAuthStateChange((event, session) => {
+        const isAdminSessionActive = sessionStorage.getItem('admin_session_active')
+        if (event === 'SIGNED_IN' && !isAdminSessionActive) {
+          sessionStorage.setItem('admin_session_active', 'true')
+        }
+        if (sessionStorage.getItem('admin_session_active')) {
+          setSession(session)
+        } else {
+          setSession(null)
+        }
+      })
+      subscription = data.subscription
+    }
+
+    return () => {
+      if (subscription) subscription.unsubscribe()
+    }
   }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!supabase?.auth) {
+      toast.error('Serviço de autenticação indisponível.')
+      return
+    }
     setAuthLoading(true)
     let email = login
     if (login === 'eradigital') email = 'eradigital@eradigital.com.br'
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
-      toast.error('Credenciais inválidas.')
-    } else {
-      sessionStorage.setItem('admin_session_active', 'true')
-      toast.success('Login realizado com sucesso!')
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) {
+        toast.error('Credenciais inválidas.')
+      } else {
+        sessionStorage.setItem('admin_session_active', 'true')
+        toast.success('Login realizado com sucesso!')
+      }
+    } catch (error) {
+      toast.error('Erro ao realizar login.')
+    } finally {
+      setAuthLoading(false)
     }
-    setAuthLoading(false)
   }
 
   const handleLogout = async () => {
     sessionStorage.removeItem('admin_session_active')
-    await supabase.auth.signOut()
+    if (supabase?.auth) {
+      try {
+        await supabase.auth.signOut()
+      } catch (error) {
+        console.error('Logout error:', error)
+      }
+    }
     setSession(null)
     toast.success('Você saiu do sistema.')
   }

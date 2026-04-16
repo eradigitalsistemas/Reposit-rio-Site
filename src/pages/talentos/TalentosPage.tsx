@@ -146,6 +146,31 @@ export default function TalentosPage() {
         (v) => typeof v === 'string' && v.trim() !== '',
       ).length
 
+      let userId = pb.authStore.record?.id
+      if (!userId && values.personal?.email) {
+        const password = Math.random().toString(36).slice(-8) + 'Aa1@'
+        const user = await pb.collection('users').create({
+          email: values.personal.email,
+          password: password,
+          passwordConfirm: password,
+          name: values.personal.nome,
+        })
+        await pb.collection('users').authWithPassword(values.personal.email, password)
+        userId = user.id
+      }
+
+      if (userId && values.educations) {
+        for (const edu of values.educations) {
+          await pb.collection('educations').create({
+            user_id: userId,
+            instituicao: edu.instituicao,
+            curso: edu.curso,
+            data_inicio: edu.data_inicio,
+            data_fim: edu.data_fim || '',
+          })
+        }
+      }
+
       await pb.collection('candidatos').create({
         nome: values.personal?.nome,
         email: values.personal?.email,

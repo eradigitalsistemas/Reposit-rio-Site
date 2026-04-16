@@ -51,7 +51,6 @@ const steps = [
 
 export default function TalentosPage() {
   const [currentStep, setCurrentStep] = useState(0)
-  const [isCheckingEmail, setIsCheckingEmail] = useState(false)
   const [isCertLeadOpen, setIsCertLeadOpen] = useState(false)
   const [certLeadData, setCertLeadData] = useState({
     email: '',
@@ -198,25 +197,6 @@ export default function TalentosPage() {
     const isStepValid = await trigger(fieldsToValidate as any)
 
     if (isStepValid) {
-      if (currentStep === 0) {
-        setIsCheckingEmail(true)
-        const email = getValues('personal.email')
-        try {
-          const data = await pb.collection('users').getFirstListItem(`email="${email}"`)
-          if (data) {
-            setError('personal.email', {
-              type: 'manual',
-              message: 'Email já cadastrado. Deseja editar o currículo existente?',
-            })
-            setIsCheckingEmail(false)
-            return
-          }
-        } catch (e) {
-          // Ignora erros de rede localmente (ou quando o registro não existe)
-        }
-        setIsCheckingEmail(false)
-      }
-
       forceNextStep()
     }
   }
@@ -236,70 +216,76 @@ export default function TalentosPage() {
         (v) => typeof v === 'string' && v.trim() !== '',
       ).length
 
-      let userId = pb.authStore.record?.id
+      let scoreD = 0,
+        scoreI = 0,
+        scoreS = 0,
+        scoreC = 0
+      Object.values(discValues).forEach((ans) => {
+        if (ans === 'D') scoreD++
+        if (ans === 'I') scoreI++
+        if (ans === 'S') scoreS++
+        if (ans === 'C') scoreC++
+      })
+
+      const scores = [
+        { type: 'Dominância (D)', value: scoreD },
+        { type: 'Influência (I)', value: scoreI },
+        { type: 'Estabilidade (S)', value: scoreS },
+        { type: 'Conformidade (C)', value: scoreC },
+      ].sort((a, b) => b.value - a.value)
+
+      let tipoPerfil = scores[0].type
+      if (scores[0].value === scores[1].value && scores[0].value > 0) {
+        tipoPerfil = `${scores[0].type.split(' ')[0]} / ${scores[1].type.split(' ')[0]}`
+      }
+
       const dataNascimento = values.personal?.data_nascimento
         ? `${values.personal.data_nascimento} 12:00:00.000Z`
         : undefined
 
-      if (!userId && values.personal?.email) {
-        const password = Math.random().toString(36).slice(-8) + 'Aa1@'
-        const user = await pb.collection('users').create({
-          email: values.personal.email,
-          password: password,
-          passwordConfirm: password,
-          name: values.personal.nome,
-          telefone: values.personal.telefone,
-          data_nascimento: dataNascimento,
-          endereco: values.personal.endereco || '',
-        })
-        await pb.collection('users').authWithPassword(values.personal.email, password)
-        userId = user.id
-      } else if (userId) {
-        await pb.collection('users').update(userId, {
-          name: values.personal?.nome,
-          telefone: values.personal?.telefone,
-          data_nascimento: dataNascimento,
-          endereco: values.personal?.endereco || '',
-        })
-      }
-
-      if (userId && values.educations) {
-        for (const edu of values.educations) {
-          await pb.collection('educations').create({
-            user_id: userId,
-            instituicao: edu.instituicao,
-            curso: edu.curso,
-            data_inicio: edu.data_inicio,
-            data_fim: edu.data_fim || '',
-          })
-        }
-      }
-
-      if (userId && values.experiences) {
-        for (const exp of values.experiences) {
-          await pb.collection('experiences').create({
-            user_id: userId,
-            empresa: exp.empresa,
-            cargo: exp.cargo,
-            data_inicio: exp.data_inicio,
-            data_fim: exp.data_fim || '',
-            descricao: exp.descricao || '',
-          })
-        }
-      }
+      const splitByComma = (str?: string) =>
+        str
+          ? str
+              .split(',')
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : []
 
       await pb.collection('candidatos').create({
         nome: values.personal?.nome,
         email: values.personal?.email,
         telefone: values.personal?.telefone,
+        endereco: values.personal?.endereco,
+        data_nascimento: dataNascimento,
+        foto_url: values.personal?.foto_url || '',
+        curriculo_url: values.personal?.foto_url || '',
         formacoes: values.educations || [],
         experiencias: values.experiences || [],
-        curriculo_url: values.personal?.foto_url || '',
+        resumo_profissional: values.additional_info?.resumo_profissional || '',
+        soft_skills: splitByComma(values.additional_info?.soft_skills),
+        hard_skills: splitByComma(values.additional_info?.hard_skills),
+        cursos_adicionais: splitByComma(values.additional_info?.cursos_adicionais),
+        idiomas: splitByComma(values.additional_info?.idiomas),
         disc_respondido: discAnsweredCount > 0,
-        disc_resultado: discValues,
-        status: 'novo',
-        origem: 'site',
-        empresa_id: '00000000-0000-0000-0000-000000000000',
+        disc_resultado:
+          discAnsweredCount > 0
+            ? {
+                pontuacao_d: scoreD,
+                pontuacao_i: scoreI,
+                pontuacao_s: scoreS,
+                pontuacao_c: scoreC,
+                tipo_perfil: tipoPerfil,
+                respostas: discValues,
+              }
+            : null,
+        status: 'Novo',
+        origem: 'Site',
+        empresa_id: '',
+      })
+
+      toast({
+        title: 'Currículo enviado com sucesso! Boa sorte!',
+        description: 'Sua candidatura foi registrada em nosso banco de talentos.',
       })
 
       localStorage.removeItem(STORAGE_KEY)
@@ -308,8 +294,23 @@ export default function TalentosPage() {
       console.error(err)
       const fieldErrors = extractFieldErrors(err)
 
-      if (Object.keys(fieldErrors).length > 0) {
+      let errorMsg = getErrorMessage(err)
+
+      if (
+        fieldErrors.email ||
+        errorMsg.toLowerCase().includes('unique') ||
+        errorMsg.toLowerCase().includes('already exists') ||
+        err.response?.data?.email?.code === 'validation_not_unique'
+      ) {
+        errorMsg = 'Este e-mail já está cadastrado em nosso banco de talentos.'
+        setError('personal.email', { type: 'manual', message: errorMsg })
+        setCurrentStep(0)
+      } else if (Object.keys(fieldErrors).length > 0) {
         let hasPersonalError = false
+        if (fieldErrors.nome) {
+          setError('personal.nome', { type: 'manual', message: fieldErrors.nome })
+          hasPersonalError = true
+        }
         if (fieldErrors.telefone) {
           setError('personal.telefone', { type: 'manual', message: fieldErrors.telefone })
           hasPersonalError = true
@@ -325,14 +326,6 @@ export default function TalentosPage() {
           setError('personal.endereco', { type: 'manual', message: fieldErrors.endereco })
           hasPersonalError = true
         }
-        if (fieldErrors.name) {
-          setError('personal.nome', { type: 'manual', message: fieldErrors.name })
-          hasPersonalError = true
-        }
-        if (fieldErrors.email) {
-          setError('personal.email', { type: 'manual', message: fieldErrors.email })
-          hasPersonalError = true
-        }
 
         if (hasPersonalError) {
           setCurrentStep(0)
@@ -341,7 +334,7 @@ export default function TalentosPage() {
 
       toast({
         title: 'Erro ao enviar candidatura',
-        description: getErrorMessage(err),
+        description: errorMsg,
         variant: 'destructive',
       })
     } finally {
@@ -551,7 +544,7 @@ export default function TalentosPage() {
                   type="button"
                   variant="outline"
                   onClick={handlePrev}
-                  disabled={currentStep === 0 || isCheckingEmail || isSubmitting}
+                  disabled={currentStep === 0 || isSubmitting}
                   className="min-w-[100px]"
                 >
                   <ChevronLeft className="mr-2 h-4 w-4" /> Voltar
@@ -561,12 +554,11 @@ export default function TalentosPage() {
                   <Button
                     type="button"
                     onClick={handleNext}
-                    disabled={isCheckingEmail || isNextDisabled()}
+                    disabled={isNextDisabled()}
                     className="min-w-[120px]"
                   >
-                    {isCheckingEmail && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {!isCheckingEmail && 'Próximo'}
-                    {!isCheckingEmail && <ChevronRight className="ml-2 h-4 w-4" />}
+                    Próximo
+                    <ChevronRight className="ml-2 h-4 w-4" />
                   </Button>
                 ) : (
                   <Button

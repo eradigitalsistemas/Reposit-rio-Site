@@ -106,6 +106,30 @@ export type Database = {
         }
         Relationships: []
       }
+      certificates: {
+        Row: {
+          benefits: Json
+          created_at: string
+          description: string
+          id: string
+          title: string
+        }
+        Insert: {
+          benefits?: Json
+          created_at?: string
+          description: string
+          id?: string
+          title: string
+        }
+        Update: {
+          benefits?: Json
+          created_at?: string
+          description?: string
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
       candidates: {
         Row: {
           created_at: string
@@ -1587,6 +1611,12 @@ export const Constants = {
 //   event_type: text (not null)
 //   details: text (nullable)
 //   created_at: timestamp with time zone (not null, default: now())
+// Table: certificates
+//   id: uuid (not null, default: gen_random_uuid())
+//   title: text (not null)
+//   description: text (not null)
+//   benefits: jsonb (not null, default: '[]'::jsonb)
+//   created_at: timestamp with time zone (not null, default: now())
 // Table: candidates
 //   id: uuid (not null, default: gen_random_uuid())
 //   email: text (not null)
@@ -1884,6 +1914,8 @@ export const Constants = {
 //   FOREIGN KEY agenda_eventos_usuario_id_fkey: FOREIGN KEY (usuario_id) REFERENCES auth.users(id) ON DELETE CASCADE
 // Table: auth_logs
 //   PRIMARY KEY auth_logs_pkey: PRIMARY KEY (id)
+// Table: certificates
+//   PRIMARY KEY certificates_pkey: PRIMARY KEY (id)
 // Table: candidates
 //   UNIQUE candidates_email_key: UNIQUE (email)
 //   PRIMARY KEY candidates_pkey: PRIMARY KEY (id)
@@ -2020,6 +2052,9 @@ export const Constants = {
 //     USING: is_admin()
 //   Policy "auth_logs_insert" (INSERT, PERMISSIVE) roles={authenticated}
 //     WITH CHECK: true
+// Table: certificates
+//   Policy "auth_read_certificates" (SELECT, PERMISSIVE) roles={anon,authenticated}
+//     USING: true
 // Table: candidates
 //   Policy "auth_all_candidates" (ALL, PERMISSIVE) roles={authenticated}
 //     USING: true

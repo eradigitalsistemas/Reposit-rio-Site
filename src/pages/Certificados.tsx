@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Loader2, CheckCircle2, MessageCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
+import type { Database } from '@/lib/supabase/types'
 import { HeroSection } from '@/components/blocks/HeroSection'
 import { CertificateCard } from '@/components/blocks/CertificateCard'
 import { FAQAccordion } from '@/components/blocks/FAQAccordion'
@@ -84,7 +85,9 @@ export default function Certificados() {
     )
   }
 
-  const [certificates, setCertificates] = useState<any[]>([])
+  const [certificates, setCertificates] = useState<
+    Database['public']['Tables']['certificates']['Row'][]
+  >([])
   const [isLoadingCerts, setIsLoadingCerts] = useState(true)
   const [fetchError, setFetchError] = useState(false)
 
@@ -155,7 +158,7 @@ export default function Certificados() {
                 key={cert.id}
                 type={cert.title}
                 description={cert.description}
-                benefits={cert.benefits}
+                benefits={cert.benefits as string[]}
                 onAction={() => handleWhatsAppCard(cert.title)}
               />
             ))}

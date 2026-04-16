@@ -12,7 +12,7 @@ migrate(
     record.setPassword('Skip@Pass')
     record.setVerified(true)
     record.set('name', 'Admin Era Digital')
-    record.set('telefone', '11999999999') // Non-zero value required if field is numeric
+    record.set('telefone', 11999999999) // Non-zero value required if field is numeric
     app.save(record)
   },
   (app) => {

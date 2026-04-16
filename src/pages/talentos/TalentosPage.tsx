@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CheckCircle2, ChevronLeft, ChevronRight, Loader2, Save } from 'lucide-react'
-import { supabase } from '@/lib/supabase/client'
+import pb from '@/lib/pocketbase/client'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Card, CardContent } from '@/components/ui/card'
@@ -106,11 +106,7 @@ export default function TalentosPage() {
         setIsCheckingEmail(true)
         const email = getValues('personal.email')
         try {
-          const { data } = await supabase
-            .from('users')
-            .select('id')
-            .eq('email', email)
-            .maybeSingle()
+          const data = await pb.collection('users').getFirstListItem(`email="${email}"`)
           if (data) {
             setError('personal.email', {
               type: 'manual',
@@ -120,7 +116,7 @@ export default function TalentosPage() {
             return
           }
         } catch (e) {
-          // Ignora erros de rede localmente
+          // Ignora erros de rede localmente (ou quando o registro não existe)
         }
         setIsCheckingEmail(false)
       }

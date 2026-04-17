@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CheckCircle2, ChevronLeft, ChevronRight, Loader2, Save } from 'lucide-react'
+import { CheckCircle2, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import pb from '@/lib/pocketbase/client'
 import { getErrorMessage, extractFieldErrors } from '@/lib/pocketbase/errors'
 import { useToast } from '@/hooks/use-toast'
@@ -26,8 +26,6 @@ import { StepExperience } from './StepExperience'
 import { StepAdditional } from './StepAdditional'
 import { StepDisc } from './StepDisc'
 import { StepReview } from './StepReview'
-
-const STORAGE_KEY = 'talentos_form_data'
 
 const generateDocument = (values: TalentosFormValues) => {
   const formatDate = (dateStr?: string) => {
@@ -225,9 +223,6 @@ export default function TalentosPage() {
   })
   const [erpLeadLoading, setErpLeadLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [saveStatus, setSaveStatus] = useState<'Salvando...' | 'Salvo' | ''>('')
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const isInitialMount = useRef(true)
   const navigate = useNavigate()
   const { toast } = useToast()
 
@@ -249,29 +244,10 @@ export default function TalentosPage() {
   const formValues = watch()
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        reset(parsed)
-      } catch (e) {
-        // Ignore parse error
-      }
-    }
-    setTimeout(() => {
-      isInitialMount.current = false
-    }, 100)
+    // Clear any previous persisted data to ensure a fresh form on mount
+    localStorage.removeItem('talentos_form_data')
+    reset(defaultTalentosValues as any)
   }, [reset])
-
-  const saveData = () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(getValues()))
-    setSaveStatus('Salvando...')
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    timeoutRef.current = setTimeout(() => {
-      setSaveStatus('Salvo')
-      setTimeout(() => setSaveStatus(''), 2000)
-    }, 500)
-  }
 
   const handleErpLeadSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -340,7 +316,6 @@ export default function TalentosPage() {
   }
 
   const forceNextStep = () => {
-    saveData()
     setCurrentStep((prev) => prev + 1)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -361,7 +336,6 @@ export default function TalentosPage() {
   }
 
   const handlePrev = () => {
-    saveData()
     setCurrentStep((prev) => prev - 1)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -460,6 +434,10 @@ export default function TalentosPage() {
         title: 'Currículo enviado com sucesso!',
         description: 'Sua candidatura foi registrada e o download foi iniciado.',
       })
+
+      // Clear the form for future entries
+      reset(defaultTalentosValues as any)
+      setCurrentStep(0)
 
       localStorage.setItem('talentos_generated_at', new Date().toISOString())
       navigate('/talentos/sucesso')
@@ -702,14 +680,6 @@ export default function TalentosPage() {
             </span>
             <span className="hidden sm:inline-block">—</span>
             <span className="text-primary font-semibold">{steps[currentStep].title}</span>
-          </div>
-          <div className="text-xs flex items-center text-muted-foreground font-normal">
-            {saveStatus === 'Salvando...' && <span className="animate-pulse">{saveStatus}</span>}
-            {saveStatus === 'Salvo' && (
-              <span className="flex items-center text-green-600 dark:text-green-500">
-                <Save className="w-3.5 h-3.5 mr-1.5" /> Todos os dados salvos
-              </span>
-            )}
           </div>
         </div>
         <Progress value={progress} className="h-2 rounded-full" />

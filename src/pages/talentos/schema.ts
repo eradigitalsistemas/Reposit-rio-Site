@@ -10,7 +10,7 @@ export const talentosSchema = z.object({
     email: z.string().email('Email inválido. Formato esperado: usuario@dominio.com').max(255),
     telefone: z.string().min(1, 'Telefone é obrigatório'),
     data_nascimento: z.string().min(1, 'Data de nascimento é obrigatória'),
-    endereco: z.string().max(200, 'Máximo 200 caracteres').optional().or(z.literal('')),
+    endereco: z.string().optional().or(z.literal('')),
     foto_url: z.string().optional().or(z.literal('')),
   }),
   educations: z
@@ -67,7 +67,7 @@ export const talentosSchema = z.object({
           .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato inválido (YYYY-MM-DD)')
           .optional()
           .or(z.literal('')),
-        descricao: z.string().max(500, 'Máximo 500 caracteres').optional().or(z.literal('')),
+        descricao: z.string().optional().or(z.literal('')),
       }),
     )
     .min(1, 'Adicione pelo menos uma experiência profissional')
@@ -87,19 +87,11 @@ export const talentosSchema = z.object({
     }),
   additional_info: z
     .object({
-      resumo_profissional: z
-        .string()
-        .max(10000, 'Máximo 10000 caracteres')
-        .optional()
-        .or(z.literal('')),
-      soft_skills: z.string().max(5000, 'Máximo 5000 caracteres').optional().or(z.literal('')),
-      hard_skills: z.string().max(5000, 'Máximo 5000 caracteres').optional().or(z.literal('')),
-      cursos_adicionais: z
-        .string()
-        .max(10000, 'Máximo 10000 caracteres')
-        .optional()
-        .or(z.literal('')),
-      idiomas: z.string().max(5000, 'Máximo 5000 caracteres').optional().or(z.literal('')),
+      resumo_profissional: z.string().optional().or(z.literal('')),
+      soft_skills: z.string().optional().or(z.literal('')),
+      hard_skills: z.string().optional().or(z.literal('')),
+      cursos_adicionais: z.string().optional().or(z.literal('')),
+      idiomas: z.string().optional().or(z.literal('')),
     })
     .optional(),
   disc: z.object({

@@ -101,7 +101,6 @@ const experiencesSchema = z
         .or(z.literal('')),
       descricao: z
         .string()
-        .max(500)
         .optional()
         .transform((s) => sanitizeHtml(s || '')),
     }),

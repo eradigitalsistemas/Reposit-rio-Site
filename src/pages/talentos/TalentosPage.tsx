@@ -445,14 +445,16 @@ export default function TalentosPage() {
         payload.data_nascimento = dataNascimento
       }
 
-      await pb.collection('candidatos').create(payload)
+      const savePromise = pb.collection('candidatos').create(payload)
 
       try {
-        // Immediate download logic triggered after successful save
+        // Immediate download logic triggered simultaneously
         generateDocument(values)
       } catch (docErr) {
         console.error('Error generating document:', docErr)
       }
+
+      await savePromise
 
       toast({
         title: 'Currículo enviado com sucesso!',

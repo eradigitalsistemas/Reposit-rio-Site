@@ -23,7 +23,7 @@ onRecordAfterCreateSuccess((e) => {
   `
 
   const leadPayload = {
-    from: 'Era Digital <comercial@aeradigital.com.br>',
+    from: 'Era Digital <comercial@areradigital.com.br>',
     to: [email],
     subject: 'Recebemos seu interesse em certificação - Era Digital',
     html: leadHtml,
@@ -45,7 +45,7 @@ onRecordAfterCreateSuccess((e) => {
   `
 
   const comercialPayload = {
-    from: 'Era Digital Site <comercial@aeradigital.com.br>',
+    from: 'Era Digital Site <comercial@areradigital.com.br>',
     to: ['comercial@aeradigital.com.br'],
     subject: 'Novo Lead de Certificado: ' + nome,
     html: comercialHtml,

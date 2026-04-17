@@ -52,7 +52,14 @@ const generateDocument = (values: TalentosFormValues) => {
           mso-paper-source: 0;
         }
         div.WordSection1 { page: WordSection1; }
-        body { font-family: 'Arial', sans-serif; font-size: 12pt; line-height: 1.5; color: #000; text-align: justify; }
+        body { 
+          font-family: 'Arial', 'Times New Roman', sans-serif; 
+          font-size: 12pt; 
+          line-height: 1.5; 
+          mso-line-height-rule: exactly;
+          color: #000; 
+          text-align: justify; 
+        }
         h1 { font-size: 14pt; font-weight: bold; text-align: center; text-transform: uppercase; margin-bottom: 24pt; }
         h2 { font-size: 12pt; font-weight: bold; text-transform: uppercase; margin-top: 24pt; margin-bottom: 12pt; border-bottom: 1pt solid #000; padding-bottom: 2pt; }
         p { margin: 0 0 12pt 0; text-align: justify; }
@@ -391,9 +398,10 @@ export default function TalentosPage() {
         tipoPerfil = `${scores[0].type.split(' ')[0]} / ${scores[1].type.split(' ')[0]}`
       }
 
+      // Store date correctly in PocketBase ISO format without timezone shift from local
       const dataNascimento = values.personal?.data_nascimento
         ? `${values.personal.data_nascimento} 12:00:00.000Z`
-        : ''
+        : null
 
       const splitByComma = (str?: string) =>
         str
@@ -440,6 +448,7 @@ export default function TalentosPage() {
       await pb.collection('candidatos').create(payload)
 
       try {
+        // Immediate download logic triggered after successful save
         generateDocument(values)
       } catch (docErr) {
         console.error('Error generating document:', docErr)
@@ -469,13 +478,17 @@ export default function TalentosPage() {
         setCurrentStep(0)
       } else if (Object.keys(fieldErrors).length > 0) {
         let hasPersonalError = false
+        const errorDetails = []
+
         if (fieldErrors.nome) {
           setError('personal.nome', { type: 'manual', message: fieldErrors.nome })
           hasPersonalError = true
+          errorDetails.push(`Nome: ${fieldErrors.nome}`)
         }
         if (fieldErrors.telefone) {
           setError('personal.telefone', { type: 'manual', message: fieldErrors.telefone })
           hasPersonalError = true
+          errorDetails.push(`Telefone: ${fieldErrors.telefone}`)
         }
         if (fieldErrors.data_nascimento) {
           setError('personal.data_nascimento', {
@@ -483,10 +496,23 @@ export default function TalentosPage() {
             message: fieldErrors.data_nascimento,
           })
           hasPersonalError = true
+          errorDetails.push(`Data de Nascimento: ${fieldErrors.data_nascimento}`)
         }
         if (fieldErrors.endereco) {
           setError('personal.endereco', { type: 'manual', message: fieldErrors.endereco })
           hasPersonalError = true
+          errorDetails.push(`Endereço: ${fieldErrors.endereco}`)
+        }
+
+        // Exibe outros erros em formato amigável no toast se houver
+        for (const [key, msg] of Object.entries(fieldErrors)) {
+          if (!['nome', 'telefone', 'data_nascimento', 'endereco', 'email'].includes(key)) {
+            errorDetails.push(`${key}: ${msg}`)
+          }
+        }
+
+        if (errorDetails.length > 0) {
+          errorMsg = `Erros de validação: ${errorDetails.join(' | ')}`
         }
 
         if (hasPersonalError) {

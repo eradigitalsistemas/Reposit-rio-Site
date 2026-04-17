@@ -89,17 +89,17 @@ export const talentosSchema = z.object({
     .object({
       resumo_profissional: z
         .string()
-        .max(2000, 'Máximo 2000 caracteres')
+        .max(10000, 'Máximo 10000 caracteres')
         .optional()
         .or(z.literal('')),
-      soft_skills: z.string().max(1000, 'Máximo 1000 caracteres').optional().or(z.literal('')),
-      hard_skills: z.string().max(1000, 'Máximo 1000 caracteres').optional().or(z.literal('')),
+      soft_skills: z.string().max(5000, 'Máximo 5000 caracteres').optional().or(z.literal('')),
+      hard_skills: z.string().max(5000, 'Máximo 5000 caracteres').optional().or(z.literal('')),
       cursos_adicionais: z
         .string()
-        .max(2000, 'Máximo 2000 caracteres')
+        .max(10000, 'Máximo 10000 caracteres')
         .optional()
         .or(z.literal('')),
-      idiomas: z.string().max(1000, 'Máximo 1000 caracteres').optional().or(z.literal('')),
+      idiomas: z.string().max(5000, 'Máximo 5000 caracteres').optional().or(z.literal('')),
     })
     .optional(),
   disc: z.object({

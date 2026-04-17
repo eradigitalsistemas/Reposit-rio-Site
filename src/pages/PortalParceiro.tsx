@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Form,
   FormControl,
@@ -37,6 +38,7 @@ const formSchema = z.object({
   email: z.string().email('Email inválido'),
   telefone: z.string().min(14, 'Telefone incompleto'),
   profissao_ocupacao: z.string().min(2, 'Selecione sua profissão/ocupação'),
+  mensagem: z.string().optional(),
   lgpd: z.boolean().refine((val) => val === true, 'Você deve aceitar os termos de privacidade'),
 })
 
@@ -52,6 +54,7 @@ export default function PortalParceiro() {
       email: '',
       telefone: '',
       profissao_ocupacao: '',
+      mensagem: '',
       lgpd: false,
     },
   })
@@ -64,6 +67,7 @@ export default function PortalParceiro() {
         email: values.email,
         telefone: values.telefone,
         profissao_ocupacao: values.profissao_ocupacao,
+        mensagem: values.mensagem,
       })
       setIsSuccess(true)
     } catch (err: any) {
@@ -226,6 +230,23 @@ export default function PortalParceiro() {
                               <option value="Advogado">Advogado</option>
                               <option value="Outro">Outro</option>
                             </select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="mensagem"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Mensagem (Opcional)</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Gostaria de saber mais sobre as comissões..."
+                              className="resize-none"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

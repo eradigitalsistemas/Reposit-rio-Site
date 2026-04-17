@@ -33,37 +33,59 @@ const ResumeView = ({ c }: { c: any }) => {
   const formacoes = Array.isArray(c.formacoes) ? c.formacoes : []
   const experiencias = Array.isArray(c.experiencias) ? c.experiencias : []
   const disc = c.disc_resultado || {}
+  const hardSkills = Array.isArray(c.hard_skills) ? c.hard_skills : []
+  const softSkills = Array.isArray(c.soft_skills) ? c.soft_skills : []
+  const idiomas = Array.isArray(c.idiomas) ? c.idiomas : []
+  const cursos = Array.isArray(c.cursos_adicionais) ? c.cursos_adicionais : []
 
   return (
     <div className="space-y-6 p-6 bg-background rounded-lg">
-      <div className="border-b pb-4">
-        <h2 className="text-2xl font-bold">{c.nome}</h2>
-        <div className="text-muted-foreground space-y-1 mt-2 text-sm">
-          <p>
-            <strong>E-mail:</strong> {c.email}
-          </p>
-          <p>
-            <strong>Telefone:</strong> {c.telefone}
-          </p>
-          <p>
-            <strong>Nascimento:</strong>{' '}
-            {c.data_nascimento
-              ? format(new Date(c.data_nascimento), 'dd/MM/yyyy')
-              : 'Não informado'}
-          </p>
-          <p>
-            <strong>Endereço:</strong> {c.endereco || 'Não informado'}
-          </p>
-        </div>
-        <div className="flex gap-2 mt-4">
-          <span className="text-xs px-2 py-1 bg-secondary rounded-md">
-            Origem: {c.origem || 'N/A'}
-          </span>
-          <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-md">
-            Status: {c.status || 'Novo'}
-          </span>
+      <div className="flex gap-6 border-b pb-4">
+        {c.foto_url && (
+          <div className="shrink-0 hidden sm:block">
+            <img
+              src={c.foto_url}
+              alt={c.nome}
+              className="w-24 h-24 rounded-full object-cover border"
+            />
+          </div>
+        )}
+        <div className="flex-1">
+          <h2 className="text-2xl font-bold">{c.nome}</h2>
+          <div className="text-muted-foreground space-y-1 mt-2 text-sm">
+            <p>
+              <strong>E-mail:</strong> {c.email}
+            </p>
+            <p>
+              <strong>Telefone:</strong> {c.telefone}
+            </p>
+            <p>
+              <strong>Nascimento:</strong>{' '}
+              {c.data_nascimento
+                ? format(new Date(c.data_nascimento), 'dd/MM/yyyy')
+                : 'Não informado'}
+            </p>
+            <p>
+              <strong>Endereço:</strong> {c.endereco || 'Não informado'}
+            </p>
+          </div>
+          <div className="flex gap-2 mt-4">
+            <span className="text-xs px-2 py-1 bg-secondary rounded-md">
+              Origem: {c.origem || 'N/A'}
+            </span>
+            <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-md">
+              Status: {c.status || 'Novo'}
+            </span>
+          </div>
         </div>
       </div>
+
+      {c.resumo_profissional && (
+        <div>
+          <h3 className="font-semibold text-lg border-b mb-3">Resumo Profissional</h3>
+          <p className="text-sm whitespace-pre-wrap">{c.resumo_profissional}</p>
+        </div>
+      )}
 
       <div>
         <h3 className="font-semibold text-lg border-b mb-3">Experiência Profissional</h3>
@@ -101,6 +123,79 @@ const ResumeView = ({ c }: { c: any }) => {
           <p className="text-sm text-muted-foreground">Não informada</p>
         )}
       </div>
+
+      {cursos.length > 0 && (
+        <div>
+          <h3 className="font-semibold text-lg border-b mb-3">Cursos Adicionais</h3>
+          {cursos.map((curso: any, i: number) => {
+            const isString = typeof curso === 'string'
+            return (
+              <div key={i} className="mb-3">
+                <p className="font-medium text-base">
+                  {isString ? curso : curso.nome || curso.curso}
+                </p>
+                {!isString && curso.instituicao && (
+                  <p className="text-sm text-muted-foreground">{curso.instituicao}</p>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {idiomas.length > 0 && (
+        <div>
+          <h3 className="font-semibold text-lg border-b mb-3">Idiomas</h3>
+          <div className="flex flex-wrap gap-2">
+            {idiomas.map((idioma: any, i: number) => {
+              const isString = typeof idioma === 'string'
+              const label = isString
+                ? idioma
+                : `${idioma.idioma || idioma.nome} - ${idioma.nivel || ''}`
+              return (
+                <span key={i} className="text-xs bg-muted px-2 py-1 rounded-md border">
+                  {label}
+                </span>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {(hardSkills.length > 0 || softSkills.length > 0) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {hardSkills.length > 0 && (
+            <div>
+              <h3 className="font-semibold text-lg border-b mb-3">Hard Skills</h3>
+              <div className="flex flex-wrap gap-2">
+                {hardSkills.map((skill: any, i: number) => (
+                  <span
+                    key={i}
+                    className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-md border border-primary/20"
+                  >
+                    {typeof skill === 'string' ? skill : skill.nome}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {softSkills.length > 0 && (
+            <div>
+              <h3 className="font-semibold text-lg border-b mb-3">Soft Skills</h3>
+              <div className="flex flex-wrap gap-2">
+                {softSkills.map((skill: any, i: number) => (
+                  <span
+                    key={i}
+                    className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded-md border"
+                  >
+                    {typeof skill === 'string' ? skill : skill.nome}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       <div>
         <h3 className="font-semibold text-lg border-b mb-3">Perfil DISC</h3>

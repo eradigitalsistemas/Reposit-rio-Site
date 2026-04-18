@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/table'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Skeleton } from '@/components/ui/skeleton'
 import { format } from 'date-fns'
 import { Search, Eye, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -260,21 +261,27 @@ const ResumeView = ({ c }: { c: any }) => {
 export default function CandidatesTab() {
   const [candidates, setCandidates] = useState<any[]>([])
   const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(true)
 
-  const loadData = async () => {
+  const loadData = async (showLoading = true) => {
+    if (showLoading) setLoading(true)
     try {
       const records = await pb.collection('candidatos').getFullList({ sort: '-created' })
       setCandidates(records)
     } catch (err) {
       console.error(err)
+      toast.error('Erro ao carregar candidatos.')
+    } finally {
+      if (showLoading) setLoading(false)
     }
   }
 
   useEffect(() => {
-    loadData()
+    loadData(true)
   }, [])
+
   useRealtime('candidatos', () => {
-    loadData()
+    loadData(false)
   })
 
   const filtered = candidates.filter(
@@ -315,63 +322,93 @@ export default function CandidatesTab() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filtered.map((c) => (
-            <TableRow key={c.id}>
-              <TableCell className="font-medium">{c.nome}</TableCell>
-              <TableCell>
-                <div className="text-sm">{c.email}</div>
-                <div className="text-xs text-muted-foreground">{c.telefone}</div>
-              </TableCell>
-              <TableCell>
-                <div className="text-xs font-medium">{c.status || 'Novo'}</div>
-                <div className="text-xs text-muted-foreground">
-                  {c.created ? format(new Date(c.created), 'dd/MM/yyyy') : '-'}
-                </div>
-              </TableCell>
-              <TableCell className="text-right flex items-center justify-end gap-2">
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <Eye className="w-4 h-4 mr-2" /> Ver
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent className="w-full sm:max-w-2xl bg-muted/30 p-0">
-                    <ScrollArea className="h-full p-4">
-                      <ResumeView c={c} />
-                    </ScrollArea>
-                  </SheetContent>
-                </Sheet>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-destructive hover:bg-destructive/10"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Esta ação é irreversível. O candidato será removido da base.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleDelete(c.id)}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      >
-                        Excluir
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+          {loading ? (
+            Array.from({ length: 5 }).map((_, i) => (
+              <TableRow key={i}>
+                <TableCell>
+                  <Skeleton className="h-4 w-[150px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-[200px] mb-1" />
+                  <Skeleton className="h-3 w-[100px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-[80px] mb-1" />
+                  <Skeleton className="h-3 w-[80px]" />
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Skeleton className="h-8 w-16" />
+                    <Skeleton className="h-8 w-8" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : filtered.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                Nenhum candidato encontrado.
               </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            filtered.map((c) => (
+              <TableRow key={c.id}>
+                <TableCell className="font-medium">{c.nome}</TableCell>
+                <TableCell>
+                  <div className="text-sm">{c.email}</div>
+                  <div className="text-xs text-muted-foreground">{c.telefone}</div>
+                </TableCell>
+                <TableCell>
+                  <div className="text-xs font-medium">{c.status || 'Novo'}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {c.created ? format(new Date(c.created), 'dd/MM/yyyy') : '-'}
+                  </div>
+                </TableCell>
+                <TableCell className="text-right flex items-center justify-end gap-2">
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <Eye className="w-4 h-4 mr-2" /> Ver
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent className="w-full sm:max-w-2xl bg-muted/30 p-0">
+                      <ScrollArea className="h-full p-4">
+                        <ResumeView c={c} />
+                      </ScrollArea>
+                    </SheetContent>
+                  </Sheet>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta ação é irreversível. O candidato será removido da base.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(c.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Excluir
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
     </div>

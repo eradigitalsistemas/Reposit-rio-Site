@@ -27,12 +27,15 @@ import { format } from 'date-fns'
 import { Search, Eye, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function LeadsTab() {
   const [leads, setLeads] = useState<any[]>([])
   const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(true)
 
-  const loadAll = async () => {
+  const loadAll = async (showLoading = true) => {
+    if (showLoading) setLoading(true)
     try {
       const [leadsRes, parceirosRes, certificadosRes] = await Promise.all([
         pb.collection('leads').getFullList({ sort: '-created' }),
@@ -58,16 +61,19 @@ export default function LeadsTab() {
       setLeads(combined)
     } catch (err) {
       console.error(err)
+      toast.error('Erro ao carregar leads.')
+    } finally {
+      if (showLoading) setLoading(false)
     }
   }
 
   useEffect(() => {
-    loadAll()
+    loadAll(true)
   }, [])
 
-  useRealtime('leads', () => loadAll())
-  useRealtime('leads_parceiros', () => loadAll())
-  useRealtime('leads_certificados', () => loadAll())
+  useRealtime('leads', () => loadAll(false))
+  useRealtime('leads_parceiros', () => loadAll(false))
+  useRealtime('leads_certificados', () => loadAll(false))
 
   const formatDate = (dateString: string) =>
     dateString ? format(new Date(dateString), 'dd/MM/yyyy HH:mm') : '-'
@@ -138,7 +144,30 @@ export default function LeadsTab() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filtered.length === 0 ? (
+          {loading ? (
+            Array.from({ length: 5 }).map((_, i) => (
+              <TableRow key={i}>
+                <TableCell>
+                  <Skeleton className="h-4 w-[120px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-[180px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-[200px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-6 w-[80px] rounded-full" />
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Skeleton className="h-8 w-16" />
+                    <Skeleton className="h-8 w-8" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : filtered.length === 0 ? (
             <TableRow>
               <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                 Nenhum lead encontrado.

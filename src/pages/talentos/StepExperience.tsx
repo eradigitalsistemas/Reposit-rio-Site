@@ -24,8 +24,8 @@ export function StepExperience() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h3 className="text-lg font-semibold flex items-center">
-            <Briefcase className="w-5 h-5 mr-2 text-primary" />
-            Experiência Profissional
+            <Briefcase className="w-5 h-5 mr-2 text-primary flex-shrink-0" />
+            <span>Experiência Profissional</span>
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
             Adicione suas experiências mais relevantes (mínimo 1)

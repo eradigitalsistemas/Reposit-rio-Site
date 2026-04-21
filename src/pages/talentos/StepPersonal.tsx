@@ -54,8 +54,8 @@ export function StepPersonal() {
         </p>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8 p-4 bg-muted/30 rounded-lg border border-border">
-        <Avatar className="w-24 h-24 border-2 border-primary/20 shadow-sm">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center mb-8 p-4 bg-muted/30 rounded-lg border border-border space-y-6 sm:space-y-0 sm:space-x-6">
+        <Avatar className="w-24 h-24 border-2 border-primary/20 shadow-sm flex-shrink-0">
           <AvatarImage src={fotoUrl} className="object-cover" />
           <AvatarFallback className="bg-muted">
             <Camera className="h-8 w-8 text-muted-foreground/50" />
@@ -66,7 +66,7 @@ export function StepPersonal() {
           <p className="text-xs text-muted-foreground">
             Formatos suportados: JPG, PNG, WebP. Tamanho máximo: 5MB.
           </p>
-          <div className="flex flex-wrap gap-2 pt-1">
+          <div className="flex flex-wrap items-center pt-1 -mr-2 -mb-2">
             <Input
               type="file"
               accept="image/jpeg, image/png, image/webp"
@@ -78,18 +78,20 @@ export function StepPersonal() {
               type="button"
               variant="secondary"
               size="sm"
+              className="mr-2 mb-2"
               onClick={() => document.getElementById('foto-upload')?.click()}
             >
-              <Camera className="w-4 h-4 mr-2" /> Escolher Foto
+              <Camera className="w-4 h-4 mr-2 flex-shrink-0" /> Escolher Foto
             </Button>
             {fotoUrl && (
               <Button
                 type="button"
                 variant="destructive"
                 size="sm"
+                className="mr-2 mb-2"
                 onClick={() => setValue('personal.foto_url', '', { shouldValidate: true })}
               >
-                <Trash2 className="h-4 w-4 mr-2" /> Remover
+                <Trash2 className="h-4 w-4 mr-2 flex-shrink-0" /> Remover
               </Button>
             )}
           </div>

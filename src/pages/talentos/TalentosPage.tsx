@@ -38,7 +38,7 @@ const generateDocument = (values: TalentosFormValues) => {
   }
 
   const content = `
-    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='https://www.w3.org/TR/REC-html40'>
     <head>
       <meta charset='utf-8'>
       <style>
@@ -85,7 +85,7 @@ const generateDocument = (values: TalentosFormValues) => {
             ? `
         <div class="section">
           <h2>Resumo Profissional</h2>
-          <p>${values.additional_info.resumo_profissional.replace(/\n/g, '<br>')}</p>
+          <p>${String(values.additional_info.resumo_profissional).replace(/\n/g, '<br>')}</p>
         </div>
         `
             : ''
@@ -100,10 +100,10 @@ const generateDocument = (values: TalentosFormValues) => {
             .map(
               (exp: any) => `
             <p>
-              <span class="item-title">${exp.empresa}</span><br>
-              Cargo: ${exp.cargo}<br>
+              <span class="item-title">${exp.empresa || ''}</span><br>
+              Cargo: ${exp.cargo || ''}<br>
               Período: ${formatDate(exp.data_inicio)} até ${exp.data_fim ? formatDate(exp.data_fim) : 'Atual'}
-              ${exp.descricao ? '<br>' + exp.descricao.replace(/\n/g, '<br>') : ''}
+              ${exp.descricao ? '<br>' + String(exp.descricao).replace(/\n/g, '<br>') : ''}
             </p>
           `,
             )
@@ -122,8 +122,8 @@ const generateDocument = (values: TalentosFormValues) => {
             .map(
               (edu: any) => `
             <p>
-              <span class="item-title">${edu.instituicao}</span><br>
-              Curso: ${edu.curso}<br>
+              <span class="item-title">${edu.instituicao || ''}</span><br>
+              Curso: ${edu.curso || ''}<br>
               Período: ${formatDate(edu.data_inicio)} até ${edu.data_fim ? formatDate(edu.data_fim) : 'Atual'}
             </p>
           `,
@@ -153,7 +153,7 @@ const generateDocument = (values: TalentosFormValues) => {
             ? `
         <div class="section">
           <h2>Idiomas</h2>
-          <p>${values.additional_info.idiomas.replace(/\n/g, '<br>')}</p>
+          <p>${String(values.additional_info.idiomas).replace(/\n/g, '<br>')}</p>
         </div>
         `
             : ''
@@ -164,7 +164,7 @@ const generateDocument = (values: TalentosFormValues) => {
             ? `
         <div class="section">
           <h2>Cursos Adicionais</h2>
-          <p>${values.additional_info.cursos_adicionais.replace(/\n/g, '<br>')}</p>
+          <p>${String(values.additional_info.cursos_adicionais).replace(/\n/g, '<br>')}</p>
         </div>
         `
             : ''
@@ -271,10 +271,13 @@ export default function TalentosPage() {
       })
       setIsErpLeadOpen(false)
       setErpLeadData({ email: '', telefone: '', empresa: '' })
-    } catch (err) {
+    } catch (err: any) {
+      const isPolicyError = err?.status === 403 || err?.status === 404
       toast({
-        title: 'Erro ao registrar',
-        description: getErrorMessage(err),
+        title: isPolicyError ? 'Acesso Indisponível' : 'Erro ao registrar',
+        description: isPolicyError
+          ? 'Não foi possível conectar ao servidor. Tente novamente mais tarde.'
+          : getErrorMessage(err),
         variant: 'destructive',
       })
     } finally {
@@ -304,10 +307,13 @@ export default function TalentosPage() {
       })
       setIsCertLeadOpen(false)
       setCertLeadData({ email: '', telefone: '', tipo_certificado: '' })
-    } catch (err) {
+    } catch (err: any) {
+      const isPolicyError = err?.status === 403 || err?.status === 404
       toast({
-        title: 'Erro ao registrar',
-        description: getErrorMessage(err),
+        title: isPolicyError ? 'Acesso Indisponível' : 'Erro ao registrar',
+        description: isPolicyError
+          ? 'Não foi possível conectar ao servidor. Tente novamente mais tarde.'
+          : getErrorMessage(err),
         variant: 'destructive',
       })
     } finally {
@@ -443,8 +449,19 @@ export default function TalentosPage() {
       navigate('/talentos/sucesso')
     } catch (err: any) {
       console.error(err)
-      const fieldErrors = extractFieldErrors(err)
 
+      if (err?.status === 403 || err?.status === 404) {
+        toast({
+          title: 'Serviço Indisponível',
+          description:
+            'Não foi possível salvar os dados. Verifique sua conexão ou tente mais tarde.',
+          variant: 'destructive',
+        })
+        setIsSubmitting(false)
+        return
+      }
+
+      const fieldErrors = extractFieldErrors(err)
       let errorMsg = getErrorMessage(err)
 
       if (
@@ -560,15 +577,18 @@ export default function TalentosPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-6 px-4 animate-fade-in">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0 sm:space-x-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Cadastro de Talentos</h1>
           <p className="text-muted-foreground mt-1">Preencha seu currículo e perfil DISC.</p>
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex flex-wrap items-center -mr-2 -mb-2">
           <Dialog open={isErpLeadOpen} onOpenChange={setIsErpLeadOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="whitespace-nowrap">
+              <Button
+                variant="outline"
+                className="mr-2 mb-2 whitespace-normal h-auto py-2 text-center"
+              >
                 Interesse em ERP?
               </Button>
             </DialogTrigger>
@@ -619,7 +639,10 @@ export default function TalentosPage() {
 
           <Dialog open={isCertLeadOpen} onOpenChange={setIsCertLeadOpen}>
             <DialogTrigger asChild>
-              <Button variant="secondary" className="whitespace-nowrap">
+              <Button
+                variant="secondary"
+                className="mr-2 mb-2 whitespace-normal h-auto py-2 text-center"
+              >
                 Interesse em Certificados?
               </Button>
             </DialogTrigger>
@@ -674,7 +697,7 @@ export default function TalentosPage() {
 
       <div className="mb-8 sticky top-[80px] bg-background/95 pb-4 z-10 pt-4 -mt-4 border-b">
         <div className="flex justify-between items-center text-sm font-medium mb-3">
-          <div className="text-muted-foreground flex items-center gap-2">
+          <div className="text-muted-foreground flex items-center space-x-2">
             <span>
               Passo {currentStep + 1} de {steps.length}
             </span>

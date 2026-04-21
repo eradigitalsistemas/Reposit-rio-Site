@@ -14,10 +14,10 @@ export function StepEducation() {
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
         <div className="space-y-1">
-          <h3 className="text-2xl font-bold flex items-center gap-2">
-            <GraduationCap className="h-6 w-6 text-primary" /> Educação
+          <h3 className="text-2xl font-bold flex items-center space-x-2">
+            <GraduationCap className="h-6 w-6 text-primary flex-shrink-0" /> <span>Educação</span>
           </h3>
           <p className="text-muted-foreground">Liste suas formações, cursos ou certificações.</p>
         </div>
@@ -27,13 +27,13 @@ export function StepEducation() {
           onClick={() => append({ instituicao: '', curso: '', data_inicio: '', data_fim: '' })}
           disabled={fields.length >= maxEducations}
         >
-          <Plus className="h-4 w-4 mr-2" /> Adicionar Formação
+          <Plus className="h-4 w-4 mr-2 flex-shrink-0" /> Adicionar Formação
         </Button>
       </div>
 
       {fields.length === 0 && (
-        <div className="p-4 bg-destructive/10 text-destructive rounded-lg flex items-center gap-3">
-          <AlertCircle className="w-5 h-5" />
+        <div className="p-4 bg-destructive/10 text-destructive rounded-lg flex items-center space-x-3">
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
           <p className="text-sm font-medium">
             Você precisa adicionar pelo menos uma formação acadêmica.
           </p>

@@ -19,14 +19,14 @@ export function CertificateCard({ type, description, benefits, onAction }: Certi
         {description && <p className="text-sm text-muted-foreground text-center">{description}</p>}
         <ul className="space-y-2 flex-1">
           {benefits.map((benefit, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm">
+            <li key={i} className="flex items-start space-x-2 text-sm">
               <Check className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
               <span>{benefit}</span>
             </li>
           ))}
         </ul>
         <Button className="w-full" variant="outline" onClick={onAction}>
-          Solicitar {type}
+          <span>Solicitar {type}</span>
         </Button>
       </CardContent>
     </Card>

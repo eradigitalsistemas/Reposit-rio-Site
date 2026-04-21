@@ -182,7 +182,7 @@ export default function Certificados() {
                 <CardContent className="flex-1 pt-6 flex flex-col">
                   <div className="space-y-3 mb-6 flex-1">
                     {[1, 2, 3].map((j) => (
-                      <div key={j} className="flex items-start gap-2">
+                      <div key={j} className="flex items-start space-x-2">
                         <Skeleton className="h-4 w-4 rounded-full mt-0.5" />
                         <Skeleton className="h-4 w-full" />
                       </div>
@@ -198,7 +198,7 @@ export default function Certificados() {
             <Alert variant="destructive" className="max-w-2xl">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Erro ao carregar</AlertTitle>
-              <AlertDescription className="mt-2 flex flex-col gap-4">
+              <AlertDescription className="mt-2 flex flex-col space-y-4">
                 <p>
                   Não foi possível carregar os certificados no momento. Verifique sua conexão com a
                   internet ou se as credenciais do banco de dados estão corretas.
@@ -209,7 +209,7 @@ export default function Certificados() {
                   className="w-fit border-destructive text-destructive hover:bg-destructive/10"
                   onClick={() => fetchCertificates()}
                 >
-                  Tentar Novamente
+                  <span>Tentar Novamente</span>
                 </Button>
               </AlertDescription>
             </Alert>
@@ -279,7 +279,7 @@ export default function Certificados() {
                 Sua solicitação foi enviada com sucesso! Em breve entraremos em contato.
               </p>
               <Button onClick={() => setIsSuccess(false)} variant="outline">
-                Enviar nova solicitação
+                <span>Enviar nova solicitação</span>
               </Button>
             </div>
           ) : (
@@ -401,7 +401,7 @@ export default function Certificados() {
                     />
                     <Button type="submit" className="w-full" disabled={isSubmitting}>
                       {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Enviar Solicitação
+                      <span>Enviar Solicitação</span>
                     </Button>
                   </form>
                 </Form>

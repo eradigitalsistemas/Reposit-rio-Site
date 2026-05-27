@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-21T00:03:23.557Z",
+  "generatedAt": "2026-05-27T12:14:39.747Z",
   "collections": [
     {
       "name": "users",
@@ -821,6 +821,74 @@
         }
       ],
       "indexes": []
+    },
+    {
+      "name": "avaliacoes_psicossociais",
+      "type": "base",
+      "apiRules": {
+        "list": "user_id = @request.auth.id",
+        "view": "user_id = @request.auth.id",
+        "create": "@request.auth.id != ''",
+        "update": "user_id = @request.auth.id",
+        "delete": null
+      },
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "respostas",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "data_conclusao",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "pontuacao_geral",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "observacoes_admin",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_avaliacoes_psico_user_id ON avaliacoes_psicossociais (user_id)",
+        "CREATE INDEX idx_avaliacoes_psico_status ON avaliacoes_psicossociais (status)"
+      ]
     }
   ]
 }

@@ -14,6 +14,7 @@ import BaseConhecimento from './pages/BaseConhecimento'
 import Tecnologia from './pages/Tecnologia'
 import TalentosPage from './pages/talentos/TalentosPage'
 import TalentosSuccessPage from './pages/talentos/TalentosSuccessPage'
+import AvaliacaoPsicossocialPage from './pages/talentos/AvaliacaoPsicossocialPage'
 import DesignSystem from './pages/DesignSystem'
 import IntegrationsDashboard from './pages/admin/IntegrationsDashboard'
 import AdminTalentosPage from './pages/admin/AdminTalentosPage'
@@ -41,6 +42,14 @@ const App = () => (
               <Route path="/tecnologia" element={<Tecnologia />} />
               <Route path="/talentos" element={<TalentosPage />} />
               <Route path="/talentos/sucesso" element={<TalentosSuccessPage />} />
+              <Route
+                path="/talentos/avaliacao-psicossocial"
+                element={
+                  <ProtectedRoute>
+                    <AvaliacaoPsicossocialPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/design-system" element={<DesignSystem />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route

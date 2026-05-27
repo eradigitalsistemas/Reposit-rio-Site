@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-27T12:16:18.288Z",
+  "generatedAt": "2026-05-27T12:51:55.589Z",
   "collections": [
     {
       "name": "users",
@@ -828,7 +828,7 @@
       "apiRules": {
         "list": "user_id = @request.auth.id",
         "view": "user_id = @request.auth.id",
-        "create": "@request.auth.id != ''",
+        "create": "",
         "update": "user_id = @request.auth.id",
         "delete": null
       },
@@ -836,7 +836,7 @@
         {
           "name": "user_id",
           "type": "relation",
-          "required": true,
+          "required": false,
           "system": false,
           "collectionRef": "users"
         },
@@ -883,6 +883,48 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "nome",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "email",
+          "type": "email",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "telefone",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "empresa",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "departamento",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "cargo",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "tempo_empresa",
+          "type": "number",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": [

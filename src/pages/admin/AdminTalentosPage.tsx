@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { LayoutDashboard, LogOut } from 'lucide-react'
 import CandidatesTab from './components/CandidatesTab'
 import LeadsTab from './components/LeadsTab'
+import AvaliacoesNR1Tab from './components/AvaliacoesNR1Tab'
 
 export default function AdminTalentosPage() {
   const { signOut } = useAuth()
@@ -31,15 +32,19 @@ export default function AdminTalentosPage() {
         </div>
 
         <Tabs defaultValue="talentos" className="w-full">
-          <TabsList className="mb-6 grid w-full max-w-md grid-cols-2">
+          <TabsList className="mb-6 grid w-full max-w-3xl grid-cols-3">
             <TabsTrigger value="talentos">Banco de Talentos</TabsTrigger>
             <TabsTrigger value="leads">Central de Leads</TabsTrigger>
+            <TabsTrigger value="nr1">Avaliações NR-1</TabsTrigger>
           </TabsList>
           <TabsContent value="talentos" className="mt-0 outline-none">
             <CandidatesTab />
           </TabsContent>
           <TabsContent value="leads" className="mt-0 outline-none">
             <LeadsTab />
+          </TabsContent>
+          <TabsContent value="nr1" className="mt-0 outline-none">
+            <AvaliacoesNR1Tab />
           </TabsContent>
         </Tabs>
       </div>

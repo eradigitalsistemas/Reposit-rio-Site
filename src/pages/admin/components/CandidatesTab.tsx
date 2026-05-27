@@ -384,20 +384,46 @@ export default function CandidatesTab() {
     loadData(false)
   })
 
-  const evalsByEmail = new Map(evaluations.map((e) => [e.expand?.user_id?.email, e]))
+  const evalsByEmail = new Map(evaluations.map((e) => [e.expand?.user_id?.email || e.email, e]))
 
-  const filtered = candidates.filter(
+  const candidatesEmails = new Set(candidates.map((c) => c.email))
+  const standaloneEvals = evaluations
+    .filter((e) => {
+      const email = e.expand?.user_id?.email || e.email
+      return email && !candidatesEmails.has(email)
+    })
+    .map((e) => ({
+      id: e.id + '_eval',
+      nome: e.expand?.user_id?.name || e.nome || 'Candidato (Avaliação)',
+      email: e.expand?.user_id?.email || e.email,
+      telefone: e.expand?.user_id?.telefone || e.telefone || '',
+      status: 'Apenas Avaliação',
+      created: e.created,
+      isStandalone: true,
+      evalRecord: e,
+    }))
+
+  const mergedList = [...candidates, ...standaloneEvals].sort(
+    (a, b) => new Date(b.created).getTime() - new Date(a.created).getTime(),
+  )
+
+  const filtered = mergedList.filter(
     (c) =>
       (c.nome || '').toLowerCase().includes(search.toLowerCase()) ||
       (c.email || '').toLowerCase().includes(search.toLowerCase()),
   )
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, isStandalone?: boolean) => {
     try {
-      await pb.collection('candidatos').delete(id)
-      toast.success('Candidato excluído com sucesso!')
+      if (isStandalone) {
+        await pb.collection('avaliacoes_psicossociais').delete(id.replace('_eval', ''))
+        toast.success('Avaliação excluída com sucesso!')
+      } else {
+        await pb.collection('candidatos').delete(id)
+        toast.success('Candidato excluído com sucesso!')
+      }
     } catch (err) {
-      toast.error('Erro ao excluir candidato.')
+      toast.error('Erro ao excluir registro.')
     }
   }
 
@@ -480,7 +506,10 @@ export default function CandidatesTab() {
                     </SheetTrigger>
                     <SheetContent className="w-full sm:max-w-2xl bg-muted/30 p-0">
                       <ScrollArea className="h-full p-4">
-                        <ResumeView c={c} evaluation={evalsByEmail.get(c.email)} />
+                        <ResumeView
+                          c={c.isStandalone ? { ...c, ...c.evalRecord } : c}
+                          evaluation={c.isStandalone ? c.evalRecord : evalsByEmail.get(c.email)}
+                        />
                       </ScrollArea>
                     </SheetContent>
                   </Sheet>
@@ -498,13 +527,13 @@ export default function CandidatesTab() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Esta ação é irreversível. O candidato será removido da base.
+                          Esta ação é irreversível. O registro será removido da base.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
                         <AlertDialogAction
-                          onClick={() => handleDelete(c.id)}
+                          onClick={() => handleDelete(c.id, c.isStandalone)}
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
                           Excluir

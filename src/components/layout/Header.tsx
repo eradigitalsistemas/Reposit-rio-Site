@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Logo } from './Logo'
 import { Navigation } from './Navigation'
+import { useAuth } from '@/hooks/use-auth'
 import { MobileMenu } from './MobileMenu'
 import { CTAButton } from './CTAButton'
 import { cn } from '@/lib/utils'
@@ -19,6 +20,7 @@ export function Header({ currentPage: propCurrentPage, onNavigate }: HeaderProps
   const [isScrolled, setIsScrolled] = useState(false)
 
   const currentPage = propCurrentPage || location.pathname
+  const { isAuthenticated } = useAuth()
 
   // Close menu on route change
   useEffect(() => {
@@ -54,6 +56,7 @@ export function Header({ currentPage: propCurrentPage, onNavigate }: HeaderProps
     { label: 'Portal do Parceiro', href: '/parceiros' },
     { label: 'FAQ', href: '/faq' },
     { label: 'Base de Conhecimento', href: '/base-conhecimento' },
+    { label: 'Avaliação NR-1', href: '/talentos/avaliacao-psicossocial' },
     { label: 'Área Restrita', href: '/admin/talentos' },
   ]
 

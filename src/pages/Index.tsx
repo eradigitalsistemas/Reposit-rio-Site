@@ -1,212 +1,118 @@
-import { Link, useNavigate } from 'react-router-dom'
-import {
-  FileBadge,
-  Briefcase,
-  Users,
-  ArrowRight,
-  Zap,
-  Shield,
-  Headphones,
-  Rocket,
-  Handshake,
-} from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
+import { useNavigate } from 'react-router-dom'
+import { HeroSection } from '@/components/blocks/HeroSection'
 import { Button } from '@/components/ui/button'
-import { BenefitsSection } from '@/components/blocks/BenefitsSection'
-import { CTASection } from '@/components/blocks/CTASection'
-import { RegistrationFormSection } from '@/components/blocks/RegistrationFormSection'
+import { ShieldCheck, FileCheck, Users, ArrowRight } from 'lucide-react'
 
-const Index = () => {
+export default function Index() {
   const navigate = useNavigate()
+
   return (
-    <div className="space-y-24 pb-10">
-      {/* Hero Section */}
-      <section className="flex flex-col md:flex-row items-center gap-10 pt-10 animate-slide-up">
-        <div className="flex-1 space-y-6 text-center md:text-left">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-primary">
-            Transforme o futuro da sua empresa com a{' '}
-            <span className="text-secondary">Super Era Digital</span>
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto md:mx-0">
-            Sistemas ERP inteligentes, certificados digitais seguros e um portal exclusivo de
-            talentos para alavancar seus negócios.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-            <Button size="lg" asChild className="text-lg px-8">
-              <Link to="/talentos">Crie seu Currículo</Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              asChild
-              className="text-lg px-8 border-primary text-primary hover:bg-primary/5"
-            >
-              <Link to="/erp">Conhecer Soluções</Link>
-            </Button>
+    <div className="flex flex-col min-h-screen bg-background">
+      <main className="flex-1">
+        {/* Hero Section */}
+        <div className="container max-w-7xl mx-auto px-4 py-12 md:py-24">
+          <HeroSection
+            title={
+              <>
+                Era Digital <span className="text-blue-600">Web</span>
+              </>
+            }
+            subtitle="Plataforma integrada para gestão de talentos, emissão de certificados e compliance corporativo (NR-1)."
+            cta="Conhecer Soluções"
+            onCTA={() => navigate('/talentos')}
+            ctaIcon={<ArrowRight className="w-5 h-5" />}
+            imageSrc="https://img.usecurling.com/p/800/800?q=digital%20business&color=blue&dpr=2"
+          />
+        </div>
+
+        {/* Features Section */}
+        <section className="bg-muted/30 py-20 border-y">
+          <div className="container max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16 animate-fade-in-up">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+                Soluções Corporativas
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Ferramentas especializadas para otimizar processos e garantir conformidade na sua
+                empresa.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="bg-card p-8 rounded-2xl shadow-sm border hover:shadow-md transition-shadow">
+                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6">
+                  <FileCheck className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold mb-3">Certificados</h3>
+                <p className="text-muted-foreground mb-6">
+                  Emissão e validação de certificados digitais com segurança e agilidade.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/certificados')}
+                  className="w-full"
+                >
+                  Saiba mais
+                </Button>
+              </div>
+              <div className="bg-card p-8 rounded-2xl shadow-sm border hover:shadow-md transition-shadow">
+                <div className="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center mb-6">
+                  <Users className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold mb-3">Banco de Talentos</h3>
+                <p className="text-muted-foreground mb-6">
+                  Captação de currículos e análise de perfil comportamental (DISC).
+                </p>
+                <Button variant="outline" onClick={() => navigate('/talentos')} className="w-full">
+                  Saiba mais
+                </Button>
+              </div>
+              <div className="bg-card p-8 rounded-2xl shadow-sm border hover:shadow-md transition-shadow">
+                <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mb-6">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold mb-3">Compliance NR-1</h3>
+                <p className="text-muted-foreground mb-6">
+                  Avaliação psicossocial automatizada para gestão de riscos ocupacionais.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/talentos/avaliacao-psicossocial')}
+                  className="w-full"
+                >
+                  Saiba mais
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="flex-1 w-full max-w-md mx-auto relative animate-fade-in">
-          <div className="aspect-video md:aspect-square rounded-2xl overflow-hidden shadow-2xl relative z-10 group">
-            <img
-              src="https://img.usecurling.com/p/800/800?q=digital%20business&color=green"
-              alt="Business Technology"
-              className="object-cover w-full h-full grayscale opacity-90 group-hover:grayscale-0 transition-all duration-700"
-            />
-            <div className="absolute inset-0 bg-primary/20 mix-blend-multiply pointer-events-none transition-opacity duration-700 group-hover:opacity-0"></div>
+        </section>
+
+        {/* NR-1 CTA Section */}
+        <section className="py-24 relative overflow-hidden">
+          <div className="absolute inset-0 bg-primary/5 -z-10" />
+          <div className="container max-w-5xl mx-auto px-4 text-center">
+            <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-full mb-6">
+              <ShieldCheck className="w-8 h-8 text-primary" />
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
+              Gerenciamento de Riscos Ocupacionais
+            </h2>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10">
+              Em conformidade com a NR-1 (Portaria MTP nº 1.419/2024), disponibilizamos uma
+              ferramenta completa de Avaliação Psicossocial. Identifique e previna riscos no
+              ambiente de trabalho de forma estruturada e confidencial.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button
+                size="lg"
+                className="px-8 text-lg w-full sm:w-auto"
+                onClick={() => navigate('/talentos/avaliacao-psicossocial')}
+              >
+                Iniciar Avaliação NR-1
+              </Button>
+            </div>
           </div>
-          <div className="absolute -inset-4 bg-secondary/20 rounded-full blur-3xl -z-10"></div>
-        </div>
-      </section>
-
-      {/* Highlights */}
-      <section className="space-y-8 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-        <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight">Nossas Soluções</h2>
-          <p className="text-muted-foreground mt-2">
-            Escolha a plataforma ideal para sua necessidade
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Link to="/certificados" className="block group">
-            <Card className="h-full transition-all duration-300 hover:shadow-lg hover:border-primary/50 group-hover:-translate-y-1">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-4">
-                  <FileBadge className="h-6 w-6" />
-                </div>
-                <CardTitle className="group-hover:text-secondary transition-colors">
-                  Certificados Digitais
-                </CardTitle>
-                <CardDescription>
-                  Emissão rápida e validada de e-CPF, e-CNPJ e mais para sua segurança digital.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center text-sm font-medium text-secondary">
-                  Saiba mais <ArrowRight className="ml-2 h-4 w-4" />
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link to="/erp" className="block group">
-            <Card className="h-full transition-all duration-300 hover:shadow-lg hover:border-primary/50 group-hover:-translate-y-1">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-4">
-                  <Briefcase className="h-6 w-6" />
-                </div>
-                <CardTitle className="group-hover:text-secondary transition-colors">
-                  Sistemas ERP
-                </CardTitle>
-                <CardDescription>
-                  Gestão integrada, redução de custos e tomada de decisão baseada em dados.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center text-sm font-medium text-secondary">
-                  Conheça o ERP <ArrowRight className="ml-2 h-4 w-4" />
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link to="/talentos" className="block group">
-            <Card className="h-full transition-all duration-300 hover:shadow-lg hover:border-primary/50 group-hover:-translate-y-1">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-4">
-                  <Users className="h-6 w-6" />
-                </div>
-                <CardTitle className="group-hover:text-secondary transition-colors">
-                  Banco de Talentos
-                </CardTitle>
-                <CardDescription>
-                  Cadastre seu currículo, realize nossa análise DISC e conecte-se com oportunidades.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center text-sm font-medium text-secondary">
-                  Acessar portal <ArrowRight className="ml-2 h-4 w-4" />
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link to="/parceiros" className="block group">
-            <Card className="h-full transition-all duration-300 hover:shadow-lg hover:border-primary/50 group-hover:-translate-y-1">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-4">
-                  <Handshake className="h-6 w-6" />
-                </div>
-                <CardTitle className="group-hover:text-secondary transition-colors">
-                  Portal do Parceiro
-                </CardTitle>
-                <CardDescription>
-                  Contadores e parceiros: condições especiais e suporte dedicado em certificados
-                  digitais.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center text-sm font-medium text-secondary">
-                  Seja parceiro <ArrowRight className="ml-2 h-4 w-4" />
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        </div>
-      </section>
-
-      {/* Benefits */}
-      <section className="bg-slate-50 rounded-3xl p-8 md:p-12 space-y-8 animate-fade-in">
-        <div className="text-center max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold tracking-tight">Por que escolher a Era Digital?</h2>
-        </div>
-        <BenefitsSection
-          columns={4}
-          benefits={[
-            {
-              icon: <Zap className="h-6 w-6" />,
-              title: 'Agilidade',
-              description: 'Processos otimizados e sem burocracia.',
-            },
-            {
-              icon: <Shield className="h-6 w-6" />,
-              title: 'Segurança',
-              description: 'Conformidade total com a LGPD.',
-            },
-            {
-              icon: <Headphones className="h-6 w-6" />,
-              title: 'Suporte',
-              description: 'Atendimento humanizado e rápido.',
-            },
-            {
-              icon: <Rocket className="h-6 w-6" />,
-              title: 'Inovação',
-              description: 'Tecnologia de ponta atualizada.',
-            },
-          ]}
-        />
-      </section>
-
-      {/* Lead Capture Form */}
-      <section className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold tracking-tight">Comece sua transformação</h2>
-          <p className="text-muted-foreground mt-2">
-            Deixe seus dados e nossa equipe de especialistas entrará em contato.
-          </p>
-        </div>
-        <RegistrationFormSection />
-      </section>
-
-      {/* Final CTA */}
-      <CTASection
-        title="Pronto para começar?"
-        description="Junte-se a centenas de empresas e profissionais que já transformaram seus resultados com nossas soluções."
-        buttonText="Entenda nossa tecnologia"
-        onCTA={() => navigate('/tecnologia')}
-        variant="secondary"
-      />
+        </section>
+      </main>
     </div>
   )
 }
-
-export default Index

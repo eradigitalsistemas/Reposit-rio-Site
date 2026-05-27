@@ -73,7 +73,7 @@ export function MobileMenu({ isOpen, onToggle, items, currentPage }: MobileMenuP
 
             return (
               <NavLink
-                key={item.href}
+                key={item.label}
                 label={item.label}
                 href={item.href}
                 isActive={isActive}

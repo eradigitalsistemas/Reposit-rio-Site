@@ -16,7 +16,7 @@ export function Navigation({ items, currentPage }: NavigationProps) {
       {items.map((item) => {
         const isActive = item.href === '/' ? currentPage === '/' : currentPage.startsWith(item.href)
 
-        return <NavLink key={item.href} label={item.label} href={item.href} isActive={isActive} />
+        return <NavLink key={item.label} label={item.label} href={item.href} isActive={isActive} />
       })}
     </nav>
   )

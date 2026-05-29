@@ -20,7 +20,7 @@ export default function AvaliacaoPsicossocialPage() {
   const [isSuccess, setIsSuccess] = useState(false)
 
   const [identificacao, setIdentificacao] = useState({
-    nome: user?.name || '',
+    nome: '',
     empresa: '',
     departamento: '',
     cargo: '',
@@ -287,8 +287,8 @@ export default function AvaliacaoPsicossocialPage() {
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <Label>
-                      46. Existe algum fator de risco psicossocial que não foi abordado nas questões
-                      anteriores e que você gostaria de destacar?
+                      46. Existe alguma pergunta relacionada ao seu ambiente de trabalho que não foi
+                      feita anteriormente e que você gostaria de responder?
                     </Label>
                     <Textarea
                       rows={4}

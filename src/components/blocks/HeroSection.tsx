@@ -29,7 +29,7 @@ export function HeroSection({
       <div
         className={`flex-1 space-y-6 max-w-4xl w-full ${alignClass} ${!imageSrc ? 'mx-auto' : ''}`}
       >
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-primary">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-primary [&_.text-blue-600]:text-primary [&_span]:text-primary">
           {title}
         </h1>
         <p

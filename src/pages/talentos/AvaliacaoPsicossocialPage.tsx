@@ -299,8 +299,7 @@ export default function AvaliacaoPsicossocialPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>
-                      47. Que sugestões você daria para melhorar o ambiente psicossocial na sua
-                      área?
+                      47. Que sugestões você daria para melhorar o ambiente de trabalho na sua área?
                     </Label>
                     <Textarea
                       rows={4}

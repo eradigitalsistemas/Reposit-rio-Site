@@ -240,9 +240,9 @@ export default function AvaliacoesNR1EmpresaTab() {
         cursorY += 8
 
         selectedGroup.qualitativas.forEach((q: any) => {
-          const text = `Fatores de Risco: ${q.q46 || '-'}\nSugestões: ${q.q47 || '-'}`
-          const splitText = doc.splitTextToSize(text, usableWidth - 10)
-          const boxHeight = splitText.length * 5 + 6
+          const splitRisco = doc.splitTextToSize(q.q46 || '-', usableWidth - 10)
+          const splitSugestoes = doc.splitTextToSize(q.q47 || '-', usableWidth - 10)
+          const boxHeight = (splitRisco.length + splitSugestoes.length) * 4 + 16
 
           checkPageBreak(boxHeight + 4)
 
@@ -251,9 +251,23 @@ export default function AvaliacoesNR1EmpresaTab() {
           doc.roundedRect(margin, cursorY, usableWidth, boxHeight, 2, 2, 'FD')
 
           doc.setFontSize(9)
+          doc.setTextColor(23, 23, 23)
+          doc.setFont('helvetica', 'bold')
+          doc.text('Fatores de Risco:', margin + 5, cursorY + 6)
+
           doc.setFont('helvetica', 'normal')
           doc.setTextColor(102, 102, 102)
-          doc.text(splitText, margin + 5, cursorY + 6)
+          doc.text(splitRisco, margin + 5, cursorY + 10)
+
+          const sugY = cursorY + 10 + splitRisco.length * 4 + 2
+
+          doc.setFont('helvetica', 'bold')
+          doc.setTextColor(23, 23, 23)
+          doc.text('Sugestões:', margin + 5, sugY)
+
+          doc.setFont('helvetica', 'normal')
+          doc.setTextColor(102, 102, 102)
+          doc.text(splitSugestoes, margin + 5, sugY + 4)
 
           cursorY += boxHeight + 4
         })
@@ -271,9 +285,30 @@ export default function AvaliacoesNR1EmpresaTab() {
       cursorY += 10
 
       selectedGroup.avaliacoes.forEach((av: any, index: number) => {
+        // Calculate total height for this employee to keep header and main sections together
         const boxHeight = 26
-        if (checkPageBreak(boxHeight + 10)) {
-          cursorY += 10
+        let totalNeeded = boxHeight + 8
+
+        let combinedQuali = ''
+        let splitQuali: string[] = []
+        let qualiHeight = 0
+        if (av.respostas?.qualitativas?.q46 || av.respostas?.qualitativas?.q47) {
+          const q46 = av.respostas.qualitativas.q46
+            ? `Fatores não abordados: ${av.respostas.qualitativas.q46}`
+            : ''
+          const q47 = av.respostas.qualitativas.q47
+            ? `Sugestões: ${av.respostas.qualitativas.q47}`
+            : ''
+          combinedQuali = [q46, q47].filter(Boolean).join('\n')
+          if (combinedQuali) {
+            splitQuali = doc.splitTextToSize(combinedQuali, usableWidth - 16)
+            qualiHeight = splitQuali.length * 4 + 6
+            totalNeeded += qualiHeight + 4
+          }
+        }
+
+        if (checkPageBreak(Math.min(totalNeeded, 150))) {
+          cursorY += 4
         }
 
         doc.setFillColor(249, 250, 251)
@@ -302,6 +337,8 @@ export default function AvaliacoesNR1EmpresaTab() {
           return [153, 27, 27]
         }
         const riskColor = getRiskHex(av.pontuacao_geral)
+        doc.setTextColor(riskColor[0], riskColor[1], riskColor[2])
+        doc.setFont('helvetica', 'bold')
         doc.text(
           `Risco: ${risk.label} (${Number(av.pontuacao_geral).toFixed(2)})`,
           margin + 4,
@@ -310,25 +347,15 @@ export default function AvaliacoesNR1EmpresaTab() {
 
         cursorY += boxHeight + 4
 
-        if (av.respostas?.qualitativas?.q46 || av.respostas?.qualitativas?.q47) {
-          const q46 = av.respostas.qualitativas.q46
-            ? `Fatores não abordados: ${av.respostas.qualitativas.q46}`
-            : ''
-          const q47 = av.respostas.qualitativas.q47
-            ? `Sugestões: ${av.respostas.qualitativas.q47}`
-            : ''
-          const combined = [q46, q47].filter(Boolean).join('\n')
-          if (combined) {
-            const splitQuali = doc.splitTextToSize(combined, usableWidth - 16)
-            const qualiHeight = splitQuali.length * 4 + 6
-            checkPageBreak(qualiHeight + 4)
-            doc.setFillColor(255, 255, 255)
-            doc.setDrawColor(229, 231, 235)
-            doc.roundedRect(margin + 4, cursorY, usableWidth - 8, qualiHeight, 2, 2, 'FD')
-            doc.setFontSize(8)
-            doc.text(splitQuali, margin + 6, cursorY + 5)
-            cursorY += qualiHeight + 4
-          }
+        if (combinedQuali && splitQuali.length > 0) {
+          doc.setFillColor(255, 255, 255)
+          doc.setDrawColor(229, 231, 235)
+          doc.roundedRect(margin + 4, cursorY, usableWidth - 8, qualiHeight, 2, 2, 'FD')
+          doc.setFontSize(8)
+          doc.setTextColor(102, 102, 102)
+          doc.setFont('helvetica', 'normal')
+          doc.text(splitQuali, margin + 6, cursorY + 5)
+          cursorY += qualiHeight + 4
         }
 
         if (av.respostas?.completas?.length) {
@@ -355,7 +382,7 @@ export default function AvaliacoesNR1EmpresaTab() {
           cursorY += 4
         }
 
-        cursorY += 4 // space before next employee
+        cursorY += 6 // space before next employee
       })
 
       drawFooter(doc.internal.getNumberOfPages())

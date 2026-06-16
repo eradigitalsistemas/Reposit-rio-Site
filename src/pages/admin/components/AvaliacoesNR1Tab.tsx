@@ -263,9 +263,15 @@ export default function AvaliacoesNR1Tab() {
       // --- Score Summary & Charts ---
       const gap = 6
       const colWidth = (usableWidth - gap) / 2
+      const dimBoxWidth = (colWidth - gap) / 2
+      const dimBoxHeight = 22
 
-      // Ensure we have enough space for the tallest column (50px)
-      checkPageBreak(50 + 10)
+      const numRows = Math.ceil(PSYCHO_DIMENSIONS.length / 2)
+      const dimGridHeight = numRows * (dimBoxHeight + gap) - gap
+      const totalChartsHeight = Math.max(40, dimGridHeight)
+
+      // Ensure we have enough space for the tallest column
+      checkPageBreak(totalChartsHeight + 10)
       const chartsStartY = cursorY
 
       // Left Column: Média Geral
@@ -295,8 +301,6 @@ export default function AvaliacoesNR1Tab() {
       // Dimensions Grid (Right Column)
       const rightX = margin + colWidth + gap
       const dimGridY = chartsStartY
-      const dimBoxWidth = (colWidth - gap) / 2
-      const dimBoxHeight = 22
 
       PSYCHO_DIMENSIONS.forEach((dim, i) => {
         const row = Math.floor(i / 2)
@@ -324,8 +328,8 @@ export default function AvaliacoesNR1Tab() {
         doc.text(dRisk.label, dX + dimBoxWidth - 3, dY + 18, { align: 'right' })
       })
 
-      // Update cursorY using the tallest column (50px) plus a bottom margin gap
-      cursorY = chartsStartY + 50 + 10
+      // Update cursorY using the tallest column plus a bottom margin gap
+      cursorY = chartsStartY + totalChartsHeight + 10
 
       // --- Escala de Respostas ---
       checkPageBreak(38)

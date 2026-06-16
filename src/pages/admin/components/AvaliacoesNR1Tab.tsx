@@ -123,8 +123,8 @@ export default function AvaliacoesNR1Tab() {
     if (!selectedEval) return
     setIsGeneratingPDF(true)
 
-    // Wait for React to re-render charts with animations disabled
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    // Wait for React to re-render charts
+    await new Promise((resolve) => setTimeout(resolve, 100))
 
     try {
       const doc = new jsPDF({
@@ -341,29 +341,61 @@ export default function AvaliacoesNR1Tab() {
         clonedSvg.setAttribute('width', String(canvas.width))
         clonedSvg.setAttribute('height', String(canvas.height))
 
+        const originalElements = svgElement.querySelectorAll('*')
+        const clonedElements = clonedSvg.querySelectorAll('*')
+
+        for (let i = 0; i < originalElements.length; i++) {
+          const orig = originalElements[i]
+          const clone = clonedElements[i] as HTMLElement | SVGElement
+
+          const computedStyle = window.getComputedStyle(orig)
+
+          const fill = computedStyle.fill
+          if (fill && fill !== 'none') clone.style.fill = fill
+
+          const stroke = computedStyle.stroke
+          if (stroke && stroke !== 'none') clone.style.stroke = stroke
+
+          const strokeWidth = computedStyle.strokeWidth
+          if (strokeWidth && strokeWidth !== 'none') clone.style.strokeWidth = strokeWidth
+
+          const font = computedStyle.fontFamily
+          if (font) clone.style.fontFamily = font
+
+          const fontSize = computedStyle.fontSize
+          if (fontSize) clone.style.fontSize = fontSize
+
+          const opacity = computedStyle.opacity
+          if (opacity && opacity !== '1') clone.style.opacity = opacity
+
+          const visibility = computedStyle.visibility
+          if (visibility && visibility !== 'visible') clone.style.visibility = visibility
+        }
+
+        // Clean up text fill to ensure dark enough text in generated PDFs
         const texts = clonedSvg.querySelectorAll('text')
         texts.forEach((t) => {
-          t.setAttribute('fill', '#666666')
+          if (!t.style.fill || t.style.fill === 'none' || t.style.fill.includes('var(')) {
+            t.style.fill = '#666666'
+          }
           t.style.fontFamily = 'sans-serif'
-          t.style.fontSize = t.style.fontSize || '12px'
-          t.style.fill = '#666666'
         })
 
         const lines = clonedSvg.querySelectorAll('line, path')
         lines.forEach((l) => {
-          const stroke = l.getAttribute('stroke') || l.style.stroke
+          const stroke = l.style.stroke || l.getAttribute('stroke')
           if (
             stroke === 'currentColor' ||
-            stroke === 'var(--border)' ||
-            stroke === 'var(--background)'
+            stroke?.includes('var(--border)') ||
+            stroke?.includes('var(--background)')
           ) {
-            l.setAttribute('stroke', '#e5e5e5')
             l.style.stroke = '#e5e5e5'
           }
         })
 
         let svgData = new XMLSerializer().serializeToString(clonedSvg)
 
+        // Fallback variable replacements
         svgData = svgData.replace(/var\(--color-baixo\)/g, '#16a34a')
         svgData = svgData.replace(/var\(--color-moderado\)/g, '#ca8a04')
         svgData = svgData.replace(/var\(--color-alto\)/g, '#ea580c')
@@ -1014,7 +1046,7 @@ export default function AvaliacoesNR1Tab() {
                               innerRadius={50}
                               outerRadius={80}
                               strokeWidth={2}
-                              isAnimationActive={!isGeneratingPDF}
+                              isAnimationActive={false}
                             >
                               {chartData.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -1045,11 +1077,7 @@ export default function AvaliacoesNR1Tab() {
                           cursor={{ fill: 'transparent' }}
                           contentStyle={{ borderRadius: '8px', color: '#000' }}
                         />
-                        <Bar
-                          dataKey="score"
-                          radius={[4, 4, 0, 0]}
-                          isAnimationActive={!isGeneratingPDF}
-                        >
+                        <Bar dataKey="score" radius={[4, 4, 0, 0]} isAnimationActive={false}>
                           {barChartData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.fill} />
                           ))}

@@ -18,7 +18,6 @@ import { format } from 'date-fns'
 import { Search, Eye, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { discQuestions } from '@/pages/talentos/StepDisc'
-import { PSYCHO_DIMENSIONS, getPsychoRisk } from '@/lib/psycho-eval'
 import { formatPhone } from '@/lib/utils'
 import {
   AlertDialog,
@@ -32,7 +31,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 
-const ResumeView = ({ c, evaluation }: { c: any; evaluation?: any }) => {
+const ResumeView = ({ c }: { c: any }) => {
   const formacoes = Array.isArray(c.formacoes) ? c.formacoes : []
   const experiencias = Array.isArray(c.experiencias) ? c.experiencias : []
   const disc = c.disc_resultado || {}
@@ -256,94 +255,6 @@ const ResumeView = ({ c, evaluation }: { c: any; evaluation?: any }) => {
           </Button>
         </div>
       )}
-
-      {evaluation && (
-        <div className="mt-8 pt-6 border-t border-primary/20">
-          <h3 className="font-semibold text-xl mb-4 text-primary flex items-center gap-2">
-            Avaliação Psicossocial (NR-1)
-          </h3>
-          <div className="space-y-6">
-            <div className="flex items-center justify-between gap-4 bg-muted/30 p-5 rounded-lg border">
-              <div>
-                <p className="text-sm text-muted-foreground uppercase tracking-wider mb-1">
-                  Pontuação Geral
-                </p>
-                <p className="text-3xl font-bold">{evaluation.pontuacao_geral}</p>
-              </div>
-              <div>
-                {(() => {
-                  const risk = getPsychoRisk(evaluation.pontuacao_geral)
-                  return (
-                    <span
-                      className={`px-4 py-1.5 rounded-full text-sm font-semibold shadow-sm ${risk.bg} ${risk.color} ${risk.border} border`}
-                    >
-                      {risk.label}
-                    </span>
-                  )
-                })()}
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider mb-3">
-                Resultado por Dimensão
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {PSYCHO_DIMENSIONS.map((dim) => {
-                  const score = evaluation.respostas?.dimensionScores?.[dim.id] || 0
-                  const risk = getPsychoRisk(score)
-                  return (
-                    <div
-                      key={dim.id}
-                      className="p-3 border rounded-md flex justify-between items-center bg-card shadow-sm"
-                    >
-                      <span className="text-sm font-medium line-clamp-1" title={dim.title}>
-                        {dim.id}. {dim.title}
-                      </span>
-                      <div className="flex items-center gap-2 pl-2">
-                        <span className="text-sm font-bold w-8 text-right">{score.toFixed(2)}</span>
-                        <div
-                          className={`w-3 h-3 rounded-full ${risk.bg} border ${risk.border}`}
-                          title={risk.label}
-                        />
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            {evaluation.respostas?.qualitativas &&
-              (evaluation.respostas.qualitativas.q46 || evaluation.respostas.qualitativas.q47) && (
-                <div className="mt-4 space-y-4 bg-muted/20 p-5 rounded-lg border">
-                  <h4 className="font-medium text-sm uppercase tracking-wider text-muted-foreground">
-                    Respostas Qualitativas
-                  </h4>
-                  {evaluation.respostas.qualitativas.q46 && (
-                    <div>
-                      <p className="text-xs font-semibold mb-1">Fatores não abordados:</p>
-                      <p className="text-sm whitespace-pre-wrap">
-                        {evaluation.respostas.qualitativas.q46}
-                      </p>
-                    </div>
-                  )}
-                  {evaluation.respostas.qualitativas.q47 && (
-                    <div
-                      className={
-                        evaluation.respostas.qualitativas.q46 ? 'pt-3 border-t border-black/10' : ''
-                      }
-                    >
-                      <p className="text-xs font-semibold mb-1">Sugestões de melhoria:</p>
-                      <p className="text-sm whitespace-pre-wrap">
-                        {evaluation.respostas.qualitativas.q47}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-          </div>
-        </div>
-      )}
     </div>
   )
 }
@@ -385,44 +296,20 @@ export default function CandidatesTab() {
     loadData(false)
   })
 
-  const evalsByEmail = new Map(evaluations.map((e) => [e.expand?.user_id?.email || e.email, e]))
-
-  const candidatesEmails = new Set(candidates.map((c) => c.email))
-  const standaloneEvals = evaluations
-    .filter((e) => {
-      const email = e.expand?.user_id?.email || e.email
-      return email && !candidatesEmails.has(email)
-    })
-    .map((e) => ({
-      id: e.id + '_eval',
-      nome: e.expand?.user_id?.name || e.nome || 'Candidato (Avaliação)',
-      email: e.expand?.user_id?.email || e.email,
-      telefone: e.expand?.user_id?.telefone || e.telefone || '',
-      status: 'Apenas Avaliação',
-      created: e.created,
-      isStandalone: true,
-      evalRecord: e,
-    }))
-
-  const mergedList = [...candidates, ...standaloneEvals].sort(
-    (a, b) => new Date(b.created).getTime() - new Date(a.created).getTime(),
+  const evalsByEmail = new Set(
+    evaluations.map((e) => e.expand?.user_id?.email || e.email).filter(Boolean),
   )
 
-  const filtered = mergedList.filter(
+  const filtered = candidates.filter(
     (c) =>
       (c.nome || '').toLowerCase().includes(search.toLowerCase()) ||
       (c.email || '').toLowerCase().includes(search.toLowerCase()),
   )
 
-  const handleDelete = async (id: string, isStandalone?: boolean) => {
+  const handleDelete = async (id: string) => {
     try {
-      if (isStandalone) {
-        await pb.collection('avaliacoes_psicossociais').delete(id.replace('_eval', ''))
-        toast.success('Avaliação excluída com sucesso!')
-      } else {
-        await pb.collection('candidatos').delete(id)
-        toast.success('Candidato excluído com sucesso!')
-      }
+      await pb.collection('candidatos').delete(id)
+      toast.success('Candidato excluído com sucesso!')
     } catch (err) {
       toast.error('Erro ao excluir registro.')
     }
@@ -509,10 +396,7 @@ export default function CandidatesTab() {
                     </SheetTrigger>
                     <SheetContent className="w-full sm:max-w-2xl bg-muted/30 p-0">
                       <ScrollArea className="h-full p-4">
-                        <ResumeView
-                          c={c.isStandalone ? { ...c, ...c.evalRecord } : c}
-                          evaluation={c.isStandalone ? c.evalRecord : evalsByEmail.get(c.email)}
-                        />
+                        <ResumeView c={c} />
                       </ScrollArea>
                     </SheetContent>
                   </Sheet>
@@ -536,7 +420,7 @@ export default function CandidatesTab() {
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
                         <AlertDialogAction
-                          onClick={() => handleDelete(c.id, c.isStandalone)}
+                          onClick={() => handleDelete(c.id)}
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
                           Excluir

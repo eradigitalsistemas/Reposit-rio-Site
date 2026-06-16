@@ -62,9 +62,9 @@ export default function AvaliacoesNR1Tab() {
 
   const loadData = async () => {
     try {
-      let filter = ''
+      let filter = 'status = "concluído"'
       if (debouncedSearch) {
-        filter = `cnpj ~ "${debouncedSearch}" || empresa ~ "${debouncedSearch}" || nome ~ "${debouncedSearch}"`
+        filter = `status = "concluído" && (cnpj ~ "${debouncedSearch}" || empresa ~ "${debouncedSearch}" || nome ~ "${debouncedSearch}")`
       }
       const records = await pb.collection('avaliacoes_psicossociais').getList(1, 50, {
         sort: '-created',
@@ -968,7 +968,7 @@ export default function AvaliacoesNR1Tab() {
                               innerRadius={50}
                               outerRadius={80}
                               strokeWidth={2}
-                              isAnimationActive={!isGeneratingPDF}
+                              isAnimationActive={false}
                             >
                               {chartData.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -999,11 +999,7 @@ export default function AvaliacoesNR1Tab() {
                           cursor={{ fill: 'transparent' }}
                           contentStyle={{ borderRadius: '8px', color: '#000' }}
                         />
-                        <Bar
-                          dataKey="score"
-                          radius={[4, 4, 0, 0]}
-                          isAnimationActive={!isGeneratingPDF}
-                        >
+                        <Bar dataKey="score" radius={[4, 4, 0, 0]} isAnimationActive={false}>
                           {barChartData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.fill} />
                           ))}

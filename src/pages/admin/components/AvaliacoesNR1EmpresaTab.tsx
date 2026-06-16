@@ -61,6 +61,12 @@ export default function AvaliacoesNR1EmpresaTab() {
       const groups: Record<string, any> = {}
 
       records.forEach((r) => {
+        const isCompleted =
+          r.status?.toLowerCase() === 'concluído' ||
+          r.status?.toLowerCase() === 'concluido' ||
+          r.pontuacao_geral > 0
+        if (!isCompleted) return
+
         const cnpj = r.cnpj?.replace(/\D/g, '') || ''
         if (!cnpj) return
 
@@ -329,7 +335,7 @@ export default function AvaliacoesNR1EmpresaTab() {
         doc.setFontSize(12)
         doc.setTextColor(23, 23, 23)
         doc.setFont('helvetica', 'bold')
-        doc.text('Feedback Qualitativo e Sugestões', margin, cursorY)
+        doc.text('Feedback Qualitativo e Sugestões (Consolidado)', margin, cursorY)
         cursorY += 8
 
         selectedGroup.qualitativas.forEach((q: any) => {
@@ -351,6 +357,105 @@ export default function AvaliacoesNR1EmpresaTab() {
           cursorY += boxHeight + 4
         })
       }
+
+      // Detailed Individual Annex
+      doc.addPage()
+      drawHeader(doc.internal.getCurrentPageInfo().pageNumber)
+      cursorY = 35
+
+      doc.setFontSize(14)
+      doc.setTextColor(23, 23, 23)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Detalhamento por Colaborador', margin, cursorY)
+      cursorY += 10
+
+      selectedGroup.avaliacoes.forEach((av: any, index: number) => {
+        const boxHeight = 26
+        if (checkPageBreak(boxHeight + 10)) {
+          cursorY += 10
+        }
+
+        doc.setFillColor(249, 250, 251)
+        doc.setDrawColor(229, 231, 235)
+        doc.roundedRect(margin, cursorY, usableWidth, boxHeight, 2, 2, 'FD')
+
+        doc.setFontSize(10)
+        doc.setTextColor(23, 23, 23)
+        doc.setFont('helvetica', 'bold')
+        doc.text(av.nome || 'Anônimo', margin + 4, cursorY + 7)
+
+        doc.setFontSize(8)
+        doc.setTextColor(102, 102, 102)
+        doc.setFont('helvetica', 'normal')
+        doc.text(
+          `Cargo: ${av.cargo || '-'}  |  Departamento: ${av.departamento || '-'}`,
+          margin + 4,
+          cursorY + 13,
+        )
+
+        const risk = getPsychoRisk(av.pontuacao_geral)
+        const getRiskHex = (score: number) => {
+          if (score <= 1.8) return [21, 128, 61]
+          if (score <= 2.6) return [133, 77, 14]
+          if (score <= 3.4) return [154, 52, 18]
+          return [153, 27, 27]
+        }
+        const riskColor = getRiskHex(av.pontuacao_geral)
+        doc.text(
+          `Risco: ${risk.label} (${Number(av.pontuacao_geral).toFixed(2)})`,
+          margin + 4,
+          cursorY + 19,
+        )
+
+        cursorY += boxHeight + 4
+
+        if (av.respostas?.qualitativas?.q46 || av.respostas?.qualitativas?.q47) {
+          const q46 = av.respostas.qualitativas.q46
+            ? `Fatores não abordados: ${av.respostas.qualitativas.q46}`
+            : ''
+          const q47 = av.respostas.qualitativas.q47
+            ? `Sugestões: ${av.respostas.qualitativas.q47}`
+            : ''
+          const combined = [q46, q47].filter(Boolean).join('\n')
+          if (combined) {
+            const splitQuali = doc.splitTextToSize(combined, usableWidth - 16)
+            const qualiHeight = splitQuali.length * 4 + 6
+            checkPageBreak(qualiHeight + 4)
+            doc.setFillColor(255, 255, 255)
+            doc.setDrawColor(229, 231, 235)
+            doc.roundedRect(margin + 4, cursorY, usableWidth - 8, qualiHeight, 2, 2, 'FD')
+            doc.setFontSize(8)
+            doc.text(splitQuali, margin + 6, cursorY + 5)
+            cursorY += qualiHeight + 4
+          }
+        }
+
+        if (av.respostas?.completas?.length) {
+          checkPageBreak(15)
+          doc.setFontSize(9)
+          doc.setFont('helvetica', 'bold')
+          doc.setTextColor(23, 23, 23)
+          doc.text('Respostas Detalhadas:', margin + 4, cursorY + 4)
+          cursorY += 8
+
+          av.respostas.completas.forEach((ans: any) => {
+            const prefix = `[${ans.answer || '-'}] `
+            const text = ans.text
+            const splitText = doc.splitTextToSize(prefix + text, usableWidth - 16)
+            const ansHeight = splitText.length * 4 + 2
+
+            checkPageBreak(ansHeight + 2)
+            doc.setFontSize(7)
+            doc.setFont('helvetica', 'normal')
+            doc.setTextColor(102, 102, 102)
+            doc.text(splitText, margin + 6, cursorY + 3)
+            cursorY += ansHeight + 1
+          })
+          cursorY += 4
+        }
+
+        cursorY += 4 // space before next employee
+      })
 
       drawFooter(doc.internal.getNumberOfPages())
       doc.save(`Diagnostico_Corporativo_${selectedGroup.cnpj}.pdf`)
@@ -482,119 +587,222 @@ export default function AvaliacoesNR1EmpresaTab() {
               </Button>
             </div>
           </DialogHeader>
-          <ScrollArea className="flex-1 p-6">
-            {selectedGroup && (
-              <div className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="flex flex-col gap-6">
-                    <div
-                      className={`p-6 rounded-xl border flex flex-col items-center justify-center text-center ${getPsychoRisk(selectedGroup.media_geral).bg} ${getPsychoRisk(selectedGroup.media_geral).color}`}
-                    >
-                      <p className="text-sm uppercase tracking-wider font-bold opacity-80 mb-2">
-                        Média Geral / Risco
-                      </p>
-                      <p className="text-5xl font-black mb-2">
-                        {selectedGroup.media_geral.toFixed(2)}
-                      </p>
-                      <p className="text-xl font-bold">
-                        {getPsychoRisk(selectedGroup.media_geral).label}
-                      </p>
+          <ScrollArea className="flex-1 bg-muted/30">
+            <div className="mx-auto max-w-[210mm] w-full min-h-[297mm] bg-white my-8 shadow-sm border border-border/50 rounded-md overflow-hidden">
+              {selectedGroup && (
+                <div className="p-[15mm] space-y-10">
+                  <div className="border-b pb-6 mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900 uppercase tracking-tight">
+                      Diagnóstico Psicossocial Corporativo (NR-1)
+                    </h2>
+                    <p className="text-gray-600 mt-2">
+                      Empresa: {selectedGroup.nome} | CNPJ: {formatCNPJ(selectedGroup.cnpj)}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Total de Avaliações: {selectedGroup.total}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="flex flex-col gap-6">
+                      <div
+                        className={`p-6 rounded-xl border flex flex-col items-center justify-center text-center ${getPsychoRisk(selectedGroup.media_geral).bg} ${getPsychoRisk(selectedGroup.media_geral).color}`}
+                      >
+                        <p className="text-sm uppercase tracking-wider font-bold opacity-80 mb-2">
+                          Média Geral / Risco
+                        </p>
+                        <p className="text-5xl font-black mb-2">
+                          {selectedGroup.media_geral.toFixed(2)}
+                        </p>
+                        <p className="text-xl font-bold">
+                          {getPsychoRisk(selectedGroup.media_geral).label}
+                        </p>
+                      </div>
+                      <div className="p-6 rounded-xl border flex flex-col items-center justify-center h-full">
+                        <h3 className="text-sm font-bold uppercase opacity-80 mb-4 text-muted-foreground">
+                          Distribuição de Riscos
+                        </h3>
+                        {chartData.length > 0 ? (
+                          <ChartContainer
+                            id="corp-pie-chart"
+                            config={chartConfig}
+                            className="w-full min-h-[220px]"
+                          >
+                            <PieChart>
+                              <ChartTooltip
+                                cursor={false}
+                                content={<ChartTooltipContent hideLabel />}
+                              />
+                              <Pie
+                                data={chartData}
+                                dataKey="value"
+                                nameKey="name"
+                                innerRadius={50}
+                                outerRadius={80}
+                                strokeWidth={2}
+                                isAnimationActive={!isGeneratingPDF}
+                              >
+                                {chartData.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                                ))}
+                              </Pie>
+                              <RechartsLegend verticalAlign="bottom" height={36} />
+                            </PieChart>
+                          </ChartContainer>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">Sem dados suficientes.</p>
+                        )}
+                      </div>
                     </div>
-                    <div className="p-6 rounded-xl border flex flex-col items-center justify-center h-full">
+                    <div className="p-6 rounded-xl border flex flex-col items-center justify-center">
                       <h3 className="text-sm font-bold uppercase opacity-80 mb-4 text-muted-foreground">
-                        Distribuição de Riscos
+                        Média por Dimensão
                       </h3>
-                      {chartData.length > 0 ? (
-                        <ChartContainer
-                          id="corp-pie-chart"
-                          config={chartConfig}
-                          className="w-full min-h-[220px]"
+                      <ChartContainer
+                        id="corp-bar-chart"
+                        config={{}}
+                        className="w-full min-h-[220px]"
+                      >
+                        <BarChart
+                          data={barChartData}
+                          margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                         >
-                          <PieChart>
-                            <ChartTooltip
-                              cursor={false}
-                              content={<ChartTooltipContent hideLabel />}
-                            />
-                            <Pie
-                              data={chartData}
-                              dataKey="value"
-                              nameKey="name"
-                              innerRadius={50}
-                              outerRadius={80}
-                              strokeWidth={2}
-                              isAnimationActive={!isGeneratingPDF}
-                            >
-                              {chartData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.fill} />
-                              ))}
-                            </Pie>
-                            <RechartsLegend verticalAlign="bottom" height={36} />
-                          </PieChart>
-                        </ChartContainer>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">Sem dados suficientes.</p>
-                      )}
+                          <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                          <XAxis dataKey="name" tickLine={false} axisLine={false} />
+                          <YAxis domain={[0, 5]} tickLine={false} axisLine={false} />
+                          <RechartsTooltip
+                            cursor={{ fill: 'transparent' }}
+                            contentStyle={{ borderRadius: '8px', color: '#000' }}
+                          />
+                          <Bar
+                            dataKey="score"
+                            radius={[4, 4, 0, 0]}
+                            isAnimationActive={!isGeneratingPDF}
+                          >
+                            {barChartData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.fill} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ChartContainer>
                     </div>
                   </div>
-                  <div className="p-6 rounded-xl border flex flex-col items-center justify-center">
-                    <h3 className="text-sm font-bold uppercase opacity-80 mb-4 text-muted-foreground">
-                      Média por Dimensão
+
+                  {selectedGroup.qualitativas.length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-bold border-b pb-2 text-gray-900">
+                        Feedback Qualitativo e Sugestões (Consolidado)
+                      </h3>
+                      <div className="grid gap-3">
+                        {selectedGroup.qualitativas.map((q: any, i: number) => (
+                          <div key={i} className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                            {q.q46 && (
+                              <p className="text-sm mb-2 text-gray-700">
+                                <span className="font-semibold text-gray-900">
+                                  Fatores de risco não abordados:
+                                </span>{' '}
+                                {q.q46}
+                              </p>
+                            )}
+                            {q.q47 && (
+                              <p className="text-sm text-gray-700">
+                                <span className="font-semibold text-gray-900">
+                                  Sugestões de melhoria:
+                                </span>{' '}
+                                {q.q47}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-6 pt-10">
+                    <h3 className="text-xl font-bold border-b pb-3 text-gray-900">
+                      Detalhamento por Colaborador
                     </h3>
-                    <ChartContainer
-                      id="corp-bar-chart"
-                      config={{}}
-                      className="w-full min-h-[220px]"
-                    >
-                      <BarChart
-                        data={barChartData}
-                        margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                      >
-                        <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                        <XAxis dataKey="name" tickLine={false} axisLine={false} />
-                        <YAxis domain={[0, 5]} tickLine={false} axisLine={false} />
-                        <RechartsTooltip
-                          cursor={{ fill: 'transparent' }}
-                          contentStyle={{ borderRadius: '8px', color: '#000' }}
-                        />
-                        <Bar
-                          dataKey="score"
-                          radius={[4, 4, 0, 0]}
-                          isAnimationActive={!isGeneratingPDF}
-                        >
-                          {barChartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ChartContainer>
+
+                    <div className="space-y-8">
+                      {selectedGroup.avaliacoes.map((av: any, i: number) => {
+                        const risk = getPsychoRisk(av.pontuacao_geral)
+                        return (
+                          <div
+                            key={av.id || i}
+                            className="border rounded-xl p-5 bg-white shadow-sm break-inside-avoid page-break-inside-avoid"
+                          >
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4 mb-4">
+                              <div>
+                                <h4 className="font-bold text-lg text-gray-900">
+                                  {av.nome || 'Anônimo'}
+                                </h4>
+                                <p className="text-sm text-gray-500">
+                                  Cargo: {av.cargo || '-'} • Depto: {av.departamento || '-'}
+                                </p>
+                              </div>
+                              <div
+                                className={`px-4 py-2 rounded-lg text-center ${risk.bg} ${risk.color} border`}
+                              >
+                                <p className="text-xs uppercase font-bold tracking-wider opacity-80">
+                                  Risco
+                                </p>
+                                <p className="font-black text-xl">
+                                  {risk.label}{' '}
+                                  <span className="text-sm">
+                                    ({Number(av.pontuacao_geral).toFixed(2)})
+                                  </span>
+                                </p>
+                              </div>
+                            </div>
+
+                            {(av.respostas?.qualitativas?.q46 ||
+                              av.respostas?.qualitativas?.q47) && (
+                              <div className="mb-4 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                                {av.respostas.qualitativas.q46 && (
+                                  <p className="text-sm text-gray-700 mb-2">
+                                    <span className="font-semibold text-gray-900">
+                                      Fatores não abordados:
+                                    </span>{' '}
+                                    {av.respostas.qualitativas.q46}
+                                  </p>
+                                )}
+                                {av.respostas.qualitativas.q47 && (
+                                  <p className="text-sm text-gray-700">
+                                    <span className="font-semibold text-gray-900">Sugestões:</span>{' '}
+                                    {av.respostas.qualitativas.q47}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+
+                            {av.respostas?.completas?.length > 0 && (
+                              <div className="mt-4">
+                                <h5 className="text-sm font-bold text-gray-900 mb-3">
+                                  Respostas Detalhadas:
+                                </h5>
+                                <div className="grid gap-2">
+                                  {av.respostas.completas.map((ans: any, idx: number) => (
+                                    <div
+                                      key={idx}
+                                      className="text-xs p-2.5 bg-gray-50/50 border border-gray-100 rounded text-gray-600 flex gap-2"
+                                    >
+                                      <span className="font-bold text-gray-900 shrink-0">
+                                        [{ans.answer || '-'}]
+                                      </span>
+                                      <span>{ans.text}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
                 </div>
-                {selectedGroup.qualitativas.length > 0 && (
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-bold border-b pb-2">
-                      Feedback Qualitativo e Sugestões
-                    </h3>
-                    <div className="grid gap-3">
-                      {selectedGroup.qualitativas.map((q: any, i: number) => (
-                        <div key={i} className="bg-muted/20 p-4 rounded-lg border">
-                          {q.q46 && (
-                            <p className="text-sm mb-2">
-                              <span className="font-semibold">Fatores de risco não abordados:</span>{' '}
-                              {q.q46}
-                            </p>
-                          )}
-                          {q.q47 && (
-                            <p className="text-sm">
-                              <span className="font-semibold">Sugestões de melhoria:</span> {q.q47}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+              )}
+            </div>
           </ScrollArea>
         </DialogContent>
       </Dialog>

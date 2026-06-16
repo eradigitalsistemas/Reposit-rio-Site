@@ -34,6 +34,8 @@ import {
   Tooltip as RechartsTooltip,
 } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import AvaliacoesNR1EmpresaTab from './AvaliacoesNR1EmpresaTab'
 
 const chartConfig = {
   baixo: { label: 'Baixo Risco', color: '#16a34a' },
@@ -43,6 +45,7 @@ const chartConfig = {
 }
 
 export default function AvaliacoesNR1Tab() {
+  const [viewMode, setViewMode] = useState<'colaborador' | 'empresa'>('colaborador')
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedEval, setSelectedEval] = useState<any | null>(null)
@@ -643,9 +646,33 @@ export default function AvaliacoesNR1Tab() {
     )
   }
 
+  if (viewMode === 'empresa') {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center mb-6">
+          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)}>
+            <TabsList>
+              <TabsTrigger value="colaborador">Por Colaborador</TabsTrigger>
+              <TabsTrigger value="empresa">Visão Corporativa</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+        <AvaliacoesNR1EmpresaTab />
+      </div>
+    )
+  }
+
   return (
     <>
       <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)}>
+            <TabsList>
+              <TabsTrigger value="colaborador">Por Colaborador</TabsTrigger>
+              <TabsTrigger value="empresa">Visão Corporativa</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
         <div className="flex justify-between items-center">
           <div className="relative w-80">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

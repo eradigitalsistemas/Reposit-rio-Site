@@ -62,9 +62,10 @@ export default function AvaliacoesNR1Tab() {
 
   const loadData = async () => {
     try {
-      let filter = 'status = "concluído"'
+      const baseFilter = '(status ~ "concluído" || status ~ "concluido" || pontuacao_geral > 0)'
+      let filter = baseFilter
       if (debouncedSearch) {
-        filter = `status = "concluído" && (cnpj ~ "${debouncedSearch}" || empresa ~ "${debouncedSearch}" || nome ~ "${debouncedSearch}")`
+        filter = `${baseFilter} && (cnpj ~ "${debouncedSearch}" || empresa ~ "${debouncedSearch}" || nome ~ "${debouncedSearch}")`
       }
       const records = await pb.collection('avaliacoes_psicossociais').getList(1, 50, {
         sort: '-created',

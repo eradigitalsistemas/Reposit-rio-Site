@@ -264,8 +264,8 @@ export default function AvaliacoesNR1Tab() {
       const gap = 6
       const colWidth = (usableWidth - gap) / 2
 
-      // Ensure we have enough space for the tallest column (Right Column = 182px)
-      checkPageBreak(182 + 10)
+      // Ensure we have enough space for the tallest column (50px)
+      checkPageBreak(50 + 10)
       const chartsStartY = cursorY
 
       // Left Column: Média Geral
@@ -292,199 +292,9 @@ export default function AvaliacoesNR1Tab() {
       doc.setFontSize(14)
       doc.text(risk.label, margin + colWidth / 2, chartsStartY + 34, { align: 'center' })
 
-      // Left Column: Pie Chart Box
-      const pieY = chartsStartY + 40 + gap
-      doc.setFillColor(255, 255, 255)
-      doc.setDrawColor(229, 231, 235)
-      doc.roundedRect(margin, pieY, colWidth, 80, 4, 4, 'FD')
-
-      doc.setFontSize(9)
-      doc.setTextColor(102, 102, 102)
-      doc.text('DISTRIBUIÇÃO DE RISCOS', margin + colWidth / 2, pieY + 8, { align: 'center' })
-
-      // Right Column: Bar Chart Box
-      const rightX = margin + colWidth + gap
-      doc.setFillColor(255, 255, 255)
-      doc.setDrawColor(229, 231, 235)
-      doc.roundedRect(rightX, chartsStartY, colWidth, 70, 4, 4, 'FD')
-
-      doc.setFontSize(9)
-      doc.setTextColor(102, 102, 102)
-      doc.text('PONTUAÇÃO POR DIMENSÃO', rightX + colWidth / 2, chartsStartY + 8, {
-        align: 'center',
-      })
-
-      // Charts Capture
-      const pieChartSvg = document.querySelector('#pdf-pie-chart svg') as SVGSVGElement | null
-      const barChartSvg = document.querySelector('#pdf-bar-chart svg') as SVGSVGElement | null
-
-      const captureChart = async (svgElement: SVGSVGElement) => {
-        const canvas = document.createElement('canvas')
-        const scale = 4
-        const rect = svgElement.getBoundingClientRect()
-        const width = rect.width || svgElement.clientWidth || 300
-        const height = rect.height || svgElement.clientHeight || 220
-
-        canvas.width = width * scale
-        canvas.height = height * scale
-        const ctx = canvas.getContext('2d')
-        if (!ctx) return null
-
-        ctx.fillStyle = '#ffffff'
-        ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-        const clonedSvg = svgElement.cloneNode(true) as SVGSVGElement
-        clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-        if (!clonedSvg.getAttribute('viewBox')) {
-          clonedSvg.setAttribute('viewBox', `0 0 ${width} ${height}`)
-        }
-        clonedSvg.setAttribute('width', String(canvas.width))
-        clonedSvg.setAttribute('height', String(canvas.height))
-
-        const originalElements = svgElement.querySelectorAll('*')
-        const clonedElements = clonedSvg.querySelectorAll('*')
-
-        for (let i = 0; i < originalElements.length; i++) {
-          const orig = originalElements[i]
-          const clone = clonedElements[i] as HTMLElement | SVGElement
-
-          const computedStyle = window.getComputedStyle(orig)
-
-          const fill = computedStyle.fill
-          if (fill && fill !== 'none') clone.style.fill = fill
-
-          const stroke = computedStyle.stroke
-          if (stroke && stroke !== 'none') clone.style.stroke = stroke
-
-          const strokeWidth = computedStyle.strokeWidth
-          if (strokeWidth && strokeWidth !== 'none') clone.style.strokeWidth = strokeWidth
-
-          const font = computedStyle.fontFamily
-          if (font) clone.style.fontFamily = font
-
-          const fontSize = computedStyle.fontSize
-          if (fontSize) clone.style.fontSize = fontSize
-
-          const opacity = computedStyle.opacity
-          if (opacity && opacity !== '1') clone.style.opacity = opacity
-
-          const visibility = computedStyle.visibility
-          if (visibility && visibility !== 'visible') clone.style.visibility = visibility
-        }
-
-        // Clean up text fill to ensure dark enough text in generated PDFs
-        const texts = clonedSvg.querySelectorAll('text')
-        texts.forEach((t) => {
-          if (!t.style.fill || t.style.fill === 'none' || t.style.fill.includes('var(')) {
-            t.style.fill = '#666666'
-          }
-          t.style.fontFamily = 'sans-serif'
-        })
-
-        const lines = clonedSvg.querySelectorAll('line, path')
-        lines.forEach((l) => {
-          const stroke = l.style.stroke || l.getAttribute('stroke')
-          if (
-            stroke === 'currentColor' ||
-            stroke?.includes('var(--border)') ||
-            stroke?.includes('var(--background)')
-          ) {
-            l.style.stroke = '#e5e5e5'
-          }
-        })
-
-        let svgData = new XMLSerializer().serializeToString(clonedSvg)
-
-        // Fallback variable replacements
-        svgData = svgData.replace(/var\(--color-baixo\)/g, '#16a34a')
-        svgData = svgData.replace(/var\(--color-moderado\)/g, '#ca8a04')
-        svgData = svgData.replace(/var\(--color-alto\)/g, '#ea580c')
-        svgData = svgData.replace(/var\(--color-critico\)/g, '#dc2626')
-        svgData = svgData.replace(/var\(--background\)/g, '#ffffff')
-        svgData = svgData.replace(/var\(--foreground\)/g, '#000000')
-        svgData = svgData.replace(/var\(--border\)/g, '#e5e5e5')
-        svgData = svgData.replace(/currentColor/g, '#666666')
-
-        const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
-        const url = URL.createObjectURL(blob)
-
-        return new Promise<{ imgData: string; width: number; height: number }>(
-          (resolve, reject) => {
-            const img = new Image()
-            img.crossOrigin = 'anonymous'
-            img.onload = () => {
-              ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-              URL.revokeObjectURL(url)
-              resolve({ imgData: canvas.toDataURL('image/png', 1.0), width, height })
-            }
-            img.onerror = (err) => {
-              URL.revokeObjectURL(url)
-              console.error('Failed to load SVG into Image for canvas rendering', err)
-              reject(new Error('Failed to load SVG image'))
-            }
-            img.src = url
-          },
-        )
-      }
-
-      if (pieChartSvg) {
-        try {
-          const pieData = await captureChart(pieChartSvg)
-          if (pieData) {
-            const imgWidth = colWidth - 20
-            const ratio = pieData.height / pieData.width
-            const imgHeight = imgWidth * ratio
-
-            const imgX = margin + (colWidth - imgWidth) / 2
-
-            const pieTopSpace = 55
-            const yOffset = (pieTopSpace - imgHeight) / 2 + 8
-            doc.addImage(pieData.imgData, 'PNG', imgX, pieY + yOffset, imgWidth, imgHeight)
-
-            const legendYStart = pieY + 58
-            const legendItemHeight = 5
-            const totalLegendHeight = chartData.length * legendItemHeight
-            const legendYOffset = (22 - totalLegendHeight) / 2
-
-            chartData.forEach((cd, idx) => {
-              const itemY = legendYStart + legendYOffset + idx * legendItemHeight
-              doc.setFillColor(cd.fill)
-              doc.rect(margin + colWidth / 2 - 25, itemY, 3, 3, 'F')
-              doc.setFontSize(7)
-              doc.setTextColor(102, 102, 102)
-              doc.setFont('helvetica', 'normal')
-              doc.text(`${cd.name} (${cd.value})`, margin + colWidth / 2 - 18, itemY + 2.5)
-            })
-          }
-        } catch (e) {
-          console.error(e)
-        }
-      }
-
-      if (barChartSvg) {
-        try {
-          const barData = await captureChart(barChartSvg)
-          if (barData) {
-            const imgWidth = colWidth - 10
-            const ratio = barData.height / barData.width
-            const imgHeight = imgWidth * ratio
-            const yOffset = (70 - imgHeight) / 2 + 4
-            doc.addImage(
-              barData.imgData,
-              'PNG',
-              rightX + 5,
-              chartsStartY + yOffset,
-              imgWidth,
-              imgHeight,
-            )
-          }
-        } catch (e) {
-          console.error(e)
-        }
-      }
-
       // Dimensions Grid (Right Column)
-      const dimGridY = chartsStartY + 70 + gap
+      const rightX = margin + colWidth + gap
+      const dimGridY = chartsStartY
       const dimBoxWidth = (colWidth - gap) / 2
       const dimBoxHeight = 22
 
@@ -514,8 +324,8 @@ export default function AvaliacoesNR1Tab() {
         doc.text(dRisk.label, dX + dimBoxWidth - 3, dY + 18, { align: 'right' })
       })
 
-      // Update cursorY using the tallest column (182px) plus a bottom margin gap
-      cursorY = chartsStartY + 182 + 10
+      // Update cursorY using the tallest column (50px) plus a bottom margin gap
+      cursorY = chartsStartY + 50 + 10
 
       // --- Escala de Respostas ---
       checkPageBreak(38)

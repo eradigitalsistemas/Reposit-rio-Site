@@ -322,48 +322,74 @@ export default function AvaliacoesNR1Tab() {
         const canvas = document.createElement('canvas')
         const scale = 4
         const rect = svgElement.getBoundingClientRect()
-        const width = rect.width || 300
-        const height = rect.height || 220
+        const width = rect.width || svgElement.clientWidth || 300
+        const height = rect.height || svgElement.clientHeight || 220
 
         canvas.width = width * scale
         canvas.height = height * scale
         const ctx = canvas.getContext('2d')
         if (!ctx) return null
-        ctx.scale(scale, scale)
 
         ctx.fillStyle = '#ffffff'
-        ctx.fillRect(0, 0, width, height)
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
 
         const clonedSvg = svgElement.cloneNode(true) as SVGSVGElement
         clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+        if (!clonedSvg.getAttribute('viewBox')) {
+          clonedSvg.setAttribute('viewBox', `0 0 ${width} ${height}`)
+        }
+        clonedSvg.setAttribute('width', String(canvas.width))
+        clonedSvg.setAttribute('height', String(canvas.height))
 
         const texts = clonedSvg.querySelectorAll('text')
         texts.forEach((t) => {
           t.setAttribute('fill', '#666666')
           t.style.fontFamily = 'sans-serif'
-          t.style.fontSize = '12px'
+          t.style.fontSize = t.style.fontSize || '12px'
+          t.style.fill = '#666666'
         })
 
-        const lines = clonedSvg.querySelectorAll('line')
+        const lines = clonedSvg.querySelectorAll('line, path')
         lines.forEach((l) => {
-          if (!l.getAttribute('stroke') || l.getAttribute('stroke') === 'currentColor') {
+          const stroke = l.getAttribute('stroke') || l.style.stroke
+          if (
+            stroke === 'currentColor' ||
+            stroke === 'var(--border)' ||
+            stroke === 'var(--background)'
+          ) {
             l.setAttribute('stroke', '#e5e5e5')
+            l.style.stroke = '#e5e5e5'
           }
         })
 
-        const svgData = new XMLSerializer().serializeToString(clonedSvg)
+        let svgData = new XMLSerializer().serializeToString(clonedSvg)
+
+        svgData = svgData.replace(/var\(--color-baixo\)/g, '#16a34a')
+        svgData = svgData.replace(/var\(--color-moderado\)/g, '#ca8a04')
+        svgData = svgData.replace(/var\(--color-alto\)/g, '#ea580c')
+        svgData = svgData.replace(/var\(--color-critico\)/g, '#dc2626')
+        svgData = svgData.replace(/var\(--background\)/g, '#ffffff')
+        svgData = svgData.replace(/var\(--foreground\)/g, '#000000')
+        svgData = svgData.replace(/var\(--border\)/g, '#e5e5e5')
+        svgData = svgData.replace(/currentColor/g, '#666666')
+
         const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
         const url = URL.createObjectURL(blob)
 
         return new Promise<{ imgData: string; width: number; height: number }>(
           (resolve, reject) => {
             const img = new Image()
+            img.crossOrigin = 'anonymous'
             img.onload = () => {
-              ctx.drawImage(img, 0, 0, width, height)
+              ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
               URL.revokeObjectURL(url)
-              resolve({ imgData: canvas.toDataURL('image/png'), width, height })
+              resolve({ imgData: canvas.toDataURL('image/png', 1.0), width, height })
             }
-            img.onerror = reject
+            img.onerror = (err) => {
+              URL.revokeObjectURL(url)
+              console.error('Failed to load SVG into Image for canvas rendering', err)
+              reject(new Error('Failed to load SVG image'))
+            }
             img.src = url
           },
         )
@@ -373,11 +399,30 @@ export default function AvaliacoesNR1Tab() {
         try {
           const pieData = await captureChart(pieChartSvg)
           if (pieData) {
-            const imgWidth = colWidth - 10
+            const imgWidth = colWidth - 20
             const ratio = pieData.height / pieData.width
             const imgHeight = imgWidth * ratio
-            const yOffset = (80 - imgHeight) / 2 + 4
-            doc.addImage(pieData.imgData, 'PNG', margin + 5, pieY + yOffset, imgWidth, imgHeight)
+
+            const imgX = margin + (colWidth - imgWidth) / 2
+
+            const pieTopSpace = 55
+            const yOffset = (pieTopSpace - imgHeight) / 2 + 8
+            doc.addImage(pieData.imgData, 'PNG', imgX, pieY + yOffset, imgWidth, imgHeight)
+
+            const legendYStart = pieY + 58
+            const legendItemHeight = 5
+            const totalLegendHeight = chartData.length * legendItemHeight
+            const legendYOffset = (22 - totalLegendHeight) / 2
+
+            chartData.forEach((cd, idx) => {
+              const itemY = legendYStart + legendYOffset + idx * legendItemHeight
+              doc.setFillColor(cd.fill)
+              doc.rect(margin + colWidth / 2 - 25, itemY, 3, 3, 'F')
+              doc.setFontSize(7)
+              doc.setTextColor(102, 102, 102)
+              doc.setFont('helvetica', 'normal')
+              doc.text(`${cd.name} (${cd.value})`, margin + colWidth / 2 - 18, itemY + 2.5)
+            })
           }
         } catch (e) {
           console.error(e)
@@ -969,7 +1014,7 @@ export default function AvaliacoesNR1Tab() {
                               innerRadius={50}
                               outerRadius={80}
                               strokeWidth={2}
-                              isAnimationActive={false}
+                              isAnimationActive={!isGeneratingPDF}
                             >
                               {chartData.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -1000,7 +1045,11 @@ export default function AvaliacoesNR1Tab() {
                           cursor={{ fill: 'transparent' }}
                           contentStyle={{ borderRadius: '8px', color: '#000' }}
                         />
-                        <Bar dataKey="score" radius={[4, 4, 0, 0]} isAnimationActive={false}>
+                        <Bar
+                          dataKey="score"
+                          radius={[4, 4, 0, 0]}
+                          isAnimationActive={!isGeneratingPDF}
+                        >
                           {barChartData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.fill} />
                           ))}

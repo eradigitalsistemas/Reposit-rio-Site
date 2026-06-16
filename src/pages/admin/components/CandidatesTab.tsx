@@ -19,6 +19,7 @@ import { Search, Eye, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { discQuestions } from '@/pages/talentos/StepDisc'
 import { PSYCHO_DIMENSIONS, getPsychoRisk } from '@/lib/psycho-eval'
+import { formatPhone } from '@/lib/utils'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,7 +60,7 @@ const ResumeView = ({ c, evaluation }: { c: any; evaluation?: any }) => {
               <strong>E-mail:</strong> {c.email}
             </p>
             <p>
-              <strong>Telefone:</strong> {c.telefone}
+              <strong>Telefone:</strong> {c.telefone ? formatPhone(c.telefone) : '-'}
             </p>
             <p>
               <strong>Nascimento:</strong>{' '}
@@ -484,7 +485,9 @@ export default function CandidatesTab() {
                 <TableCell className="font-medium">{c.nome}</TableCell>
                 <TableCell>
                   <div className="text-sm">{c.email}</div>
-                  <div className="text-xs text-muted-foreground">{c.telefone}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {c.telefone ? formatPhone(c.telefone) : '-'}
+                  </div>
                 </TableCell>
                 <TableCell>
                   <div className="text-xs font-medium">{c.status || 'Novo'}</div>

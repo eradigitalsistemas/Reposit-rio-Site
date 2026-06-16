@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-29T14:40:00.244Z",
+  "generatedAt": "2026-06-03T13:52:46.250Z",
   "collections": [
     {
       "name": "users",
@@ -826,11 +826,11 @@
       "name": "avaliacoes_psicossociais",
       "type": "base",
       "apiRules": {
-        "list": "user_id = @request.auth.id",
-        "view": "user_id = @request.auth.id",
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
         "create": "",
-        "update": "user_id = @request.auth.id",
-        "delete": null
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
       },
       "fields": [
         {
@@ -925,11 +925,18 @@
           "type": "number",
           "required": false,
           "system": false
+        },
+        {
+          "name": "cnpj",
+          "type": "text",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": [
         "CREATE INDEX idx_avaliacoes_psico_user_id ON avaliacoes_psicossociais (user_id)",
-        "CREATE INDEX idx_avaliacoes_psico_status ON avaliacoes_psicossociais (status)"
+        "CREATE INDEX idx_avaliacoes_psico_status ON avaliacoes_psicossociais (status)",
+        "CREATE INDEX `idx_avaliacoes_psico_cnpj` ON `avaliacoes_psicossociais` (cnpj)"
       ]
     }
   ]

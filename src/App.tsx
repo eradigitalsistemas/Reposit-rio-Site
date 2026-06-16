@@ -44,11 +44,7 @@ const App = () => (
               <Route path="/talentos/sucesso" element={<TalentosSuccessPage />} />
               <Route
                 path="/talentos/avaliacao-psicossocial"
-                element={
-                  <ProtectedRoute>
-                    <AvaliacaoPsicossocialPage />
-                  </ProtectedRoute>
-                }
+                element={<AvaliacaoPsicossocialPage />}
               />
               <Route path="/design-system" element={<DesignSystem />} />
               <Route path="/admin/login" element={<AdminLogin />} />

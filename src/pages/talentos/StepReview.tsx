@@ -2,6 +2,7 @@ import { useFormContext } from 'react-hook-form'
 import { CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TalentosFormValues } from './schema'
+import { formatPhone } from '@/lib/utils'
 
 interface StepReviewProps {
   setCurrentStep: (step: number) => void
@@ -48,7 +49,9 @@ export function StepReview({ setCurrentStep }: StepReviewProps) {
               <span className="text-muted-foreground block text-xs uppercase tracking-wider">
                 Telefone
               </span>
-              <span className="font-medium">{values.personal?.telefone}</span>
+              <span className="font-medium">
+                {values.personal?.telefone ? formatPhone(values.personal?.telefone) : '-'}
+              </span>
             </div>
           </div>
         </div>

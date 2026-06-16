@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { CheckCircle2, ChevronRight, ChevronLeft, ShieldCheck, Info } from 'lucide-react'
 import { PSYCHO_DIMENSIONS, calculatePsychoScores } from '@/lib/psycho-eval'
+import { formatPhone, formatCNPJ } from '@/lib/utils'
 
 export default function AvaliacaoPsicossocialPage() {
   const { user } = useAuth()
@@ -21,7 +22,10 @@ export default function AvaliacaoPsicossocialPage() {
 
   const [identificacao, setIdentificacao] = useState({
     nome: '',
+    email: '',
+    telefone: '',
     empresa: '',
+    cnpj: '',
     departamento: '',
     cargo: '',
     tempo_empresa: '',
@@ -33,7 +37,10 @@ export default function AvaliacaoPsicossocialPage() {
     if (step === 1) {
       if (
         !identificacao.nome ||
+        !identificacao.email ||
+        !identificacao.telefone ||
         !identificacao.empresa ||
+        !identificacao.cnpj ||
         !identificacao.departamento ||
         !identificacao.cargo ||
         !identificacao.tempo_empresa
@@ -70,9 +77,12 @@ export default function AvaliacaoPsicossocialPage() {
       )
 
       const payload = {
-        user_id: user?.id,
+        user_id: user?.id || '',
         nome: identificacao.nome,
+        email: identificacao.email,
+        telefone: identificacao.telefone,
         empresa: identificacao.empresa,
+        cnpj: identificacao.cnpj,
         departamento: identificacao.departamento,
         cargo: identificacao.cargo,
         tempo_empresa: Number(identificacao.tempo_empresa),
@@ -187,12 +197,44 @@ export default function AvaliacaoPsicossocialPage() {
                     />
                   </div>
                   <div className="space-y-2">
+                    <Label>E-mail</Label>
+                    <Input
+                      type="email"
+                      value={identificacao.email}
+                      onChange={(e) =>
+                        setIdentificacao({ ...identificacao, email: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Telefone</Label>
+                    <Input
+                      value={identificacao.telefone}
+                      onChange={(e) =>
+                        setIdentificacao({
+                          ...identificacao,
+                          telefone: formatPhone(e.target.value),
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
                     <Label>Empresa</Label>
                     <Input
                       value={identificacao.empresa}
                       onChange={(e) =>
                         setIdentificacao({ ...identificacao, empresa: e.target.value })
                       }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>CNPJ da Empresa</Label>
+                    <Input
+                      value={identificacao.cnpj}
+                      onChange={(e) =>
+                        setIdentificacao({ ...identificacao, cnpj: formatCNPJ(e.target.value) })
+                      }
+                      placeholder="00.000.000/0000-00"
                     />
                   </div>
                   <div className="space-y-2">

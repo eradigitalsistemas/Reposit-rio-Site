@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { TalentosFormValues } from './schema'
+import { formatPhone } from '@/lib/utils'
 
 export function StepPersonal() {
   const {
@@ -159,7 +160,8 @@ export function StepPersonal() {
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder="Ex: (11) 99999-9999"
+                    onChange={(e) => field.onChange(formatPhone(e.target.value))}
+                    placeholder="Ex: (11) 9 9999-9999"
                     error={fieldState.invalid}
                     success={fieldState.isDirty && !fieldState.invalid && !!field.value}
                   />

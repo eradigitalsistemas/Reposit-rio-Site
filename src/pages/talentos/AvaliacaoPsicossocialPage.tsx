@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
 import pb from '@/lib/pocketbase/client'
@@ -32,17 +32,6 @@ export default function AvaliacaoPsicossocialPage() {
   })
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [qualitative, setQualitative] = useState({ q46: '', q47: '' })
-
-  useEffect(() => {
-    if (user) {
-      setIdentificacao((prev) => ({
-        ...prev,
-        nome: prev.nome || user.name || '',
-        email: prev.email || user.email || '',
-        telefone: prev.telefone || user.telefone || '',
-      }))
-    }
-  }, [user])
 
   const handleNext = () => {
     if (step === 1) {

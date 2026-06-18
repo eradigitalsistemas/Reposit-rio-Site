@@ -33,9 +33,9 @@
   ],
   "deployment": {
     "lastDevBuildRef": "cccc711",
-    "lastProdBuildRef": "060cbba",
-    "publishedAt": "2026-06-17T18:55:01.263Z",
-    "lastPublishedRef": "a42e2e3"
+    "lastProdBuildRef": "0aec2e2",
+    "publishedAt": "2026-06-17T19:25:41.278Z",
+    "lastPublishedRef": "cccc711"
   },
   "migrations": {
     "applied": [

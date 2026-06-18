@@ -278,6 +278,292 @@ export const PSYCHO_DIMENSIONS: Dimension[] = [
   },
 ]
 
+export function getRiskLevelKey(score: number): 'baixo' | 'moderado' | 'alto' | 'critico' {
+  if (score <= 1.8) return 'baixo'
+  if (score <= 2.6) return 'moderado'
+  if (score <= 3.4) return 'alto'
+  return 'critico'
+}
+
+export const PSYCHO_FEEDBACK: Record<
+  string,
+  Record<'baixo' | 'moderado' | 'alto' | 'critico', { diagnostico: string; mitigacao: string[] }>
+> = {
+  A: {
+    baixo: {
+      diagnostico: 'Excelente clareza nas tarefas, ritmo adequado e boa autonomia.',
+      mitigacao: [
+        'Manter práticas atuais de alinhamento de tarefas.',
+        'Incentivar o compartilhamento de métodos de trabalho eficientes com a equipe.',
+      ],
+    },
+    moderado: {
+      diagnostico:
+        'Algumas ambiguidades nas tarefas ou pressão ocasional para cumprimento de prazos.',
+      mitigacao: [
+        'Revisar a distribuição de demandas periódicas.',
+        'Definir expectativas e prioridades de forma mais clara.',
+      ],
+    },
+    alto: {
+      diagnostico: 'Frequente sobrecarga, ritmo intenso e pouca autonomia para o colaborador.',
+      mitigacao: [
+        'Realizar mapeamento de processos para eliminar gargalos.',
+        'Redistribuir tarefas e repensar prazos de entrega.',
+        'Treinar lideranças em técnicas de delegação.',
+      ],
+    },
+    critico: {
+      diagnostico: 'Sobrecarga extrema, metas inatingíveis e ritmo altamente exaustivo.',
+      mitigacao: [
+        'Intervenção imediata nas metas estabelecidas.',
+        'Adequar o quadro de pessoal às demandas do setor.',
+        'Promover revisão ergonômica da organização do trabalho.',
+      ],
+    },
+  },
+  B: {
+    baixo: {
+      diagnostico: 'Condições físicas, equipamentos e ergonomia adequados e seguros.',
+      mitigacao: [
+        'Manter as manutenções preventivas em dia.',
+        'Continuar incentivando o uso das pausas regulares.',
+      ],
+    },
+    moderado: {
+      diagnostico: 'Pequenas inadequações físicas ou falta pontual de recursos ideais.',
+      mitigacao: [
+        'Realizar levantamento de necessidades de equipamentos.',
+        'Incentivar a organização e pequenos ajustes ergonômicos no posto de trabalho.',
+      ],
+    },
+    alto: {
+      diagnostico:
+        'Problemas ergonômicos relevantes, ambiente desconfortável ou falhas na segurança.',
+      mitigacao: [
+        'Efetuar Análise Ergonômica do Trabalho (AET) no setor.',
+        'Atualizar ou substituir equipamentos e mobiliários inadequados.',
+        'Reforçar a fiscalização de segurança e pausas.',
+      ],
+    },
+    critico: {
+      diagnostico:
+        'Riscos iminentes à integridade física, ausência de ferramentas básicas e ambiente hostil.',
+      mitigacao: [
+        'Paralisação preventiva para correção de riscos graves, se necessário.',
+        'Investimento emergencial em infraestrutura e mobiliário.',
+        'Implementação rigorosa de políticas de segurança física.',
+      ],
+    },
+  },
+  C: {
+    baixo: {
+      diagnostico: 'Relações interpessoais saudáveis, respeito mútuo e boa cooperação.',
+      mitigacao: [
+        'Promover momentos de integração e celebração em equipe.',
+        'Reconhecer publicamente a colaboração entre os membros.',
+      ],
+    },
+    moderado: {
+      diagnostico: 'Alguns ruídos de comunicação, conflitos pontuais ou falta de feedback regular.',
+      mitigacao: [
+        'Implementar rotina de feedbacks construtivos.',
+        'Estimular o diálogo aberto e mediação de pequenos conflitos.',
+      ],
+    },
+    alto: {
+      diagnostico:
+        'Conflitos interpessoais frequentes, falta de apoio da liderança e indícios de hostilidade.',
+      mitigacao: [
+        'Treinamento de lideranças em gestão de conflitos e empatia.',
+        'Abrir canais seguros para mediação e escuta ativa.',
+        'Monitorar o clima da equipe de perto.',
+      ],
+    },
+    critico: {
+      diagnostico:
+        'Ambiente tóxico, com fortes indícios de assédio moral, discriminação ou isolamento.',
+      mitigacao: [
+        'Abertura imediata de canal de denúncias confidencial.',
+        'Investigação profunda de possíveis casos de assédio ou discriminação.',
+        'Ação corretiva/disciplinar e programa intensivo de conscientização.',
+      ],
+    },
+  },
+  D: {
+    baixo: {
+      diagnostico: 'O colaborador sente-se valorizado, com remuneração e benefícios justos.',
+      mitigacao: [
+        'Manter a transparência sobre critérios de reconhecimento.',
+        'Continuar oferecendo oportunidades de crescimento e desenvolvimento.',
+      ],
+    },
+    moderado: {
+      diagnostico:
+        'Percepção de reconhecimento irregular ou dúvidas sobre oportunidades de crescimento.',
+      mitigacao: [
+        'Clarificar os planos de carreira e critérios de promoção.',
+        'Criar programas de reconhecimento não-financeiro (elogios, prêmios simbólicos).',
+      ],
+    },
+    alto: {
+      diagnostico:
+        'Forte descontentamento com a falta de reconhecimento e sentimento de injustiça.',
+      mitigacao: [
+        'Revisar a política de remuneração e benefícios frente ao mercado.',
+        'Implementar avaliações de desempenho transparentes.',
+        'Garantir que esforços extras sejam devidamente compensados.',
+      ],
+    },
+    critico: {
+      diagnostico: 'Completa desvalorização, sensação de exploração e estagnação profissional.',
+      mitigacao: [
+        'Reestruturação profunda da política de cargos e salários.',
+        'Intervenção da diretoria para alinhar práticas de reconhecimento em toda a gestão.',
+        'Criar plano de ação de valorização imediata.',
+      ],
+    },
+  },
+  E: {
+    baixo: {
+      diagnostico: 'Excelente equilíbrio entre a vida pessoal e as exigências do trabalho.',
+      mitigacao: [
+        'Continuar respeitando o direito à desconexão.',
+        'Apoiar o uso de políticas de flexibilidade quando aplicável.',
+      ],
+    },
+    moderado: {
+      diagnostico:
+        'Ocasional invasão do trabalho na vida pessoal ou dificuldade pontual de desconexão.',
+      mitigacao: [
+        'Orientar lideranças a não acionarem a equipe fora do expediente.',
+        'Incentivar o planejamento adequado das férias e descansos.',
+      ],
+    },
+    alto: {
+      diagnostico:
+        'Desequilíbrio significativo, horas extras frequentes e trabalho levado para casa.',
+      mitigacao: [
+        'Criar política estrita de limitação de horas extras.',
+        'Restringir exigência de respostas fora do horário comercial.',
+        'Rever a capacidade operacional da equipe.',
+      ],
+    },
+    critico: {
+      diagnostico:
+        'Esgotamento total, ausência de limites entre vida pessoal e trabalho, cultura impositiva.',
+      mitigacao: [
+        'Proibir terminantemente a cobrança de tarefas fora do horário de trabalho.',
+        'Auditoria imediata nas cargas horárias.',
+        'Implementação de medidas obrigatórias de qualidade de vida e desconexão.',
+      ],
+    },
+  },
+  F: {
+    baixo: {
+      diagnostico: 'Boa disposição física e mental, sem sinais relevantes de estresse ocupacional.',
+      mitigacao: [
+        'Manter o acesso a recursos de promoção do bem-estar.',
+        'Incentivar atividades físicas e cuidados preventivos de saúde.',
+      ],
+    },
+    moderado: {
+      diagnostico: 'Sinais leves de cansaço, tensão ou desmotivação relacionados ao trabalho.',
+      mitigacao: [
+        'Oferecer palestras e workshops sobre saúde mental e resiliência.',
+        'Proporcionar momentos de descompressão durante o expediente.',
+      ],
+    },
+    alto: {
+      diagnostico: 'Sintomas evidentes de estresse, ansiedade ou desgaste físico persistente.',
+      mitigacao: [
+        'Oferecer ou facilitar acesso a apoio psicológico profissional.',
+        'Avaliar a necessidade de readequação temporária de funções.',
+        'Acompanhamento direto do SESMT ou Recursos Humanos.',
+      ],
+    },
+    critico: {
+      diagnostico:
+        'Alto risco de Burnout, sintomas graves de exaustão emocional, insônia e desinteresse total.',
+      mitigacao: [
+        'Avaliação médica imediata para possível afastamento e tratamento.',
+        'Apoio integral à saúde do colaborador através de rede credenciada.',
+        'Investigação profunda e correção das causas raízes de estresse no setor.',
+      ],
+    },
+  },
+  G: {
+    baixo: {
+      diagnostico: 'Comunicação fluida, transparente e ambiente altamente participativo.',
+      mitigacao: [
+        'Manter as reuniões de equipe frequentes e eficientes.',
+        'Garantir que os canais de sugestão continuem ativos e valorizados.',
+      ],
+    },
+    moderado: {
+      diagnostico:
+        'Falhas eventuais de comunicação ou participação limitada em decisões departamentais.',
+      mitigacao: [
+        'Melhorar a periodicidade dos comunicados institucionais.',
+        'Encorajar ativamente os colaboradores a expressarem opiniões construtivas.',
+      ],
+    },
+    alto: {
+      diagnostico: 'Comunicação deficiente, falta de voz e sensação de exclusão das decisões.',
+      mitigacao: [
+        'Estabelecer rotinas claras de "Town Halls" ou reuniões de alinhamento com a diretoria.',
+        'Criar comitês representativos para ouvir a base.',
+        'Garantir retorno formal e prático às sugestões dos funcionários.',
+      ],
+    },
+    critico: {
+      diagnostico:
+        'Comunicação estritamente unilateral, cultura de silêncio por medo de retaliação e ocultação de informações.',
+      mitigacao: [
+        'Mudança urgente na postura da gestão e liderança.',
+        'Implementar canais de escuta anônima auditados por terceiros.',
+        'Treinamento obrigatório de gestores em transparência e escuta ativa.',
+      ],
+    },
+  },
+  H: {
+    baixo: {
+      diagnostico:
+        'Segurança no emprego e boa percepção sobre a gestão das mudanças organizacionais.',
+      mitigacao: [
+        'Continuar comunicando com antecedência qualquer alteração de rota ou ferramenta.',
+        'Manter a oferta contínua de treinamentos de atualização.',
+      ],
+    },
+    moderado: {
+      diagnostico:
+        'Certa apreensão com o futuro ou necessidade de melhor preparo frente a inovações.',
+      mitigacao: [
+        'Reforçar comunicados sobre a estabilidade e os objetivos de longo prazo da empresa.',
+        'Aprimorar a capacitação técnica prévia à implementação de novos processos.',
+      ],
+    },
+    alto: {
+      diagnostico:
+        'Insegurança acentuada, mudanças impostas de forma abrupta e sensação de defasagem.',
+      mitigacao: [
+        'Criar um plano estruturado de Gestão de Mudanças (Change Management).',
+        'Promover diálogos frequentes e abertos sobre o futuro do mercado e da empresa.',
+        'Oferecer suporte e tempo adequados de transição para novas tecnologias.',
+      ],
+    },
+    critico: {
+      diagnostico:
+        'Pânico generalizado quanto à manutenção do emprego, ameaças constantes e mudanças caóticas.',
+      mitigacao: [
+        'Ação imediata da Alta Direção para restaurar o mínimo de confiança e segurança psicológica.',
+        'Transparência radical sobre a real situação e motivos das reestruturações.',
+        'Fornecer suporte direto aos times impactados durante e após a transição.',
+      ],
+    },
+  },
+}
+
 export function getPsychoRisk(score: number) {
   if (score <= 1.8)
     return {

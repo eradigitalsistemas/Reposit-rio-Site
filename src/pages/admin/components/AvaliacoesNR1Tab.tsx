@@ -17,7 +17,12 @@ import { Loader2, FileText, Search, Pencil, Trash2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { Label } from '@/components/ui/label'
-import { getPsychoRisk, PSYCHO_DIMENSIONS } from '@/lib/psycho-eval'
+import {
+  getPsychoRisk,
+  getRiskLevelKey,
+  PSYCHO_FEEDBACK,
+  PSYCHO_DIMENSIONS,
+} from '@/lib/psycho-eval'
 import { formatPhone, formatCNPJ } from '@/lib/utils'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -330,6 +335,57 @@ export default function AvaliacoesNR1Tab() {
 
       // Update cursorY using the tallest column plus a bottom margin gap
       cursorY = chartsStartY + totalChartsHeight + 10
+
+      // --- Diagnóstico e Medidas de Mitigação ---
+      checkPageBreak(25)
+      doc.setFontSize(14)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(23, 23, 23)
+      doc.text('Diagnóstico e Medidas de Mitigação', margin, cursorY)
+      cursorY += 8
+
+      PSYCHO_DIMENSIONS.forEach((dim) => {
+        const score = Number(selectedEval.respostas?.dimensionScores?.[dim.id] || 0)
+        const riskKey = getRiskLevelKey(score)
+        const feedback = PSYCHO_FEEDBACK[dim.id]?.[riskKey]
+        if (!feedback) return
+
+        const dRisk = getRiskColors(score)
+
+        checkPageBreak(30)
+
+        doc.setFillColor(249, 250, 251)
+        doc.setDrawColor(229, 231, 235)
+
+        doc.setFontSize(10)
+        doc.setFont('helvetica', 'bold')
+        doc.setTextColor(dRisk.text[0], dRisk.text[1], dRisk.text[2])
+        doc.text(`${dim.id} - ${dim.title} (${dRisk.label} - ${score.toFixed(2)})`, margin, cursorY)
+        cursorY += 6
+
+        doc.setFontSize(9)
+        doc.setTextColor(23, 23, 23)
+        doc.setFont('helvetica', 'bold')
+        doc.text('Diagnóstico:', margin, cursorY)
+
+        doc.setFont('helvetica', 'normal')
+        const diagLines = doc.splitTextToSize(feedback.diagnostico, usableWidth - 25)
+        doc.text(diagLines, margin + 22, cursorY)
+        cursorY += diagLines.length * 4 + 2
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Mitigação:', margin, cursorY)
+        cursorY += 4
+
+        doc.setFont('helvetica', 'normal')
+        feedback.mitigacao.forEach((m) => {
+          const mLines = doc.splitTextToSize(`• ${m}`, usableWidth - 5)
+          doc.text(mLines, margin + 5, cursorY)
+          cursorY += mLines.length * 4 + 1
+        })
+
+        cursorY += 4
+      })
 
       // --- Escala de Respostas ---
       checkPageBreak(38)
@@ -917,6 +973,54 @@ export default function AvaliacoesNR1Tab() {
                             <span className="text-[10px] uppercase font-bold tracking-tight text-right w-16 leading-tight">
                               {dRisk.label}
                             </span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Diagnóstico e Mitigação */}
+                <div className="space-y-4 mt-8">
+                  <h3 className="text-lg font-bold border-b pb-2">
+                    Diagnóstico e Medidas de Mitigação
+                  </h3>
+                  <div className="grid gap-4">
+                    {PSYCHO_DIMENSIONS.map((dim) => {
+                      const score = selectedEval.respostas?.dimensionScores?.[dim.id] || 0
+                      const riskKey = getRiskLevelKey(score)
+                      const feedback = PSYCHO_FEEDBACK[dim.id]?.[riskKey]
+                      if (!feedback) return null
+
+                      const dRisk = getPsychoRisk(score)
+
+                      return (
+                        <div key={dim.id} className="p-4 rounded-lg border bg-card">
+                          <div className="flex justify-between items-center mb-3">
+                            <h4 className="font-bold">
+                              {dim.id} - {dim.title}
+                            </h4>
+                            <span
+                              className={`px-2.5 py-1 rounded-full text-xs font-semibold ${dRisk.bg} ${dRisk.color}`}
+                            >
+                              {dRisk.label} ({score.toFixed(2)})
+                            </span>
+                          </div>
+                          <div className="space-y-3 text-sm">
+                            <div>
+                              <span className="font-semibold text-foreground">Diagnóstico:</span>{' '}
+                              <span className="text-muted-foreground">{feedback.diagnostico}</span>
+                            </div>
+                            <div>
+                              <span className="font-semibold text-foreground">
+                                Ações de Mitigação / Melhoria:
+                              </span>
+                              <ul className="list-disc pl-5 mt-1 space-y-1 text-muted-foreground">
+                                {feedback.mitigacao.map((m, i) => (
+                                  <li key={i}>{m}</li>
+                                ))}
+                              </ul>
+                            </div>
                           </div>
                         </div>
                       )

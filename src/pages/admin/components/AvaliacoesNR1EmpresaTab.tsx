@@ -15,7 +15,12 @@ import { format } from 'date-fns'
 import { Loader2, FileText, Search, Building2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
-import { getPsychoRisk, PSYCHO_DIMENSIONS } from '@/lib/psycho-eval'
+import {
+  getPsychoRisk,
+  getRiskLevelKey,
+  PSYCHO_FEEDBACK,
+  PSYCHO_DIMENSIONS,
+} from '@/lib/psycho-eval'
 import { formatCNPJ } from '@/lib/utils'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -356,6 +361,60 @@ export default function AvaliacoesNR1EmpresaTab() {
           doc.setFont('helvetica', 'normal')
           doc.text(splitQuali, margin + 6, cursorY + 5)
           cursorY += qualiHeight + 4
+        }
+
+        if (av.respostas?.dimensionScores) {
+          checkPageBreak(15)
+          doc.setFontSize(9)
+          doc.setFont('helvetica', 'bold')
+          doc.setTextColor(23, 23, 23)
+          doc.text('Diagnóstico e Mitigação por Dimensão:', margin + 4, cursorY + 4)
+          cursorY += 8
+
+          PSYCHO_DIMENSIONS.forEach((dim) => {
+            const score = Number(av.respostas.dimensionScores[dim.id] || 0)
+            const riskKey = getRiskLevelKey(score)
+            const feedback = PSYCHO_FEEDBACK[dim.id]?.[riskKey]
+            if (!feedback) return
+
+            const dRisk = getRiskHex(score)
+
+            checkPageBreak(25)
+
+            doc.setFontSize(8)
+            doc.setFont('helvetica', 'bold')
+            doc.setTextColor(dRisk[0], dRisk[1], dRisk[2])
+
+            // Re-fetch the label text locally to be safe
+            let labelText = 'Crítico'
+            if (score <= 1.8) labelText = 'Baixo Risco'
+            else if (score <= 2.6) labelText = 'Moderado'
+            else if (score <= 3.4) labelText = 'Alto'
+
+            doc.text(`${dim.id} - ${dim.title} (${labelText})`, margin + 6, cursorY + 3)
+            cursorY += 5
+
+            doc.setFontSize(7)
+            doc.setTextColor(23, 23, 23)
+            doc.setFont('helvetica', 'bold')
+            doc.text('Diagnóstico:', margin + 6, cursorY + 3)
+            doc.setFont('helvetica', 'normal')
+            const diagLines = doc.splitTextToSize(feedback.diagnostico, usableWidth - 26)
+            doc.text(diagLines, margin + 22, cursorY + 3)
+            cursorY += diagLines.length * 3 + 2
+
+            doc.setFont('helvetica', 'bold')
+            doc.text('Mitigação:', margin + 6, cursorY + 3)
+            cursorY += 4
+
+            doc.setFont('helvetica', 'normal')
+            feedback.mitigacao.forEach((m) => {
+              const mLines = doc.splitTextToSize(`• ${m}`, usableWidth - 12)
+              doc.text(mLines, margin + 10, cursorY + 3)
+              cursorY += mLines.length * 3 + 1
+            })
+            cursorY += 2
+          })
         }
 
         if (av.respostas?.completas?.length) {
@@ -700,6 +759,57 @@ export default function AvaliacoesNR1EmpresaTab() {
                                     {av.respostas.qualitativas.q47}
                                   </p>
                                 )}
+                              </div>
+                            )}
+
+                            {av.respostas?.dimensionScores && (
+                              <div className="mt-4 mb-4">
+                                <h5 className="text-sm font-bold text-gray-900 mb-3">
+                                  Diagnóstico e Mitigação por Dimensão:
+                                </h5>
+                                <div className="space-y-3">
+                                  {PSYCHO_DIMENSIONS.map((dim) => {
+                                    const score = av.respostas.dimensionScores[dim.id] || 0
+                                    const riskKey = getRiskLevelKey(score)
+                                    const feedback = PSYCHO_FEEDBACK[dim.id]?.[riskKey]
+                                    if (!feedback) return null
+                                    const dRisk = getPsychoRisk(score)
+
+                                    return (
+                                      <div
+                                        key={dim.id}
+                                        className="text-xs p-3 bg-gray-50/50 border border-gray-100 rounded-md"
+                                      >
+                                        <div className="flex justify-between items-center mb-2">
+                                          <span className="font-bold text-gray-900">
+                                            {dim.id} - {dim.title}
+                                          </span>
+                                          <span
+                                            className={`px-2 py-0.5 rounded text-[10px] font-bold ${dRisk.color} ${dRisk.bg}`}
+                                          >
+                                            {dRisk.label} ({score.toFixed(2)})
+                                          </span>
+                                        </div>
+                                        <p className="text-gray-700 mb-1">
+                                          <span className="font-semibold text-gray-900">
+                                            Diagnóstico:
+                                          </span>{' '}
+                                          {feedback.diagnostico}
+                                        </p>
+                                        <div>
+                                          <span className="font-semibold text-gray-900">
+                                            Mitigação:
+                                          </span>
+                                          <ul className="list-disc pl-4 mt-0.5 space-y-0.5 text-gray-700">
+                                            {feedback.mitigacao.map((m: string, i: number) => (
+                                              <li key={i}>{m}</li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      </div>
+                                    )
+                                  })}
+                                </div>
                               </div>
                             )}
 

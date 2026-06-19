@@ -1,6 +1,31 @@
 <!-- HTML template for the frontend react app: https://developer.mozilla.org/en-US/docs/Web/HTML --><!doctype html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
+    <script>
+      if (typeof Node === 'function' && Node.prototype) {
+        const originalRemoveChild = Node.prototype.removeChild;
+        Node.prototype.removeChild = function(child) {
+          if (child.parentNode !== this) {
+            if (typeof console !== 'undefined') {
+              console.warn('Translation patch: Cannot remove a child from a different parent', child, this);
+            }
+            return child;
+          }
+          return originalRemoveChild.apply(this, arguments);
+        };
+
+        const originalInsertBefore = Node.prototype.insertBefore;
+        Node.prototype.insertBefore = function(newNode, referenceNode) {
+          if (referenceNode && referenceNode.parentNode !== this) {
+            if (typeof console !== 'undefined') {
+              console.warn('Translation patch: Cannot insert before a reference node from a different parent', referenceNode, this);
+            }
+            referenceNode = null;
+          }
+          return originalInsertBefore.apply(this, arguments);
+        };
+      }
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Era Digital Tecnologia</title>

@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from 'react'
 import { jsPDF } from 'jspdf'
 import pb from '@/lib/pocketbase/client'
 import { useRealtime } from '@/hooks/use-realtime'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import {
   Table,
   TableBody,
@@ -45,6 +47,24 @@ const chartConfig = {
   critico: { label: 'Risco Crítico', color: '#dc2626' },
 }
 
+const PieTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload
+    return (
+      <div className="bg-background border rounded-lg shadow-sm p-3 text-sm">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: data.fill }} />
+          <span className="font-medium text-foreground">{data.name}:</span>
+          <span className="text-muted-foreground">
+            {data.value} ({data.percentage}%)
+          </span>
+        </div>
+      </div>
+    )
+  }
+  return null
+}
+
 export default function AvaliacoesNR1EmpresaTab() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -52,6 +72,7 @@ export default function AvaliacoesNR1EmpresaTab() {
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
+  const [isExecutiveMode, setIsExecutiveMode] = useState(true)
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchTerm), 500)
@@ -417,7 +438,24 @@ export default function AvaliacoesNR1EmpresaTab() {
           })
         }
 
-        if (av.respostas?.completas?.length) {
+        if (av.observacoes_admin) {
+          const splitObs = doc.splitTextToSize(
+            `Observações Internas (Admin): ${av.observacoes_admin}`,
+            usableWidth - 16,
+          )
+          const obsHeight = splitObs.length * 4 + 6
+          checkPageBreak(obsHeight + 4)
+          doc.setFillColor(255, 255, 255)
+          doc.setDrawColor(229, 231, 235)
+          doc.roundedRect(margin + 4, cursorY, usableWidth - 8, obsHeight, 2, 2, 'FD')
+          doc.setFontSize(8)
+          doc.setTextColor(102, 102, 102)
+          doc.setFont('helvetica', 'normal')
+          doc.text(splitObs, margin + 6, cursorY + 5)
+          cursorY += obsHeight + 4
+        }
+
+        if (!isExecutiveMode && av.respostas?.completas?.length) {
           checkPageBreak(15)
           doc.setFontSize(9)
           doc.setFont('helvetica', 'bold')
@@ -456,11 +494,32 @@ export default function AvaliacoesNR1EmpresaTab() {
 
   const chartData = useMemo(() => {
     if (!selectedGroup) return []
+    const total = selectedGroup.total
     return [
-      { name: 'Baixo Risco', value: selectedGroup.riskCounts.baixo, fill: '#16a34a' },
-      { name: 'Risco Moderado', value: selectedGroup.riskCounts.moderado, fill: '#ca8a04' },
-      { name: 'Risco Alto', value: selectedGroup.riskCounts.alto, fill: '#ea580c' },
-      { name: 'Risco Crítico', value: selectedGroup.riskCounts.critico, fill: '#dc2626' },
+      {
+        name: 'Baixo Risco',
+        value: selectedGroup.riskCounts.baixo,
+        percentage: total ? ((selectedGroup.riskCounts.baixo / total) * 100).toFixed(1) : 0,
+        fill: '#16a34a',
+      },
+      {
+        name: 'Risco Moderado',
+        value: selectedGroup.riskCounts.moderado,
+        percentage: total ? ((selectedGroup.riskCounts.moderado / total) * 100).toFixed(1) : 0,
+        fill: '#ca8a04',
+      },
+      {
+        name: 'Risco Alto',
+        value: selectedGroup.riskCounts.alto,
+        percentage: total ? ((selectedGroup.riskCounts.alto / total) * 100).toFixed(1) : 0,
+        fill: '#ea580c',
+      },
+      {
+        name: 'Risco Crítico',
+        value: selectedGroup.riskCounts.critico,
+        percentage: total ? ((selectedGroup.riskCounts.critico / total) * 100).toFixed(1) : 0,
+        fill: '#dc2626',
+      },
     ].filter((d) => d.value > 0)
   }, [selectedGroup])
 
@@ -563,7 +622,17 @@ export default function AvaliacoesNR1EmpresaTab() {
                 {selectedGroup?.cnpj && formatCNPJ(selectedGroup.cnpj)}
               </p>
             </div>
-            <div className="flex items-center gap-2 mr-6">
+            <div className="flex items-center gap-6 mr-6">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="executive-mode-empresa"
+                  checked={isExecutiveMode}
+                  onCheckedChange={setIsExecutiveMode}
+                />
+                <Label htmlFor="executive-mode-empresa" className="text-sm font-medium">
+                  Versão Executiva
+                </Label>
+              </div>
               <Button onClick={generatePDF} disabled={isGeneratingPDF}>
                 {isGeneratingPDF ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -616,10 +685,7 @@ export default function AvaliacoesNR1EmpresaTab() {
                             className="w-full min-h-[220px]"
                           >
                             <PieChart>
-                              <ChartTooltip
-                                cursor={false}
-                                content={<ChartTooltipContent hideLabel />}
-                              />
+                              <ChartTooltip cursor={false} content={<PieTooltip />} />
                               <Pie
                                 data={chartData}
                                 dataKey="value"
@@ -813,7 +879,18 @@ export default function AvaliacoesNR1EmpresaTab() {
                               </div>
                             )}
 
-                            {av.respostas?.completas?.length > 0 && (
+                            {av.observacoes_admin && (
+                              <div className="mt-4 bg-muted/20 p-4 rounded-lg border">
+                                <h5 className="text-sm font-bold text-gray-900 mb-2">
+                                  Observações Internas (Admin):
+                                </h5>
+                                <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                                  {av.observacoes_admin}
+                                </p>
+                              </div>
+                            )}
+
+                            {!isExecutiveMode && av.respostas?.completas?.length > 0 && (
                               <div className="mt-4">
                                 <h5 className="text-sm font-bold text-gray-900 mb-3">
                                   Respostas Detalhadas:

@@ -15,6 +15,8 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Loader2, FileText, Search, Pencil, Trash2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import { Label } from '@/components/ui/label'
 import {
@@ -49,6 +51,24 @@ const chartConfig = {
   critico: { label: 'Risco Crítico', color: '#dc2626' },
 }
 
+const PieTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload
+    return (
+      <div className="bg-background border rounded-lg shadow-sm p-3 text-sm">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: data.fill }} />
+          <span className="font-medium text-foreground">{data.name}:</span>
+          <span className="text-muted-foreground">
+            {data.value} ({data.percentage}%)
+          </span>
+        </div>
+      </div>
+    )
+  }
+  return null
+}
+
 export default function AvaliacoesNR1Tab() {
   const [viewMode, setViewMode] = useState<'colaborador' | 'empresa'>('colaborador')
   const [data, setData] = useState<any[]>([])
@@ -59,6 +79,7 @@ export default function AvaliacoesNR1Tab() {
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
+  const [isExecutiveMode, setIsExecutiveMode] = useState(true)
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchTerm), 500)
@@ -116,6 +137,7 @@ export default function AvaliacoesNR1Tab() {
         telefone: editingEval.telefone,
         email: editingEval.email,
         tempo_empresa: editingEval.tempo_empresa,
+        observacoes_admin: editingEval.observacoes_admin,
       })
       toast.success('Avaliação atualizada com sucesso.')
       setEditingEval(null)
@@ -427,6 +449,28 @@ export default function AvaliacoesNR1Tab() {
       })
       cursorY += 24 + 10
 
+      // --- Observações Admin ---
+      if (selectedEval.observacoes_admin) {
+        const textLines = doc.splitTextToSize(selectedEval.observacoes_admin, usableWidth - 8)
+        const boxHeight = textLines.length * 4 + 10
+        checkPageBreak(boxHeight + 8)
+
+        doc.setFontSize(12)
+        doc.setFont('helvetica', 'bold')
+        doc.setTextColor(23, 23, 23)
+        doc.text('Observações Internas (Admin)', margin, cursorY)
+        cursorY += 6
+
+        doc.setFillColor(249, 250, 251)
+        doc.setDrawColor(229, 231, 235)
+        doc.roundedRect(margin, cursorY, usableWidth, boxHeight, 2, 2, 'FD')
+
+        doc.setFontSize(9)
+        doc.setFont('helvetica', 'normal')
+        doc.text(textLines, margin + 4, cursorY + 6)
+        cursorY += boxHeight + 4
+      }
+
       // --- Informações Complementares ---
       const q46 = selectedEval.respostas?.qualitativas?.q46
       const q47 = selectedEval.respostas?.qualitativas?.q47
@@ -481,7 +525,7 @@ export default function AvaliacoesNR1Tab() {
       }
 
       // --- Respostas Detalhadas ---
-      if (selectedEval.respostas?.completas?.length) {
+      if (!isExecutiveMode && selectedEval.respostas?.completas?.length) {
         checkPageBreak(15)
         doc.setFontSize(12)
         doc.setFont('helvetica', 'bold')
@@ -552,18 +596,40 @@ export default function AvaliacoesNR1Tab() {
   const chartData = useMemo(() => {
     if (!selectedEval?.respostas?.dimensionScores) return []
     const riskCounts = { baixo: 0, moderado: 0, alto: 0, critico: 0 }
+    let totalDims = 0
     Object.values(selectedEval.respostas.dimensionScores).forEach((score: any) => {
       const num = Number(score)
       if (num <= 1.8) riskCounts.baixo++
       else if (num <= 2.6) riskCounts.moderado++
       else if (num <= 3.4) riskCounts.alto++
       else riskCounts.critico++
+      totalDims++
     })
     return [
-      { name: 'Baixo Risco', value: riskCounts.baixo, fill: '#16a34a' },
-      { name: 'Risco Moderado', value: riskCounts.moderado, fill: '#ca8a04' },
-      { name: 'Risco Alto', value: riskCounts.alto, fill: '#ea580c' },
-      { name: 'Risco Crítico', value: riskCounts.critico, fill: '#dc2626' },
+      {
+        name: 'Baixo Risco',
+        value: riskCounts.baixo,
+        percentage: totalDims ? ((riskCounts.baixo / totalDims) * 100).toFixed(1) : 0,
+        fill: '#16a34a',
+      },
+      {
+        name: 'Risco Moderado',
+        value: riskCounts.moderado,
+        percentage: totalDims ? ((riskCounts.moderado / totalDims) * 100).toFixed(1) : 0,
+        fill: '#ca8a04',
+      },
+      {
+        name: 'Risco Alto',
+        value: riskCounts.alto,
+        percentage: totalDims ? ((riskCounts.alto / totalDims) * 100).toFixed(1) : 0,
+        fill: '#ea580c',
+      },
+      {
+        name: 'Risco Crítico',
+        value: riskCounts.critico,
+        percentage: totalDims ? ((riskCounts.critico / totalDims) * 100).toFixed(1) : 0,
+        fill: '#dc2626',
+      },
     ].filter((d) => d.value > 0)
   }, [selectedEval])
 
@@ -783,6 +849,17 @@ export default function AvaliacoesNR1Tab() {
                   }
                 />
               </div>
+              <div className="space-y-2 col-span-1 md:col-span-2 mt-2">
+                <Label>Observações Internas (Admin)</Label>
+                <Textarea
+                  value={editingEval.observacoes_admin || ''}
+                  onChange={(e) =>
+                    setEditingEval({ ...editingEval, observacoes_admin: e.target.value })
+                  }
+                  placeholder="Anotações visíveis apenas para a equipe administrativa..."
+                  rows={4}
+                />
+              </div>
             </div>
           )}
           <div className="flex justify-end gap-2">
@@ -802,7 +879,17 @@ export default function AvaliacoesNR1Tab() {
                 Gerenciamento de Riscos Ocupacionais
               </p>
             </div>
-            <div className="flex items-center gap-2 mr-6">
+            <div className="flex items-center gap-6 mr-6">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="executive-mode"
+                  checked={isExecutiveMode}
+                  onCheckedChange={setIsExecutiveMode}
+                />
+                <Label htmlFor="executive-mode" className="text-sm font-medium">
+                  Versão Executiva
+                </Label>
+              </div>
               <Button
                 onClick={generatePDF}
                 variant="default"
@@ -905,10 +992,7 @@ export default function AvaliacoesNR1Tab() {
                           className="w-full min-h-[220px]"
                         >
                           <PieChart>
-                            <ChartTooltip
-                              cursor={false}
-                              content={<ChartTooltipContent hideLabel />}
-                            />
+                            <ChartTooltip cursor={false} content={<PieTooltip />} />
                             <Pie
                               data={chartData}
                               dataKey="value"
@@ -1050,6 +1134,20 @@ export default function AvaliacoesNR1Tab() {
                   </div>
                 </div>
 
+                {/* Observações Admin */}
+                {selectedEval.observacoes_admin && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold border-b pb-2">
+                      Observações Internas (Admin)
+                    </h3>
+                    <div className="bg-muted/20 p-4 rounded-lg">
+                      <p className="text-sm whitespace-pre-wrap">
+                        {selectedEval.observacoes_admin}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Qualitativas */}
                 {(selectedEval.respostas?.qualitativas?.q46 ||
                   selectedEval.respostas?.qualitativas?.q47) && (
@@ -1073,16 +1171,18 @@ export default function AvaliacoesNR1Tab() {
                 )}
 
                 {/* Respostas Detalhadas */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-bold border-b pb-2">Respostas Detalhadas</h3>
-                  <div className="grid gap-2">
-                    {selectedEval.respostas?.completas?.map((ans: any, i: number) => (
-                      <div key={i} className="text-sm p-3 border rounded-md bg-muted/10">
-                        <span className="font-bold mr-2">[{ans.answer || '-'}]</span> {ans.text}
-                      </div>
-                    ))}
+                {!isExecutiveMode && selectedEval.respostas?.completas?.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold border-b pb-2">Respostas Detalhadas</h3>
+                    <div className="grid gap-2">
+                      {selectedEval.respostas.completas.map((ans: any, i: number) => (
+                        <div key={i} className="text-sm p-3 border rounded-md bg-muted/10">
+                          <span className="font-bold mr-2">[{ans.answer || '-'}]</span> {ans.text}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className="mt-8 p-6 bg-muted/50 border rounded-xl text-center text-sm text-muted-foreground font-medium flex flex-col items-center gap-2">
                   <p>

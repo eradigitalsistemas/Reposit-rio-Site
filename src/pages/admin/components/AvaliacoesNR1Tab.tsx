@@ -287,76 +287,129 @@ export default function AvaliacoesNR1Tab() {
 
       cursorY += 46 + 8
 
-      // --- Score Summary & Charts ---
-      const gap = 6
-      const colWidth = (usableWidth - gap) / 2
-      const dimBoxWidth = (colWidth - gap) / 2
-      const dimBoxHeight = 22
+      // --- Score Summary ---
+      checkPageBreak(30)
 
-      const numRows = Math.ceil(PSYCHO_DIMENSIONS.length / 2)
-      const dimGridHeight = numRows * (dimBoxHeight + gap) - gap
-      const totalChartsHeight = Math.max(40, dimGridHeight)
-
-      // Ensure we have enough space for the tallest column
-      checkPageBreak(totalChartsHeight + 10)
-      const chartsStartY = cursorY
-
-      // Left Column: Média Geral
       const risk = getRiskColors(Number(selectedEval.pontuacao_geral))
       doc.setFillColor(risk.bg[0], risk.bg[1], risk.bg[2])
       doc.setDrawColor(risk.border[0], risk.border[1], risk.border[2])
-      doc.roundedRect(margin, chartsStartY, colWidth, 40, 4, 4, 'FD')
+      doc.roundedRect(margin, cursorY, usableWidth, 24, 3, 3, 'FD')
 
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(9)
       doc.setTextColor(risk.text[0], risk.text[1], risk.text[2])
-      doc.text('MÉDIA GERAL / RISCO', margin + colWidth / 2, chartsStartY + 8, { align: 'center' })
-
-      doc.setFontSize(36)
-      doc.text(
-        Number(selectedEval.pontuacao_geral).toFixed(2),
-        margin + colWidth / 2,
-        chartsStartY + 24,
-        {
-          align: 'center',
-        },
-      )
+      doc.text('MÉDIA GERAL / RISCO', margin + usableWidth / 2, cursorY + 8, { align: 'center' })
 
       doc.setFontSize(14)
-      doc.text(risk.label, margin + colWidth / 2, chartsStartY + 34, { align: 'center' })
+      doc.text(
+        `${Number(selectedEval.pontuacao_geral).toFixed(2)} - ${risk.label}`,
+        margin + usableWidth / 2,
+        cursorY + 16,
+        { align: 'center' },
+      )
 
-      // Dimensions Grid (Right Column)
-      const rightX = margin + colWidth + gap
-      const dimGridY = chartsStartY
+      cursorY += 34
 
-      PSYCHO_DIMENSIONS.forEach((dim, i) => {
-        const row = Math.floor(i / 2)
-        const col = i % 2
-        const dX = rightX + col * (dimBoxWidth + gap)
-        const dY = dimGridY + row * (dimBoxHeight + gap)
+      // Distribuição de Riscos
+      checkPageBreak(50)
+      doc.setFontSize(12)
+      doc.setTextColor(23, 23, 23)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Distribuição de Riscos', margin, cursorY)
+      cursorY += 8
 
+      const scoreNum = Number(selectedEval.pontuacao_geral)
+      const riskCounts = { baixo: 0, moderado: 0, alto: 0, critico: 0 }
+      if (scoreNum <= 1.8) riskCounts.baixo = 1
+      else if (scoreNum <= 2.6) riskCounts.moderado = 1
+      else if (scoreNum <= 3.4) riskCounts.alto = 1
+      else riskCounts.critico = 1
+
+      const chartConfigPDF = [
+        { label: 'Baixo Risco', value: riskCounts.baixo, color: [22, 163, 74] },
+        { label: 'Risco Moderado', value: riskCounts.moderado, color: [202, 138, 4] },
+        { label: 'Risco Alto', value: riskCounts.alto, color: [234, 88, 12] },
+        { label: 'Risco Crítico', value: riskCounts.critico, color: [220, 38, 38] },
+      ]
+
+      const maxDistWidth = usableWidth - 70
+
+      chartConfigPDF.forEach((item) => {
+        const percentage = item.value * 100
+        const barWidth = (percentage / 100) * maxDistWidth
+
+        doc.setFontSize(9)
+        doc.setTextColor(102, 102, 102)
+        doc.setFont('helvetica', 'normal')
+        doc.text(item.label, margin, cursorY + 4)
+
+        doc.setFillColor(243, 244, 246)
+        doc.roundedRect(margin + 30, cursorY, maxDistWidth, 6, 1, 1, 'F')
+
+        if (barWidth > 0) {
+          doc.setFillColor(item.color[0], item.color[1], item.color[2])
+          doc.roundedRect(margin + 30, cursorY, barWidth, 6, 1, 1, 'F')
+        }
+
+        doc.setTextColor(23, 23, 23)
+        doc.setFont('helvetica', 'bold')
+        doc.text(
+          `${item.value} (${percentage.toFixed(1)}%)`,
+          margin + 30 + maxDistWidth + 4,
+          cursorY + 4,
+        )
+
+        cursorY += 9
+      })
+      cursorY += 6
+
+      // Pontuação por Dimensão
+      checkPageBreak(90)
+      doc.setFontSize(12)
+      doc.setTextColor(23, 23, 23)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Pontuação por Dimensão', margin, cursorY)
+      cursorY += 8
+
+      const maxDimWidth = usableWidth - 90
+      PSYCHO_DIMENSIONS.forEach((dim) => {
         const score = Number(selectedEval.respostas?.dimensionScores?.[dim.id] || 0)
         const dRisk = getRiskColors(score)
 
-        doc.setFillColor(dRisk.bg[0], dRisk.bg[1], dRisk.bg[2])
-        doc.setDrawColor(dRisk.border[0], dRisk.border[1], dRisk.border[2])
-        doc.roundedRect(dX, dY, dimBoxWidth, dimBoxHeight, 3, 3, 'FD')
-
         doc.setFontSize(8)
+        doc.setTextColor(23, 23, 23)
         doc.setFont('helvetica', 'bold')
-        doc.setTextColor(dRisk.text[0], dRisk.text[1], dRisk.text[2])
-        const splitTitle = doc.splitTextToSize(`${dim.id} - ${dim.title}`, dimBoxWidth - 6)
-        doc.text(splitTitle[0], dX + 3, dY + 6)
+        doc.text(dim.id, margin, cursorY + 4)
 
-        doc.setFontSize(16)
-        doc.text(score.toFixed(2), dX + 3, dY + 18)
+        doc.setFont('helvetica', 'normal')
+        doc.setTextColor(102, 102, 102)
+        const titleShort = dim.title.length > 25 ? dim.title.substring(0, 25) + '...' : dim.title
+        doc.text(titleShort, margin + 8, cursorY + 4)
 
-        doc.setFontSize(7)
-        doc.text(dRisk.label, dX + dimBoxWidth - 3, dY + 18, { align: 'right' })
+        // Background bar
+        doc.setFillColor(243, 244, 246)
+        doc.roundedRect(margin + 55, cursorY, maxDimWidth, 6, 1, 1, 'F')
+
+        const fillWidth = (score / 5) * maxDimWidth
+        if (fillWidth > 0) {
+          doc.setFillColor(dRisk.text[0], dRisk.text[1], dRisk.text[2])
+          doc.roundedRect(margin + 55, cursorY, fillWidth, 6, 1, 1, 'F')
+        }
+
+        doc.setTextColor(23, 23, 23)
+        doc.setFont('helvetica', 'bold')
+        doc.text(score.toFixed(2), margin + 55 + maxDimWidth + 4, cursorY + 4)
+
+        // scale marks
+        doc.setDrawColor(209, 213, 219)
+        for (let i = 1; i <= 5; i++) {
+          const markX = margin + 55 + (i / 5) * maxDimWidth
+          if (i < 5) doc.line(markX, cursorY, markX, cursorY + 6)
+        }
+
+        cursorY += 9
       })
-
-      // Update cursorY using the tallest column plus a bottom margin gap
-      cursorY = chartsStartY + totalChartsHeight + 10
+      cursorY += 6
 
       // --- Diagnóstico e Medidas de Mitigação ---
       checkPageBreak(25)

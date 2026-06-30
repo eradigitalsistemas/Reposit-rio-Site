@@ -245,7 +245,7 @@ export function SiteFooter() {
         <ContactInfo
           address={
             <>
-              Rua Fernando Drumont, 815
+              Rua Marechal Pires Ferreira, 552
               <br />
               Centro, Floriano/PI
             </>

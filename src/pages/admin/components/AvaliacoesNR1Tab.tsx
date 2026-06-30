@@ -25,6 +25,7 @@ import {
   PSYCHO_FEEDBACK,
   PSYCHO_DIMENSIONS,
 } from '@/lib/psycho-eval'
+import { drawRiskDistributionPdf, drawThermometerScorecardPdf } from '@/lib/pdf-visuals'
 import { formatPhone, formatCNPJ } from '@/lib/utils'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -325,91 +326,31 @@ export default function AvaliacoesNR1Tab() {
       else if (scoreNum <= 3.4) riskCounts.alto = 1
       else riskCounts.critico = 1
 
-      const chartConfigPDF = [
-        { label: 'Baixo Risco', value: riskCounts.baixo, color: [22, 163, 74] },
-        { label: 'Risco Moderado', value: riskCounts.moderado, color: [202, 138, 4] },
-        { label: 'Risco Alto', value: riskCounts.alto, color: [234, 88, 12] },
-        { label: 'Risco Crítico', value: riskCounts.critico, color: [220, 38, 38] },
-      ]
+      cursorY = drawRiskDistributionPdf(doc, margin, cursorY, usableWidth, riskCounts, 1)
+      cursorY += 4
 
-      const maxDistWidth = usableWidth - 70
-
-      chartConfigPDF.forEach((item) => {
-        const percentage = item.value * 100
-        const barWidth = (percentage / 100) * maxDistWidth
-
-        doc.setFontSize(9)
-        doc.setTextColor(102, 102, 102)
-        doc.setFont('helvetica', 'normal')
-        doc.text(item.label, margin, cursorY + 4)
-
-        doc.setFillColor(243, 244, 246)
-        doc.roundedRect(margin + 30, cursorY, maxDistWidth, 6, 1, 1, 'F')
-
-        if (barWidth > 0) {
-          doc.setFillColor(item.color[0], item.color[1], item.color[2])
-          doc.roundedRect(margin + 30, cursorY, barWidth, 6, 1, 1, 'F')
-        }
-
-        doc.setTextColor(23, 23, 23)
-        doc.setFont('helvetica', 'bold')
-        doc.text(
-          `${item.value} (${percentage.toFixed(1)}%)`,
-          margin + 30 + maxDistWidth + 4,
-          cursorY + 4,
-        )
-
-        cursorY += 9
-      })
-      cursorY += 6
-
-      // Pontuação por Dimensão
-      checkPageBreak(90)
+      // Pontuação por Dimensão (Thermometer Scorecards)
+      checkPageBreak(30)
       doc.setFontSize(12)
       doc.setTextColor(23, 23, 23)
       doc.setFont('helvetica', 'bold')
       doc.text('Pontuação por Dimensão', margin, cursorY)
       cursorY += 8
 
-      const maxDimWidth = usableWidth - 90
       PSYCHO_DIMENSIONS.forEach((dim) => {
         const score = Number(selectedEval.respostas?.dimensionScores?.[dim.id] || 0)
-        const dRisk = getRiskColors(score)
-
-        doc.setFontSize(8)
-        doc.setTextColor(23, 23, 23)
-        doc.setFont('helvetica', 'bold')
-        doc.text(dim.id, margin, cursorY + 4)
-
-        doc.setFont('helvetica', 'normal')
-        doc.setTextColor(102, 102, 102)
-        const titleShort = dim.title.length > 25 ? dim.title.substring(0, 25) + '...' : dim.title
-        doc.text(titleShort, margin + 8, cursorY + 4)
-
-        // Background bar
-        doc.setFillColor(243, 244, 246)
-        doc.roundedRect(margin + 55, cursorY, maxDimWidth, 6, 1, 1, 'F')
-
-        const fillWidth = (score / 5) * maxDimWidth
-        if (fillWidth > 0) {
-          doc.setFillColor(dRisk.text[0], dRisk.text[1], dRisk.text[2])
-          doc.roundedRect(margin + 55, cursorY, fillWidth, 6, 1, 1, 'F')
-        }
-
-        doc.setTextColor(23, 23, 23)
-        doc.setFont('helvetica', 'bold')
-        doc.text(score.toFixed(2), margin + 55 + maxDimWidth + 4, cursorY + 4)
-
-        // scale marks
-        doc.setDrawColor(209, 213, 219)
-        for (let i = 1; i <= 5; i++) {
-          const markX = margin + 55 + (i / 5) * maxDimWidth
-          if (i < 5) doc.line(markX, cursorY, markX, cursorY + 6)
-        }
-
-        cursorY += 9
+        checkPageBreak(16)
+        cursorY = drawThermometerScorecardPdf(
+          doc,
+          margin,
+          cursorY,
+          usableWidth,
+          dim.id,
+          dim.title,
+          score,
+        )
       })
-      cursorY += 6
+      cursorY += 4
 
       // --- Diagnóstico e Medidas de Mitigação ---
       checkPageBreak(25)
